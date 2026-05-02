@@ -19,7 +19,7 @@ return [
         'code' => 'moneytransfer',
         'title' => 'Money Transfer',
         'description' => 'Money Transfer',
-        'active' => true,
+        'active' => false,
         'generate_invoice' => false,
         'sort' => 7,
     ],

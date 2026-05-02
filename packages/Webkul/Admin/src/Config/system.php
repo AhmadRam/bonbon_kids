@@ -1927,7 +1927,7 @@ return [
         'info' => 'admin::app.configuration.index.sales.payment-methods.info',
         'icon' => 'settings/payment-method.svg',
         'sort' => 3,
-    ], [
+    ], /* [
         'key' => 'sales.payment_methods.stripe',
         'name' => 'admin::app.configuration.index.sales.payment-methods.stripe',
         'info' => 'admin::app.configuration.index.sales.payment-methods.stripe-info',
@@ -2012,7 +2012,8 @@ return [
                 'locale_based' => false,
             ],
         ],
-    ], [
+    ], */
+ /* [
         'key' => 'sales.payment_methods.razorpay',
         'name' => 'admin::app.configuration.index.sales.payment-methods.razorpay',
         'info' => 'admin::app.configuration.index.sales.payment-methods.razorpay-info',
@@ -2120,7 +2121,8 @@ return [
                 'locale_based' => false,
             ],
         ],
-    ], [
+    ], */
+ /* [
         'key' => 'sales.payment_methods.payu',
         'name' => 'admin::app.configuration.index.sales.payment-methods.payu',
         'info' => 'admin::app.configuration.index.sales.payment-methods.payu-info',
@@ -2189,7 +2191,8 @@ return [
                 'locale_based' => false,
             ],
         ],
-    ], [
+    ], */
+ /* [
         'key' => 'sales.payment_methods.paypal_smart_button',
         'name' => 'admin::app.configuration.index.sales.payment-methods.paypal-smart-button',
         'info' => 'admin::app.configuration.index.sales.payment-methods.paypal-smart-button-info',
@@ -2266,7 +2269,8 @@ return [
                 'locale_based' => false,
             ],
         ],
-    ], [
+    ], */
+ /* [
         'key' => 'sales.payment_methods.paypal_standard',
         'name' => 'admin::app.configuration.index.sales.payment-methods.paypal-standard',
         'info' => 'admin::app.configuration.index.sales.payment-methods.paypal-standard-info',
@@ -2327,7 +2331,8 @@ return [
                 'locale_based' => false,
             ],
         ],
-    ], [
+    ], */
+ [
         'key' => 'sales.payment_methods.cashondelivery',
         'name' => 'admin::app.configuration.index.sales.payment-methods.cash-on-delivery',
         'info' => 'admin::app.configuration.index.sales.payment-methods.cash-on-delivery-info',
@@ -2337,6 +2342,7 @@ return [
                 'name' => 'active',
                 'title' => 'admin::app.configuration.index.sales.payment-methods.status',
                 'type' => 'boolean',
+                'default' => true,
                 'channel_based' => true,
                 'locale_based' => false,
             ], [
@@ -2424,7 +2430,7 @@ return [
                 'locale_based' => false,
             ],
         ],
-    ], [
+    ], /* [
         'key' => 'sales.payment_methods.moneytransfer',
         'name' => 'admin::app.configuration.index.sales.payment-methods.money-transfer',
         'info' => 'admin::app.configuration.index.sales.payment-methods.money-transfer-info',
@@ -2521,7 +2527,8 @@ return [
                 'locale_based' => false,
             ],
         ],
-    ], [
+    ], */
+ [
         'key' => 'sales.order_settings',
         'name' => 'admin::app.configuration.index.sales.order-settings.title',
         'info' => 'admin::app.configuration.index.sales.order-settings.info',

@@ -13,8 +13,12 @@ until (echo > /dev/tcp/mysql/3306) >/dev/null 2>&1; do
     sleep 1
 done
 
-# Run migrations if database is empty or as requested
-# For production, you might want to run this manually, but for "zero-dependency" first boot:
-# php artisan migrate --force
+# Ensure storage link exists
+echo "Creating storage link..."
+php artisan storage:link --force
+
+# Setup database: migrate and seed if empty, or just migrate
+echo "Running project setup..."
+php artisan project:setup
 
 exec "$@"

@@ -1,6 +1,10 @@
 <?php
 
 return [
+    'currencies' => [
+        'KWD' => 'دينار كويتي',
+    ],
+
     'customers' => [
         'forgot-password' => [
             'already-sent' => 'تم بالفعل إعادة تعيين كلمة المرور للبريد المرسل.',
@@ -1074,8 +1078,9 @@ return [
                     'info' => 'أدخل وجهتك للحصول على تقدير لتكلفة التوصيل والضرائب.',
                     'postcode' => 'الرمز البريدي',
                     'select-country' => 'اختر الدولة',
-                    'select-state' => 'اختر الولاية',
-                    'state' => 'الولاية',
+                    'select-state'   => 'اختر الولاية',
+                    'select-city'    => 'اختر المدينة',
+                    'state'          => 'الولاية',
                     'title' => 'تقدير التوصيل والضرائب',
                 ],
             ],
@@ -1101,8 +1106,9 @@ return [
                 'same-as-billing' => 'استخدم نفس العنوان للشحن؟',
                 'save' => 'حفظ',
                 'save-address' => 'حفظ هذا في دفتر العناوين',
-                'select-country' => 'اختر الدولة',
-                'select-state' => 'اختر الولاية',
+                'select-country'  => 'اختر الدولة',
+                'select-state'    => 'اختر الولاية',
+                'select-city'     => 'اختر المدينة',
                 'shipping-address' => 'عنوان الشحن',
                 'state' => 'الولاية',
                 'street-address' => 'عنوان الشارع',

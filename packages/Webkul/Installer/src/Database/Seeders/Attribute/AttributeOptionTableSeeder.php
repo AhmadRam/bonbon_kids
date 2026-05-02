@@ -70,7 +70,7 @@ class AttributeOptionTableSeeder extends Seeder
             ],
         ]);
 
-        $locales = $parameters['allowed_locales'] ?? [$defaultLocale];
+        $locales = ['en', 'ar'];
 
         foreach ($locales as $locale) {
             DB::table('attribute_option_translations')->insert([

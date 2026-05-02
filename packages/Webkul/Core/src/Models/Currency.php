@@ -37,6 +37,18 @@ class Currency extends Model implements CurrencyContract
     }
 
     /**
+     * Get currency symbol based on locale.
+     */
+    public function getSymbolAttribute($symbol)
+    {
+        if (app()->getLocale() == 'en') {
+            return 'KWD';
+        }
+
+        return $symbol;
+    }
+
+    /**
      * Get the exchange rate associated with the currency.
      */
     public function exchange_rate(): HasOne

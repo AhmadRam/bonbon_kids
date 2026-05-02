@@ -117,18 +117,15 @@ class AttributeGroupTableSeeder extends Seeder
                 'attribute_id' => 4,
                 'attribute_group_id' => 1,
                 'position' => 5,
-            ], [
-                'attribute_id' => 23,
-                'attribute_group_id' => 1,
-                'position' => 6,
-            ], [
-                'attribute_id' => 24,
-                'attribute_group_id' => 1,
-                'position' => 7,
+
             ], [
                 'attribute_id' => 25,
                 'attribute_group_id' => 1,
                 'position' => 8,
+            ], [
+                'attribute_id' => 32,
+                'attribute_group_id' => 1,
+                'position' => 9,
             ],
 
             /**
@@ -167,6 +164,10 @@ class AttributeGroupTableSeeder extends Seeder
                 'attribute_id' => 15,
                 'attribute_group_id' => 4,
                 'position' => 5,
+            ], [
+                'attribute_id' => 31,
+                'attribute_group_id' => 4,
+                'position' => 6,
             ],
 
             /**

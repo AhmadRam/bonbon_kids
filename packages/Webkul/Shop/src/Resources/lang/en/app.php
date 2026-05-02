@@ -1,6 +1,10 @@
 <?php
 
 return [
+    'currencies' => [
+        'KWD' => 'Kuwaiti Dinar',
+    ],
+
     'customers' => [
         'forgot-password' => [
             'already-sent' => 'Already Password Reset Mail Sent.',
@@ -1074,8 +1078,9 @@ return [
                     'info' => 'Enter your destination to get a shipping and tax estimate.',
                     'postcode' => 'Zip/Postcode',
                     'select-country' => 'Select Country',
-                    'select-state' => 'Select State',
-                    'state' => 'State',
+                    'select-state'   => 'Select State',
+                    'select-city'    => 'Select City',
+                    'state'          => 'State',
                     'title' => 'Estimate Shipping and Tax',
                 ],
             ],
@@ -1102,7 +1107,8 @@ return [
                 'save' => 'Save',
                 'save-address' => 'Save this to address book',
                 'select-country' => 'Select Country',
-                'select-state' => 'Select State',
+                'select-state'    => 'Select State',
+                'select-city'     => 'Select City',
                 'shipping-address' => 'Shipping Address',
                 'state' => 'State',
                 'street-address' => 'Street Address',

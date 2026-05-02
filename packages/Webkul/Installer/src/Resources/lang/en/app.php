@@ -250,12 +250,25 @@ return [
             'theme-customizations' => [
                 'bold-collections' => [
                     'content' => [
-                        'btn-title' => 'View Collections',
-                        'description' => 'Introducing Our New Bold Collections! Elevate your style with daring designs and vibrant statements. Explore striking patterns and bold colors that redefine your wardrobe. Get ready to embrace the extraordinary!',
-                        'title' => 'Get Ready for our new Bold Collections!',
+                        'btn-title' => 'Explore Gifts',
+                        'description' => 'Find the perfect gift for every celebration! From birthdays to milestones, our curated selection of toys will bring a smile to any child\'s face. Let\'s make every moment memorable!',
+                        'title' => 'Great Gift Ideas for Every Occasion',
                     ],
 
-                    'name' => 'Bold Collections',
+                    'name' => 'Special Gifts',
+                ],
+
+                'social-section' => [
+                    'name' => 'Follow the fun! #toysrus',
+                    'content' => [
+                        'title' => 'Follow the fun! #toysrus',
+                        'sub-title' => 'Tag us in your photos for a chance to be featured!',
+                    ],
+                ],
+
+                'shop-by-brand' => [
+                    'name' => 'Shop by Brand',
+                    'title' => 'Favorite Toy Brands',
                 ],
 
                 'bold-collections-2' => [
@@ -269,15 +282,15 @@ return [
                 ],
 
                 'book-tickets' => [
-                    'name' => 'Book Tickets',
+                    'name' => 'Events & Activities',
 
                     'options' => [
-                        'title' => 'Book Tickets',
+                        'title' => 'Fun Activities',
                     ],
                 ],
 
                 'categories-collections' => [
-                    'name' => 'Categories Collections',
+                    'name' => 'Shop by Category',
                 ],
 
                 'footer-links' => [
@@ -300,12 +313,12 @@ return [
 
                 'game-container' => [
                     'content' => [
-                        'sub-title-1' => 'Our Collections',
-                        'sub-title-2' => 'Our Collections',
-                        'title' => 'The game with our new additions!',
+                        'sub-title-1' => 'Interactive Play',
+                        'sub-title-2' => 'Creative Kits',
+                        'title' => 'Play & Learn with our latest picks!',
                     ],
 
-                    'name' => 'Game Container',
+                    'name' => 'Interactive Play',
                 ],
 
                 'image-carousel' => [
@@ -317,18 +330,18 @@ return [
                 ],
 
                 'kids-collection' => [
-                    'name' => 'Kids Collection',
+                    'name' => 'STEM & Learning',
 
                     'options' => [
-                        'title' => 'Kids Collection',
+                        'title' => 'Learning Toys',
                     ],
                 ],
 
                 'mens-collection' => [
-                    'name' => 'Mens Collection',
+                    'name' => 'Trending Toys',
 
                     'options' => [
-                        'title' => 'Mens Collection',
+                        'title' => 'Trending Now',
                     ],
                 ],
 
@@ -360,23 +373,23 @@ return [
 
                 'top-collections' => [
                     'content' => [
-                        'sub-title-1' => 'Our Collections',
-                        'sub-title-2' => 'Our Collections',
-                        'sub-title-3' => 'Our Collections',
-                        'sub-title-4' => 'Our Collections',
-                        'sub-title-5' => 'Our Collections',
-                        'sub-title-6' => 'Our Collections',
-                        'title' => 'The game with our new additions!',
+                        'sub-title-1' => 'Our Picks',
+                        'sub-title-2' => 'Our Picks',
+                        'sub-title-3' => 'Our Picks',
+                        'sub-title-4' => 'Our Picks',
+                        'sub-title-5' => 'Our Picks',
+                        'sub-title-6' => 'Our Picks',
+                        'title' => 'Shop by Age!',
                     ],
 
-                    'name' => 'Top Collections',
+                    'name' => 'Shop by Age',
                 ],
 
                 'womens-collection' => [
-                    'name' => 'Womens Collection',
+                    'name' => 'Dolls & Creative Play',
 
                     'options' => [
-                        'title' => 'Womens Collection',
+                        'title' => 'Create & Play',
                     ],
                 ],
             ],
@@ -396,13 +409,13 @@ return [
         'sample-categories' => [
             'category-translation' => [
                 '2' => [
-                    'description' => '<p>Men</p>',
+                    'description' => '<p>Action Figures</p>',
                     'meta-description' => '',
                     'meta-keywords' => '',
                     'meta-title' => '',
-                    'name' => 'Mens',
-                    'slug' => 'mens',
-                    'url-path' => 'men',
+                    'name' => 'Action Figures',
+                    'slug' => 'action-figures',
+                    'url-path' => 'toys/action-figures',
                 ],
 
                 '3' => [
@@ -416,13 +429,13 @@ return [
                 ],
 
                 '4' => [
-                    'description' => '<p>Woman</p>',
+                    'description' => '<p>Dolls & Plush</p>',
                     'meta-description' => '',
                     'meta-keywords' => '',
                     'meta-title' => '',
-                    'name' => 'Womens',
-                    'slug' => 'womens',
-                    'url-path' => 'woman',
+                    'name' => 'Dolls & Plush',
+                    'slug' => 'dolls-plush',
+                    'url-path' => 'toys/dolls-plush',
                 ],
 
                 '5' => [

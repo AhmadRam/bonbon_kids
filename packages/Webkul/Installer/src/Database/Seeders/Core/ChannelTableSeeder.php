@@ -41,7 +41,7 @@ class ChannelTableSeeder extends Seeder
 
         $defaultLocale = $parameters['default_locale'] ?? config('app.locale');
 
-        $locales = $parameters['allowed_locales'] ?? [$defaultLocale];
+        $locales = ['en', 'ar'];
 
         foreach ($locales as $locale) {
             DB::table('channel_translations')->insert([

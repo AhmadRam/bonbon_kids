@@ -1,0 +1,25 @@
+{
+    "name": "bagisto/laravel-upayments",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Eng. Ahmad Alsaid Ramdan",
+            "email": "a.n.s.r.96@gmail.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Webkul\\UPayments\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webkul\\UPayments\\Providers\\UPaymentsServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "minimum-stability": "dev"
+}

@@ -21,7 +21,8 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libfreetype6-dev \
     libcurl4-openssl-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    libwebp-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl zip sockets calendar curl opcache \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*

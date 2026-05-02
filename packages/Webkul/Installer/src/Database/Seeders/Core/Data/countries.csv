@@ -1,0 +1,7 @@
+country_id,country_code,default_name,translations
+"1","KW","Kuwait","ar:الكويت | en:Kuwait"
+"2","SA","Saudi Arabia","ar:السعودية | en:Saudi Arabia"
+"3","QA","Qatar","ar:قطر | en:Qatar"
+"4","AE","United Arab Emirates","ar:الإمارات | en:United Arab Emirates"
+"5","BH","Bahrain","ar:البحرين | en:Bahrain"
+"6","OM","Oman","ar:عمان | en:Oman"

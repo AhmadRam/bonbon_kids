@@ -316,7 +316,7 @@
                                                     role="button"
                                                     v-pre
                                                 >
-                                                    {{ core()->getCurrentCurrency()->symbol . ' ' . core()->getCurrentCurrencyCode() }}
+                                                    {{ core()->getCurrentCurrency()->symbol . ' ' . trans('shop::app.currencies.' . core()->getCurrentCurrencyCode()) }}
                                                 </div>
                                             </x-slot>
 
@@ -515,9 +515,18 @@
                         const stored = localStorage.getItem('categories');
 
                         if (stored) {
-                            this.categories = JSON.parse(stored);
-                            this.isLoading = false;
-                            return;
+                            try {
+                                const categories = JSON.parse(stored);
+
+                                if (Array.isArray(categories) && categories.length > 0) {
+                                    this.categories = categories;
+                                    this.isLoading = false;
+
+                                    return;
+                                }
+                            } catch (e) {
+                                localStorage.removeItem('categories');
+                            }
                         }
 
                     } catch (e) {}

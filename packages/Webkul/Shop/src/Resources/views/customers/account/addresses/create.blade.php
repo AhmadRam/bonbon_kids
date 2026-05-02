@@ -46,8 +46,8 @@
                 <x-shop::form :action="route('shop.customers.account.addresses.store')">
                     {!! view_render_event('bagisto.shop.customers.account.addresses.create_form_controls.before') !!}
 
-                    <!--Company Name -->
-                    <x-shop::form.control-group>
+                    <!--Company Name (Hidden) -->
+                    <x-shop::form.control-group class="hidden">
                         <x-shop::form.control-group.label>
                             @lang('shop::app.customers.account.addresses.create.company-name')
                         </x-shop::form.control-group.label>
@@ -125,8 +125,8 @@
 
                     {!! view_render_event('bagisto.shop.customers.account.addresses.create_form_controls.email.after') !!}
 
-                    <!-- Vat Id -->
-                    <x-shop::form.control-group>
+                    <!-- Vat Id (Hidden) -->
+                    <x-shop::form.control-group class="hidden">
                         <x-shop::form.control-group.label>
                             @lang('shop::app.customers.account.addresses.create.vat-id')
                         </x-shop::form.control-group.label>
@@ -144,48 +144,7 @@
 
                     {!! view_render_event('bagisto.shop.customers.account.addresses.create_form_controls.vat_id.after') !!}
 
-                    <!-- Street Address -->
-                    <x-shop::form.control-group>
-                        <x-shop::form.control-group.label class="required">
-                            @lang('shop::app.customers.account.addresses.create.street-address')
-                        </x-shop::form.control-group.label>
 
-                        <x-shop::form.control-group.control
-                            type="text"
-                            name="address[]"
-                            rules="required|address"
-                            :value="collect(old('address'))->first()"
-                            :label="trans('shop::app.customers.account.addresses.create.street-address')"
-                            :placeholder="trans('shop::app.customers.account.addresses.create.street-address')"
-                        />
-
-                        <x-shop::form.control-group.error control-name="address[]" />
-                    </x-shop::form.control-group>
-
-                    {!! view_render_event('bagisto.shop.customers.account.addresses.create_form_controls.street_address.after') !!}
-
-                    @if (
-                        core()->getConfigData('customer.address.information.street_lines')
-                        && core()->getConfigData('customer.address.information.street_lines') > 1
-                    )
-                        @for ($i = 1; $i < core()->getConfigData('customer.address.information.street_lines'); $i++)
-                            <x-shop::form.control-group.control
-                                type="text"
-                                name="address[{{ $i }}]"
-                                :value="old('address[{{ $i }}]')"
-                                rules="address"
-                                :label="trans('shop::app.customers.account.addresses.create.street-address')"
-                                :placeholder="trans('shop::app.customers.account.addresses.create.street-address')"
-                            />
-
-                            <x-shop::form.control-group.error
-                                class="mb-2"
-                                name="address[{{ $i }}]"
-                            />
-                        @endfor
-                    @endif
-
-                    {!! view_render_event('bagisto.shop.customers.account.addresses.create_form_controls.street_address.after') !!}
 
                     <!-- Country List-->
                     <x-shop::form.control-group>
@@ -260,22 +219,86 @@
                             @lang('shop::app.customers.account.addresses.create.city')
                         </x-shop::form.control-group.label>
 
-                        <x-shop::form.control-group.control
-                            type="text"
-                            name="city"
-                            rules="required"
-                            :value="old('city')"
-                            :label="trans('shop::app.customers.account.addresses.create.city')"
-                            :placeholder="trans('shop::app.customers.account.addresses.create.city')"
-                        />
+                        <template v-if="haveCities">
+                            <x-shop::form.control-group.control
+                                type="select"
+                                id="city"
+                                name="city"
+                                rules="required"
+                                v-model="city"
+                                :label="trans('shop::app.customers.account.addresses.create.city')"
+                                :placeholder="trans('shop::app.customers.account.addresses.create.city')"
+                            >
+                                <option value="">@lang('shop::app.customers.account.addresses.create.select-city')</option>
+                                <option 
+                                    v-for='(cityData, index) in stateCities[selectedStateId]'
+                                    :value="cityData.default_name"
+                                >
+                                    @{{ cityData.default_name }}
+                                </option>
+                            </x-shop::form.control-group.control>
+                        </template>
+
+                        <template v-else>
+                            <x-shop::form.control-group.control
+                                type="text"
+                                name="city"
+                                rules="required"
+                                :value="old('city')"
+                                v-model="city"
+                                :label="trans('shop::app.customers.account.addresses.create.city')"
+                                :placeholder="trans('shop::app.customers.account.addresses.create.city')"
+                            />
+                        </template>
 
                         <x-shop::form.control-group.error control-name="city" />
                     </x-shop::form.control-group>
 
                     {!! view_render_event('bagisto.shop.customers.account.addresses.create_form_controls.city.after') !!}
 
-                    <!-- Post Code -->
+                    <!-- Street Address -->
                     <x-shop::form.control-group>
+                        <x-shop::form.control-group.label class="required">
+                            @lang('shop::app.customers.account.addresses.create.street-address')
+                        </x-shop::form.control-group.label>
+
+                        <x-shop::form.control-group.control
+                            type="text"
+                            name="address[]"
+                            rules="required|address"
+                            :value="collect(old('address'))->first()"
+                            :label="trans('shop::app.customers.account.addresses.create.street-address')"
+                            :placeholder="trans('shop::app.customers.account.addresses.create.street-address')"
+                        />
+
+                        <x-shop::form.control-group.error control-name="address[]" />
+                    </x-shop::form.control-group>
+
+                    @if (
+                        core()->getConfigData('customer.address.information.street_lines')
+                        && core()->getConfigData('customer.address.information.street_lines') > 1
+                    )
+                        @for ($i = 1; $i < core()->getConfigData('customer.address.information.street_lines'); $i++)
+                            <x-shop::form.control-group.control
+                                type="text"
+                                name="address[{{ $i }}]"
+                                :value="old('address[{{ $i }}]')"
+                                rules="address"
+                                :label="trans('shop::app.customers.account.addresses.create.street-address')"
+                                :placeholder="trans('shop::app.customers.account.addresses.create.street-address')"
+                            />
+
+                            <x-shop::form.control-group.error
+                                class="mb-2"
+                                name="address[{{ $i }}]"
+                            />
+                        @endfor
+                    @endif
+
+                    {!! view_render_event('bagisto.shop.customers.account.addresses.create_form_controls.street_address.after') !!}
+
+                    <!-- Post Code (Hidden) -->
+                    <x-shop::form.control-group class="hidden">
                         <x-shop::form.control-group.label class="{{ core()->isPostCodeRequired() ? 'required' : '' }}">
                             @lang('shop::app.customers.account.addresses.create.post-code')
                         </x-shop::form.control-group.label>
@@ -284,7 +307,7 @@
                             type="text"
                             name="postcode"
                             rules="{{ core()->isPostCodeRequired() ? 'required' : '' }}|postcode"
-                            :value="old('postcode')"
+                            :value="old('postcode') ?? '00000'"
                             :label="trans('shop::app.customers.account.addresses.create.post-code')"
                             :placeholder="trans('shop::app.customers.account.addresses.create.post-code')"
                         />
@@ -300,16 +323,38 @@
                             @lang('shop::app.customers.account.addresses.create.phone')
                         </x-shop::form.control-group.label>
 
-                        <x-shop::form.control-group.control
-                            type="text"
-                            name="phone"
-                            rules="required|phone"
-                            :value="old('phone')"
-                            :label="trans('shop::app.customers.account.addresses.create.phone')"
-                            :placeholder="trans('shop::app.customers.account.addresses.create.phone')"
-                        />
+                        <div class="flex gap-x-2">
+                            <div class="w-[100px] min-w-[100px]">
+                                <x-shop::form.control-group.control
+                                    type="select"
+                                    name="phone_prefix"
+                                    v-model="phonePrefix"
+                                    class="!mb-0"
+                                >
+                                    <option value="+965">KW (+965)</option>
+                                    <option value="+966">SA (+966)</option>
+                                    <option value="+971">AE (+971)</option>
+                                    <option value="+974">QA (+974)</option>
+                                    <option value="+973">BH (+973)</option>
+                                    <option value="+968">OM (+968)</option>
+                                </x-shop::form.control-group.control>
+                            </div>
 
-                        <x-shop::form.control-group.error control-name="phone" />
+                            <div class="flex-1">
+                                <x-shop::form.control-group.control
+                                    type="text"
+                                    name="phone_number"
+                                    v-model="phoneNumber"
+                                    rules="required|numeric"
+                                    :label="trans('shop::app.customers.account.addresses.create.phone')"
+                                    :placeholder="trans('shop::app.customers.account.addresses.create.phone')"
+                                />
+
+                                <input type="hidden" name="phone" :value="phonePrefix + phoneNumber">
+                            </div>
+                        </div>
+
+                        <x-shop::form.control-group.error control-name="phone_number" />
                     </x-shop::form.control-group>
 
                     {!! view_render_event('bagisto.shop.customers.account.addresses.create_form_controls.phone.after') !!}
@@ -361,19 +406,41 @@
 
                         state: "{{ old('state') }}",
 
+                        city: "{{ old('city') }}",
+
                         countryStates: @json(core()->groupedStatesByCountries()),
+
+                        stateCities: @json(core()->groupedCitiesByStates()),
+
+                        phonePrefix: '+965',
+
+                        phoneNumber: "{{ old('phone') ? (str_starts_with(old('phone'), '+965') ? substr(old('phone'), 4) : old('phone')) : '' }}",
                     }
                 },
     
+                computed: {
+                    selectedStateId() {
+                        if (this.countryStates[this.country]?.length) {
+                            let selectedState = this.countryStates[this.country].find(s => s.code === this.state);
+                            return selectedState ? selectedState.id : null;
+                        }
+                        return null;
+                    },
+
+                    haveCities() {
+                        return !!(this.selectedStateId && this.stateCities[this.selectedStateId]?.length);
+                    },
+                },
+
                 methods: {
                     haveStates() {
-                        /*
-                        * The double negation operator is used to convert the value to a boolean.
-                        * It ensures that the final result is a boolean value,
-                        * true if the array has a length greater than 0, and otherwise false.
-                        */
-                        return !!this.countryStates[this.country]?.length;
-                    },
+
+                watch: {
+                    state: function(newVal, oldVal) {
+                        if (newVal !== oldVal) {
+                            this.city = '';
+                        }
+                    }
                 }
             });
         </script>

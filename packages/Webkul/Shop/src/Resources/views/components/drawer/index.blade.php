@@ -18,16 +18,8 @@
 
     @isset($header)
         <template v-slot:header="{ close }">
-            <div {{ $header->attributes->merge(['class' => 'grid gap-y-2.5 p-6 pb-5 max-md:gap-y-1.5 max-md:border-b max-md:border-zinc-200 max-md:p-4 max-md:gap-y-1 max-md:font-semibold']) }}>
+            <div {{ $header->attributes->merge(['class' => 'relative grid gap-y-2.5 p-6 pb-5 text-zinc-900 max-md:gap-y-1.5 max-md:border-b max-md:border-zinc-200 max-md:p-4 max-md:gap-y-1 max-md:font-semibold']) }}>
                 {{ $header }}
-
-                <div class="absolute top-5 max-sm:top-4 ltr:right-5 rtl:left-5">
-                    <span
-                        class="icon-cancel cursor-pointer text-3xl max-md:text-2xl"
-                        @click="close"
-                    >
-                    </span>
-                </div>
             </div>
         </template>
     @endisset
@@ -72,8 +64,9 @@
                 leave-to-class="opacity-0"
             >
                 <div
-                    class="fixed inset-0 z-20 bg-gray-500 bg-opacity-50 transition-opacity"
+                    class="fixed inset-0 z-[1000] bg-gray-500 bg-opacity-50 transition-opacity"
                     v-show="isOpen"
+                    @click="close"
                 ></div>
             </transition>
 
@@ -89,7 +82,7 @@
                 :leave-to-class="enterFromLeaveToClasses"
             >
                 <div
-                    class="fixed z-[1000] overflow-hidden bg-white max-md:!w-full"
+                    class="fixed z-[1001] overflow-hidden bg-white text-black max-md:!w-full"
                     :class="{
                         'inset-x-0 top-0': position == 'top',
                         'inset-x-0 bottom-0 max-sm:max-h-full': position == 'bottom',
@@ -98,7 +91,20 @@
                     }"
                     :style="'width:' + width"
                     v-show="isOpen"
+                    @keydown.esc="close"
+                    tabindex="0"
                 >
+                    <!-- Close Button (Pinned to the drawer edge) -->
+                    <div
+                        class="absolute top-5 z-[1002] flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[#ff3d3d] text-white shadow-lg transition hover:scale-110 ltr:right-5 rtl:left-5"
+                        @click="close"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </div>
+
                     <div class="pointer-events-auto h-full w-full overflow-auto bg-white">
                         <div class="flex h-full w-full flex-col">
                             <div class="min-h-0 min-w-0 flex-1 overflow-auto">

@@ -22,6 +22,8 @@ class DatabaseSeeder extends Seeder
 
         $this->call(StatesTableSeeder::class, false, ['parameters' => $parameters]);
 
+        $this->call(CitiesTableSeeder::class, false, ['parameters' => $parameters]);
+
         $this->call(ChannelTableSeeder::class, false, ['parameters' => $parameters]);
 
         $this->call(ConfigTableSeeder::class, false, ['parameters' => $parameters]);

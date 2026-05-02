@@ -15,7 +15,7 @@
     "name": "vue"
   },
   "src/Resources/assets/css/app.css": {
-    "file": "assets/app-DOHSUiIx.css",
+    "file": "assets/app-Dzqplu-E.css",
     "src": "src/Resources/assets/css/app.css",
     "isEntry": true
   },
@@ -23,9 +23,17 @@
     "file": "assets/bagisto-shop-BHAKyv0r.woff",
     "src": "src/Resources/assets/fonts/bagisto-shop.woff"
   },
+  "src/Resources/assets/images/apple-pay.png": {
+    "file": "assets/apple-pay-BbrkXH1J.png",
+    "src": "src/Resources/assets/images/apple-pay.png"
+  },
   "src/Resources/assets/images/cash-on-delivery.png": {
     "file": "assets/cash-on-delivery-Ck2rBtSq.png",
     "src": "src/Resources/assets/images/cash-on-delivery.png"
+  },
+  "src/Resources/assets/images/cc.png": {
+    "file": "assets/cc-DNuCbVOm.png",
+    "src": "src/Resources/assets/images/cc.png"
   },
   "src/Resources/assets/images/default-language.svg": {
     "file": "assets/default-language-BxH8WlkY.svg",
@@ -39,6 +47,10 @@
     "file": "assets/favicon-Df9chQdB.ico",
     "src": "src/Resources/assets/images/favicon.ico"
   },
+  "src/Resources/assets/images/google-pay.png": {
+    "file": "assets/google-pay-Bw8N2gIN.png",
+    "src": "src/Resources/assets/images/google-pay.png"
+  },
   "src/Resources/assets/images/hero-image.jpg": {
     "file": "assets/hero-image-BlVTwpsv.jpg",
     "src": "src/Resources/assets/images/hero-image.jpg"
@@ -46,6 +58,10 @@
   "src/Resources/assets/images/hero-image.webp": {
     "file": "assets/hero-image-DwKg3YHc.webp",
     "src": "src/Resources/assets/images/hero-image.webp"
+  },
+  "src/Resources/assets/images/knet.png": {
+    "file": "assets/knet-JTcCEJVN.png",
+    "src": "src/Resources/assets/images/knet.png"
   },
   "src/Resources/assets/images/large-product-placeholder.webp": {
     "file": "assets/large-product-placeholder-B9xoAuKQ.webp",
@@ -82,6 +98,10 @@
   "src/Resources/assets/images/review.png": {
     "file": "assets/review-ZWqERyaT.png",
     "src": "src/Resources/assets/images/review.png"
+  },
+  "src/Resources/assets/images/samsung-pay.png": {
+    "file": "assets/samsung-pay-Y6MZkxD9.png",
+    "src": "src/Resources/assets/images/samsung-pay.png"
   },
   "src/Resources/assets/images/small-product-placeholder.webp": {
     "file": "assets/small-product-placeholder-CMT26fOX.webp",

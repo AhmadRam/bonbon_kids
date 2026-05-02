@@ -212,14 +212,37 @@
                                     @lang('admin::app.customers.customers.view.address.edit.city')
                                 </x-admin::form.control-group.label>
 
-                                <x-admin::form.control-group.control
-                                    type="text"
-                                    name="city"
-                                    ::value="address.city"
-                                    rules="required"
-                                    :label="trans('admin::app.customers.customers.view.address.edit.city')"
-                                    :placeholder="trans('admin::app.customers.customers.view.address.edit.city')"
-                                />
+                                <template v-if="haveCities()">
+                                    <x-admin::form.control-group.control
+                                        type="select"
+                                        name="city"
+                                        id="city"
+                                        rules="required"
+                                        v-model="address.city"
+                                        :label="trans('admin::app.customers.customers.view.address.edit.city')"
+                                        :placeholder="trans('admin::app.customers.customers.view.address.edit.city')"
+                                    >
+                                        <option value="">Select City</option>
+                                        <option 
+                                            v-for='(cityData, index) in stateCities[address.state]'
+                                            :value="cityData.default_name"
+                                        >
+                                            @{{ cityData.default_name }}
+                                        </option>
+                                    </x-admin::form.control-group.control>
+                                </template>
+
+                                <template v-else>
+                                    <x-admin::form.control-group.control
+                                        type="text"
+                                        name="city"
+                                        ::value="address.city"
+                                        rules="required"
+                                        v-model="address.city"
+                                        :label="trans('admin::app.customers.customers.view.address.edit.city')"
+                                        :placeholder="trans('admin::app.customers.customers.view.address.edit.city')"
+                                    />
+                                </template>
 
                                 <x-admin::form.control-group.error control-name="city" />
                             </x-admin::form.control-group>
@@ -363,6 +386,8 @@
                 return {
                     countryStates: @json(core()->groupedStatesByCountries()),
 
+                    stateCities: @json(core()->groupedCitiesByStates()),
+
                     isLoading: false,
                 };
             },
@@ -398,6 +423,25 @@
 
                 haveStates() {
                     return !!this.countryStates[this.address.country]?.length;
+                },
+
+                haveCities() {
+                    let stateId = null;
+                    if (this.countryStates[this.address.country]?.length) {
+                        let selectedState = this.countryStates[this.address.country].find(s => s.code === this.address.state);
+                        if (selectedState) {
+                            stateId = selectedState.id;
+                        }
+                    }
+                    return !!this.stateCities[stateId]?.length;
+                },
+            },
+
+            watch: {
+                'address.state': function(newVal, oldVal) {
+                    if (newVal !== oldVal && oldVal !== undefined && oldVal !== '') {
+                        this.address.city = '';
+                    }
                 }
             }
         });

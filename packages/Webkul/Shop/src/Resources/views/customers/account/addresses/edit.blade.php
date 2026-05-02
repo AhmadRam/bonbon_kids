@@ -58,8 +58,8 @@
             >
                 {!! view_render_event('bagisto.shop.customers.account.address.edit_form_controls.before', ['address' => $address]) !!}
 
-                <!-- Company Name -->
-                <x-shop::form.control-group>
+                <!-- Company Name (Hidden) -->
+                <x-shop::form.control-group class="hidden">
                     <x-shop::form.control-group.label>
                         @lang('shop::app.customers.account.addresses.edit.company-name')
                     </x-shop::form.control-group.label>
@@ -137,8 +137,8 @@
 
                 {!! view_render_event('bagisto.shop.customers.account.addresses.edit_form_controls.email.after', ['address' => $address]) !!}
 
-                <!-- Vat ID -->
-                <x-shop::form.control-group>
+                <!-- Vat ID (Hidden) -->
+                <x-shop::form.control-group class="hidden">
                     <x-shop::form.control-group.label>
                         @lang('shop::app.customers.account.addresses.edit.vat-id')
                     </x-shop::form.control-group.label>
@@ -156,50 +156,7 @@
 
                 {!! view_render_event('bagisto.shop.customers.account.addresses.edit_form_controls.vat_id.after', ['address' => $address]) !!}
 
-                @php
-                    $addresses = explode(PHP_EOL, $address->address);
-                @endphp
 
-                <!-- Street Address -->
-                <x-shop::form.control-group>
-                    <x-shop::form.control-group.label class="required">
-                        @lang('shop::app.customers.account.addresses.edit.street-address')
-                    </x-shop::form.control-group.label>
-
-                    <x-shop::form.control-group.control
-                        type="text"
-                        name="address[]"
-                        :value="collect(old('address'))->first() ?? $addresses[0]"
-                        rules="required|address"
-                        :label="trans('shop::app.customers.account.addresses.edit.street-address')"
-                        :placeholder="trans('shop::app.customers.account.addresses.edit.street-address')"
-                    />
-
-                    <x-shop::form.control-group.error control-name="address[]" />
-                </x-shop::form.control-group>
-
-                @if (
-                    core()->getConfigData('customer.address.information.street_lines')
-                    && core()->getConfigData('customer.address.information.street_lines') > 1
-                )
-                    @for ($i = 1; $i < core()->getConfigData('customer.address.information.street_lines'); $i++)
-                        <x-shop::form.control-group.control
-                            type="text"
-                            name="address[{{ $i }}]"
-                            :value="old('address[{{$i}}]', $addresses[$i] ?? '')"
-                            rules="address"
-                            :label="trans('shop::app.customers.account.addresses.edit.street-address')"
-                            :placeholder="trans('shop::app.customers.account.addresses.edit.street-address')"
-                        />
-
-                        <x-shop::form.control-group.error
-                            class="mb-2"
-                            name="address[{{ $i }}]"
-                        />
-                    @endfor
-                @endif
-
-                {!! view_render_event('bagisto.shop.customers.account.addresses.edit_form_controls.street-addres.after', ['address' => $address]) !!}
 
                 <!-- Country Name -->
                 <x-shop::form.control-group>
@@ -275,21 +232,90 @@
                         @lang('shop::app.customers.account.addresses.edit.city')
                     </x-shop::form.control-group.label>
 
-                    <x-shop::form.control-group.control
-                        type="text"
-                        name="city"
-                        rules="required"
-                        :value="old('city') ?? $address->city"
-                        :label="trans('shop::app.customers.account.addresses.edit.city')"
-                        :placeholder="trans('shop::app.customers.account.addresses.edit.city')"
-                    />
+                    <template v-if="haveCities">
+                        <x-shop::form.control-group.control
+                            type="select"
+                            name="city"
+                            id="city"
+                            rules="required"
+                            v-model="addressData.city"
+                            :label="trans('shop::app.customers.account.addresses.edit.city')"
+                            :placeholder="trans('shop::app.customers.account.addresses.edit.city')"
+                        >
+                            <option value="">@lang('shop::app.customers.account.addresses.create.select-city')</option>
+                            <option 
+                                v-for='(cityData, index) in stateCities[selectedStateId]'
+                                :value="cityData.default_name"
+                            >
+                                @{{ cityData.default_name }}
+                            </option>
+                        </x-shop::form.control-group.control>
+                    </template>
+
+                    <template v-else>
+                        <x-shop::form.control-group.control
+                            type="text"
+                            name="city"
+                            rules="required"
+                            :value="old('city') ?? $address->city"
+                            v-model="addressData.city"
+                            :label="trans('shop::app.customers.account.addresses.edit.city')"
+                            :placeholder="trans('shop::app.customers.account.addresses.edit.city')"
+                        />
+                    </template>
 
                     <x-shop::form.control-group.error control-name="city" />
                 </x-shop::form.control-group>
 
                 {!! view_render_event('bagisto.shop.customers.account.addresses.edit_form_controls.city.after', ['address' => $address]) !!}
 
+                @php
+                    $addresses = explode(PHP_EOL, $address->address);
+                @endphp
+
+                <!-- Street Address -->
                 <x-shop::form.control-group>
+                    <x-shop::form.control-group.label class="required">
+                        @lang('shop::app.customers.account.addresses.edit.street-address')
+                    </x-shop::form.control-group.label>
+
+                    <x-shop::form.control-group.control
+                        type="text"
+                        name="address[]"
+                        :value="collect(old('address'))->first() ?? $addresses[0]"
+                        rules="required|address"
+                        :label="trans('shop::app.customers.account.addresses.edit.street-address')"
+                        :placeholder="trans('shop::app.customers.account.addresses.edit.street-address')"
+                    />
+
+                    <x-shop::form.control-group.error control-name="address[]" />
+                </x-shop::form.control-group>
+
+                @if (
+                    core()->getConfigData('customer.address.information.street_lines')
+                    && core()->getConfigData('customer.address.information.street_lines') > 1
+                )
+                    @for ($i = 1; $i < core()->getConfigData('customer.address.information.street_lines'); $i++)
+                        <x-shop::form.control-group.control
+                            type="text"
+                            name="address[{{ $i }}]"
+                            :value="old('address[{{$i}}]', $addresses[$i] ?? '')"
+                            rules="address"
+                            :label="trans('shop::app.customers.account.addresses.edit.street-address')"
+                            :placeholder="trans('shop::app.customers.account.addresses.edit.street-address')"
+                        />
+
+                        <x-shop::form.control-group.error
+                            class="mb-2"
+                            name="address[{{ $i }}]"
+                        />
+                    @endfor
+                @endif
+
+                {!! view_render_event('bagisto.shop.customers.account.addresses.edit_form_controls.street-addres.after', ['address' => $address]) !!}
+
+                <!-- Post Code (Hidden) -->
+                <x-shop::form.control-group class="hidden">
                     <x-shop::form.control-group.label class="{{ core()->isPostCodeRequired() ? 'required' : '' }}">
                         @lang('shop::app.customers.account.addresses.edit.post-code')
                     </x-shop::form.control-group.label>
@@ -313,16 +339,38 @@
                         @lang('shop::app.customers.account.addresses.edit.phone')
                     </x-shop::form.control-group.label>
 
-                    <x-shop::form.control-group.control
-                        type="text"
-                        name="phone"
-                        rules="required|phone"
-                        :value="old('phone') ?? $address->phone"
-                        :label="trans('shop::app.customers.account.addresses.edit.phone')"
-                        :placeholder="trans('shop::app.customers.account.addresses.edit.phone')"
-                    />
+                    <div class="flex gap-x-2">
+                        <div class="w-[100px] min-w-[100px]">
+                            <x-shop::form.control-group.control
+                                type="select"
+                                name="phone_prefix"
+                                v-model="phonePrefix"
+                                class="!mb-0"
+                            >
+                                <option value="+965">KW (+965)</option>
+                                <option value="+966">SA (+966)</option>
+                                <option value="+971">AE (+971)</option>
+                                <option value="+974">QA (+974)</option>
+                                <option value="+973">BH (+973)</option>
+                                <option value="+968">OM (+968)</option>
+                            </x-shop::form.control-group.control>
+                        </div>
 
-                    <x-shop::form.control-group.error control-name="phone" />
+                        <div class="flex-1">
+                            <x-shop::form.control-group.control
+                                type="text"
+                                name="phone_number"
+                                v-model="phoneNumber"
+                                rules="required|numeric"
+                                :label="trans('shop::app.customers.account.addresses.edit.phone')"
+                                :placeholder="trans('shop::app.customers.account.addresses.edit.phone')"
+                            />
+
+                            <input type="hidden" name="phone" :value="phonePrefix + phoneNumber">
+                        </div>
+                    </div>
+
+                    <x-shop::form.control-group.error control-name="phone_number" />
                 </x-shop::form.control-group>
 
                 {!! view_render_event('bagisto.shop.customers.account.addresses.edit_form_controls.phone.after', ['address' => $address]) !!}
@@ -349,17 +397,48 @@
                             country: "{{ old('country') ?? $address->country }}",
 
                             state: "{{ old('state') ?? $address->state }}",
+
+                            city: "{{ old('city') ?? $address->city }}",
                         },
 
                         countryStates: @json(core()->groupedStatesByCountries()),
+
+                        stateCities: @json(core()->groupedCitiesByStates()),
+
+                        phonePrefix: '+965',
+
+                        phoneNumber: '',
                     };
                 },
+
+                mounted() {
+                    this.initPhone();
+                },
     
-                methods: {
-                    haveStates() {
-                        return !!this.countryStates[this.addressData.country]?.length;
+                computed: {
+                    selectedStateId() {
+                        if (this.countryStates[this.addressData.country]?.length) {
+                            let selectedState = this.countryStates[this.addressData.country].find(s => s.code === this.addressData.state);
+                            return selectedState ? selectedState.id : null;
+                        }
+                        return null;
+                    },
+
+                    haveCities() {
+                        return !!(this.selectedStateId && this.stateCities[this.selectedStateId]?.length);
                     },
                 },
+
+                methods: {
+                    initPhone() {
+
+                watch: {
+                    'addressData.state': function(newVal, oldVal) {
+                        if (newVal !== oldVal && oldVal !== undefined && oldVal !== "") {
+                            this.addressData.city = '';
+                        }
+                    }
+                }
             });
         </script>
     @endpush

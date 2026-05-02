@@ -663,7 +663,7 @@ class Core
      */
     public function countries()
     {
-        return DB::table('countries')->get();
+        return DB::table('countries')->where('status', 1)->get();
     }
 
     /**
@@ -687,7 +687,10 @@ class Core
      */
     public function states($countryCode)
     {
-        return $this->countryStateRepository->findByField('country_code', $countryCode);
+        return $this->countryStateRepository->findWhere([
+            'country_code' => $countryCode,
+            'status'       => 1,
+        ]);
     }
 
     /**
@@ -699,8 +702,53 @@ class Core
     {
         $collection = [];
 
-        foreach (DB::table('country_states')->get() as $state) {
+        foreach (DB::table('country_states')->where('status', 1)->get() as $state) {
             $collection[$state->country_code][] = $state;
+        }
+
+        return $collection;
+    }
+
+    /**
+     * Retrieve all grouped cities by state id.
+     *
+     * @return array
+     */
+    public function groupedCitiesByStates()
+    {
+        $collection = [];
+
+        $cities = DB::table('country_state_cities')
+            ->leftJoin('country_city_translations as locale_translation', function ($join) {
+                $join->on('country_state_cities.id', '=', 'locale_translation.country_state_city_id')
+                    ->where('locale_translation.locale', app()->getLocale());
+            })
+            ->leftJoin('country_city_translations as fallback_translation', function ($join) {
+                $join->on('country_state_cities.id', '=', 'fallback_translation.country_state_city_id')
+                    ->where('fallback_translation.locale', config('app.fallback_locale'));
+            })
+            ->where('country_state_cities.status', 1)
+            ->select(
+                'country_state_cities.id',
+                'country_state_cities.country_id',
+                'country_state_cities.country_code',
+                'country_state_cities.country_state_id',
+                'country_state_cities.state_code',
+                'country_state_cities.code',
+                DB::raw("COALESCE(locale_translation.name, fallback_translation.name, NULLIF(country_state_cities.default_name, ''), country_state_cities.code) as default_name")
+            )
+            ->get();
+
+        foreach ($cities as $city) {
+            $collection[$city->country_state_id][] = [
+                'id' => $city->id,
+                'country_id' => $city->country_id,
+                'country_code' => $city->country_code,
+                'country_state_id' => $city->country_state_id,
+                'state_code' => $city->state_code,
+                'default_name' => $city->default_name,
+                'code' => $city->code,
+            ];
         }
 
         return $collection;

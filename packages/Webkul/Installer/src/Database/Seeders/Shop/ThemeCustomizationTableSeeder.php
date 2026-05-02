@@ -123,29 +123,33 @@ class ThemeCustomizationTableSeeder extends Seeder
                         'options' => json_encode([
                             'images' => [
                                 [
-                                    'title' => trans('installer::app.seeders.shop.theme-customizations.image-carousel.sliders.title', [], $locale),
-                                    'link' => '#formal-wear-female',
-                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/1.webp', 'sliders/en/1.webp'),
+                                    'title' => '',
+                                    'link' => '',
+                                    'image' => 'https://z-toys.daftara.com/v2/owner/shop_front_media/get_media/239',
                                 ], [
-                                    'title' => trans('installer::app.seeders.shop.theme-customizations.image-carousel.sliders.title', [], $locale),
-                                    'link' => '#formal-wear-men',
-                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/2.webp', 'sliders/en/2.webp'),
+                                    'title' => '',
+                                    'link' => '',
+                                    'image' => 'https://z-toys.daftara.com/v2/owner/shop_front_media/get_media/240',
                                 ], [
-                                    'title' => trans('installer::app.seeders.shop.theme-customizations.image-carousel.sliders.title', [], $locale),
-                                    'link' => '#active-wear-female',
-                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/3.webp', 'sliders/en/3.webp'),
+                                    'title' => '',
+                                    'link' => '',
+                                    'image' => 'https://z-toys.daftara.com/v2/owner/shop_front_media/get_media/241',
                                 ], [
-                                    'title' => trans('installer::app.seeders.shop.theme-customizations.image-carousel.sliders.title', [], $locale),
-                                    'link' => '#smart-home-automation',
-                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/4.webp', 'sliders/en/4.webp'),
+                                    'title' => '',
+                                    'link' => '',
+                                    'image' => 'https://z-toys.daftara.com/v2/owner/shop_front_media/get_media/242',
                                 ], [
-                                    'title' => trans('installer::app.seeders.shop.theme-customizations.image-carousel.sliders.title', [], $locale),
-                                    'link' => '#mobile-phones-accessories',
-                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/5.webp', 'sliders/en/5.webp'),
+                                    'title' => '',
+                                    'link' => '',
+                                    'image' => 'https://z-toys.daftara.com/v2/owner/shop_front_media/get_media/243',
                                 ], [
-                                    'title' => trans('installer::app.seeders.shop.theme-customizations.image-carousel.sliders.title', [], $locale),
-                                    'link' => '#laptops-tablets',
-                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/6.webp', 'sliders/en/6.webp'),
+                                    'title' => '',
+                                    'link' => '',
+                                    'image' => 'https://z-toys.daftara.com/v2/owner/shop_front_media/get_media/244',
+                                ], [
+                                    'title' => '',
+                                    'link' => '',
+                                    'image' => 'https://z-toys.daftara.com/v2/owner/shop_front_media/get_media/245',
                                 ],
                             ],
                         ]),

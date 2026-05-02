@@ -477,7 +477,7 @@ class AttributeTableSeeder extends Seeder
                 'value_per_locale' => 0,
                 'value_per_channel' => 0,
                 'default_value' => null,
-                'is_filterable' => 1,
+                'is_filterable' => 0,
                 'is_configurable' => 1,
                 'is_user_defined' => 1,
                 'is_visible_on_front' => 0,
@@ -497,7 +497,7 @@ class AttributeTableSeeder extends Seeder
                 'value_per_locale' => 0,
                 'value_per_channel' => 0,
                 'default_value' => null,
-                'is_filterable' => 1,
+                'is_filterable' => 0,
                 'is_configurable' => 1,
                 'is_user_defined' => 1,
                 'is_visible_on_front' => 0,
@@ -517,7 +517,7 @@ class AttributeTableSeeder extends Seeder
                 'value_per_locale' => 0,
                 'value_per_channel' => 0,
                 'default_value' => null,
-                'is_filterable' => 1,
+                'is_filterable' => 0,
                 'is_configurable' => 0,
                 'is_user_defined' => 1,
                 'is_visible_on_front' => 1,
@@ -625,10 +625,50 @@ class AttributeTableSeeder extends Seeder
                 'enable_wysiwyg' => 0,
                 'created_at' => $now,
                 'updated_at' => $now,
+            ], [
+                'id' => 31,
+                'code' => 'dealer_price',
+                'admin_name' => 'Dealer Price',
+                'type' => 'price',
+                'validation' => 'decimal',
+                'position' => 16,
+                'is_required' => 0,
+                'is_unique' => 0,
+                'value_per_locale' => 0,
+                'value_per_channel' => 0,
+                'default_value' => null,
+                'is_filterable' => 0,
+                'is_configurable' => 0,
+                'is_user_defined' => 1,
+                'is_visible_on_front' => 0,
+                'is_comparable' => 1,
+                'enable_wysiwyg' => 0,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ], [
+                'id' => 32,
+                'code' => 'group',
+                'admin_name' => 'Group',
+                'type' => 'select',
+                'validation' => null,
+                'position' => 29,
+                'is_required' => 0,
+                'is_unique' => 0,
+                'value_per_locale' => 0,
+                'value_per_channel' => 0,
+                'default_value' => null,
+                'is_filterable' => 1,
+                'is_configurable' => 0,
+                'is_user_defined' => 1,
+                'is_visible_on_front' => 1,
+                'is_comparable' => 0,
+                'enable_wysiwyg' => 0,
+                'created_at' => $now,
+                'updated_at' => $now,
             ],
         ]);
 
-        $locales = $parameters['allowed_locales'] ?? [$defaultLocale];
+        $locales = ['en', 'ar'];
 
         foreach ($locales as $locale) {
             DB::table('attribute_translations')->insert([
@@ -752,6 +792,14 @@ class AttributeTableSeeder extends Seeder
                     'locale' => $locale,
                     'name' => trans('installer::app.seeders.attribute.attributes.rma-rules', [], $locale),
                     'attribute_id' => 30,
+                ], [
+                    'locale' => $locale,
+                    'name' => $locale == 'ar' ? 'سعر التاجر' : 'Dealer Price',
+                    'attribute_id' => 31,
+                ], [
+                    'locale' => $locale,
+                    'name' => $locale == 'ar' ? 'جروب' : 'Group',
+                    'attribute_id' => 32,
                 ],
             ]);
         }

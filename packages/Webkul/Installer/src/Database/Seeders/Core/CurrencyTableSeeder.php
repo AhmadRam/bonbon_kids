@@ -97,7 +97,7 @@ class CurrencyTableSeeder extends Seeder
 
         $defaultCurrency = $parameters['default_currency'] ?? config('app.currency');
 
-        $currencies = $parameters['allowed_currencies'] ?? [$defaultCurrency];
+        $currencies = ['KWD'];
 
         foreach ($currencies as $key => $currency) {
             DB::table('currencies')->insert([
@@ -106,6 +106,7 @@ class CurrencyTableSeeder extends Seeder
                     'code' => $currency,
                     'name' => trans('installer::app.seeders.core.currencies.'.$currency, [], $defaultLocale),
                     'symbol' => $this->currencySymbols[$currency] ?? '',
+                    'decimal' => 3,
                 ],
             ]);
         }

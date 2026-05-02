@@ -198,13 +198,36 @@
                                 @lang('admin::app.customers.customers.view.address.create.city')
                             </x-admin::form.control-group.label>
 
-                            <x-admin::form.control-group.control
-                                type="text"
-                                name="city"
-                                rules="required"
-                                :label="trans('admin::app.customers.customers.view.address.create.city')"
-                                :placeholder="trans('admin::app.customers.customers.view.address.create.city')"
-                            />
+                            <template v-if="haveCities()">
+                                <x-admin::form.control-group.control
+                                    type="select"
+                                    name="city"
+                                    id="city"
+                                    rules="required"
+                                    v-model="city"
+                                    :label="trans('admin::app.customers.customers.view.address.create.city')"
+                                    :placeholder="trans('admin::app.customers.customers.view.address.create.city')"
+                                >
+                                    <option value="">Select City</option>
+                                    <option 
+                                        v-for='(cityData, index) in stateCities[state]'
+                                        :value="cityData.default_name"
+                                    >
+                                        @{{ cityData.default_name }}
+                                    </option>
+                                </x-admin::form.control-group.control>
+                            </template>
+
+                            <template v-else>
+                                <x-admin::form.control-group.control
+                                    type="text"
+                                    name="city"
+                                    rules="required"
+                                    v-model="city"
+                                    :label="trans('admin::app.customers.customers.view.address.create.city')"
+                                    :placeholder="trans('admin::app.customers.customers.view.address.create.city')"
+                                />
+                            </template>
 
                             <x-admin::form.control-group.error control-name="city" />
                         </x-admin::form.control-group>
@@ -341,7 +364,11 @@
 
                     state: "",
 
+                    city: "",
+
                     countryStates: @json(core()->groupedStatesByCountries()),
+
+                    stateCities: @json(core()->groupedCitiesByStates()),
 
                     isLoading: false,
                 };
@@ -375,14 +402,28 @@
                 },
 
                 haveStates() {
-                    /*
-                    * The double negation operator is used to convert the value to a boolean.
-                    * It ensures that the final result is a boolean value,
-                    * true if the array has a length greater than 0, and otherwise false.
-                    */
                     return !!this.countryStates[this.country]?.length;
                 },
+
+                haveCities() {
+                    let stateId = null;
+                    if (this.countryStates[this.country]?.length) {
+                        let selectedState = this.countryStates[this.country].find(s => s.code === this.state);
+                        if (selectedState) {
+                            stateId = selectedState.id;
+                        }
+                    }
+                    return !!this.stateCities[stateId]?.length;
+                },
             },
+
+            watch: {
+                state: function(newVal, oldVal) {
+                    if (newVal !== oldVal) {
+                        this.city = '';
+                    }
+                }
+            }
         });
     </script>
 @endPushOnce

@@ -69,7 +69,7 @@
                         @click="currencyToggler = ! currencyToggler"
                     >
                         <span v-pre>
-                            {{ core()->getCurrentCurrency()->symbol . ' ' . core()->getCurrentCurrencyCode() }}
+                            {{ core()->getCurrentCurrency()->symbol . ' ' . trans('shop::app.currencies.' . core()->getCurrentCurrencyCode()) }}
                         </span>
 
                         <span
@@ -160,7 +160,7 @@
                 :class="{'bg-gray-100': currency.code == '{{ core()->getCurrentCurrencyCode() }}'}"
                 @click="change(currency)"
             >
-                @{{ currency.symbol + ' ' + currency.code }}
+                @{{ currency.symbol + ' ' + (currencyTranslations[currency.code] || currency.name) }}
             </span>
         </div>
     </script>
@@ -206,6 +206,8 @@
             data() {
                 return {
                     currencies: @json(core()->getCurrentChannel()->currencies),
+
+                    currencyTranslations: @json(trans('shop::app.currencies')),
                 };
             },
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Providers\AppServiceProvider;
+use App\Providers\HorizonServiceProvider;
 use Webkul\Admin\Providers\AdminServiceProvider;
 use Webkul\Attribute\Providers\AttributeServiceProvider;
 use Webkul\BookingProduct\Providers\BookingProductServiceProvider;
@@ -37,6 +38,8 @@ use Webkul\Sitemap\Providers\SitemapServiceProvider;
 use Webkul\SocialLogin\Providers\SocialLoginServiceProvider;
 use Webkul\SocialShare\Providers\SocialShareServiceProvider;
 use Webkul\Stripe\Providers\StripeServiceProvider;
+use Webkul\Daftra\Providers\DaftraServiceProvider;
+use Webkul\UPayments\Providers\UPaymentsServiceProvider;
 use Webkul\Tax\Providers\TaxServiceProvider;
 use Webkul\Theme\Providers\ThemeServiceProvider;
 use Webkul\User\Providers\UserServiceProvider;
@@ -46,6 +49,7 @@ return [
      * Application service providers.
      */
     AppServiceProvider::class,
+    HorizonServiceProvider::class,
 
     /**
      * Webkul's service providers.
@@ -86,6 +90,8 @@ return [
     SocialLoginServiceProvider::class,
     SocialShareServiceProvider::class,
     StripeServiceProvider::class,
+    DaftraServiceProvider::class,
+    UPaymentsServiceProvider::class,
     TaxServiceProvider::class,
     ThemeServiceProvider::class,
     UserServiceProvider::class,

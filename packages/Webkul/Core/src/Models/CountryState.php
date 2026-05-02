@@ -24,4 +24,12 @@ class CountryState extends TranslatableModel implements CountryStateContract
 
         return $array;
     }
+
+    /**
+     * Get the cities for the state.
+     */
+    public function cities()
+    {
+        return $this->hasMany(CountryCityProxy::modelClass(), 'country_state_id');
+    }
 }

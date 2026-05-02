@@ -334,22 +334,10 @@
         <div v-else>
             <!-- Categories Navigation -->
             <div class="flex items-center">
-                <!-- "All" button for opening the category drawer -->
-                <div
-                    class="flex h-[77px] cursor-pointer items-center border-b-4 border-transparent hover:border-b-4 hover:border-navyBlue"
-                    @click="toggleCategoryDrawer"
-                >
-                    <span class="flex items-center gap-1 px-5 uppercase">
-                        <span class="text-xl icon-hamburger"></span>
 
-                        @lang('shop::app.components.layouts.header.desktop.bottom.all')
-                    </span>
-                </div>
-
-                <!-- Show only first 4 categories in main navigation -->
                 <div
                     class="group relative flex h-[77px] items-center border-b-4 border-transparent hover:border-b-4 hover:border-navyBlue"
-                    v-for="category in categories.slice(0, 4)"
+                    v-for="category in categories"
                 >
                     <span>
                         <a
@@ -408,7 +396,7 @@
                 <x-slot:toggle></x-slot>
 
                 <x-slot:header class="border-b border-gray-200">
-                    <div class="flex items-center justify-between w-full">
+                    <div class="flex items-center justify-between w-full text-black">
                         <p class="text-xl font-medium">
                             @lang('shop::app.components.layouts.header.desktop.bottom.categories')
                         </p>
@@ -538,10 +526,18 @@
                         const stored = localStorage.getItem('categories');
 
                         if (stored) {
-                            this.categories = JSON.parse(stored);
-                            this.isLoading = false;
+                            try {
+                                const categories = JSON.parse(stored);
 
-                            return;
+                                if (Array.isArray(categories) && categories.length > 0) {
+                                    this.categories = categories;
+                                    this.isLoading = false;
+
+                                    return;
+                                }
+                            } catch (e) {
+                                localStorage.removeItem('categories');
+                            }
                         }
 
                     } catch (e) {}
