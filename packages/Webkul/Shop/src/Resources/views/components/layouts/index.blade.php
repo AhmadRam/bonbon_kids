@@ -39,8 +39,8 @@
             name="currency"
             content="{{ core()->getCurrentCurrency()->toJson() }}"
         >
-        <meta 
-            name="generator" 
+        <meta
+            name="generator"
             content="Bagisto"
         >
 

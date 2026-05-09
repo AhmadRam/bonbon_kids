@@ -97,7 +97,7 @@ class InstallerController extends Controller
 
         if ($isEnvVariablesUpdated) {
             $isSeeded = $this->databaseManager->seed([
-                'default_locales' => $appLocale,
+                'default_locale'  => $appLocale,
                 'default_currency' => $appCurrency,
                 'allowed_locales' => $allowedLocales,
                 'allowed_currencies' => $allowedCurrencies,

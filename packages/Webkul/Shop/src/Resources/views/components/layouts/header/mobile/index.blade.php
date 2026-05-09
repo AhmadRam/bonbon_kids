@@ -23,14 +23,14 @@
 
             <a
                 href="{{ route('shop.home.index') }}"
-                class="max-h-[30px]"
+                class="max-h-[45px]"
                 aria-label="@lang('shop::app.components.layouts.header.mobile.bagisto')"
             >
                 <img
                     src="{{ core()->getCurrentChannel()->logo_url ?? bagisto_asset('images/logo.svg') }}"
                     alt="{{ config('app.name') }}"
-                    width="131"
-                    height="29"
+                    width="127"
+                    height="45"
                 >
             </a>
 
@@ -73,7 +73,7 @@
                             @guest('customer')
                                 <x-slot:content>
                                     <div class="grid gap-2.5">
-                                        <p class="text-xl font-dmserif">
+                                        <p class="text-xl font-poppins">
                                             @lang('shop::app.components.layouts.header.mobile.welcome-guest')
                                         </p>
 
@@ -114,7 +114,7 @@
                                 @auth('customer')
                                     <x-slot:content class="!p-0">
                                         <div class="grid gap-2.5 p-5 pb-0">
-                                            <p class="text-xl font-dmserif" v-pre>
+                                            <p class="text-xl font-poppins" v-pre>
                                         @lang('shop::app.components.layouts.header.mobile.welcome')’
                                                 {{ auth()->guard('customer')->user()->first_name }}
                                             </p>
@@ -250,8 +250,8 @@
                             <img
                                 src="{{ core()->getCurrentChannel()->logo_url ?? bagisto_asset('images/logo.svg') }}"
                                 alt="{{ config('app.name') }}"
-                                width="131"
-                                height="29"
+                                width="155"
+                                height="55"
                             >
                         </a>
                     </div>

@@ -132,9 +132,9 @@ return [
 
         'core' => [
             'channels' => [
-                'meta-description' => 'وصف متجر تجريبي',
-                'meta-keywords' => 'الكلمات الرئيسية للمتجر التجريبي',
-                'meta-title' => 'متجر تجريبي',
+                'meta-description' => 'بون بون تويز ستور — وجهتك الأولى لأفضل ألعاب الأطفال والألعاب التعليمية والترفيهية لجميع الأعمار.',
+                'meta-keywords' => 'ألعاب, ألعاب أطفال, ألعاب تعليمية, بون بون, متجر ألعاب, هدايا أطفال, ألعاب ترفيهية',
+                'meta-title' => 'بون بون تويز ستور',
                 'name' => 'افتراضي',
             ],
 
@@ -329,6 +329,22 @@ return [
                     ],
                 ],
 
+                'main-groups' => [
+                    'name' => 'المجموعات الرئيسية',
+                ],
+
+                'new-arrivals-carousel' => [
+                    'name' => 'وصل حديثاً',
+                ],
+
+                'featured-products' => [
+                    'name' => 'المنتجات المميزة',
+                ],
+
+                'all-products' => [
+                    'name' => 'جميع المنتجات',
+                ],
+
                 'kids-collection' => [
                     'name' => 'ألعاب تعليمية',
 
@@ -355,19 +371,19 @@ return [
 
                 'services-content' => [
                     'description' => [
-                        'emi-available-info' => 'توفر EMI بدون تكلفة على جميع بطاقات الائتمان الرئيسية',
-                        'free-shipping-info' => 'استمتع بالشحن المجاني على جميع الطلبات',
-                        'product-replace-info' => 'استبدال المنتج بسهولة متاح!',
-                        'time-support-info' => 'دعم مخصص على مدار الساعة عبر الدردشة والبريد الإلكتروني',
+                        'emi-available-info' => 'الدفع عند الاستلام او بالبطاقات البنكية',
+                        'free-shipping-info' => 'استمتع بخدمة التوصيل السهلة',
+                        'product-replace-info' => 'سهولة استبدال المنتج متاحة!',
+                        'time-support-info' => 'دعم مخصص على مدار 24 ساعة طوال أيام الأسبوع عبر الدردشة',
                     ],
 
                     'name' => 'محتوى الخدمات',
 
                     'title' => [
-                        'emi-available' => 'توفر EMI',
-                        'free-shipping' => 'الشحن المجاني',
+                        'emi-available' => 'سهولة الدفع',
+                        'free-shipping' => 'خدمة التوصيل',
                         'product-replace' => 'استبدال المنتج',
-                        'time-support' => 'الدعم على مدار الساعة',
+                        'time-support' => 'دعم 24/7',
                     ],
                 ],
 
@@ -402,7 +418,7 @@ return [
             ],
 
             'users' => [
-                'name' => 'مثال',
+                'name' => 'مدير',
             ],
         ],
 

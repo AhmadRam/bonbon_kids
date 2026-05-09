@@ -72,13 +72,32 @@ class ProductsTableSeeder extends Seeder
             }
         }
 
-        // 2. Setup Categories
-        if (isset($this->command)) $this->command->info("Setting up categories...");
-        $categoriesMap = $this->setupCategories();
+        // 2. Build Categories Map Dynamically from DB
+        if (isset($this->command)) $this->command->info("Building categories map dynamically...");
+        $categoriesMap = [];
+        $categories = \Illuminate\Support\Facades\DB::table('category_translations')->whereIn('locale', ['en', 'ar'])->get();
+        foreach ($categories as $cat) {
+            $categoriesMap[$cat->name] = $cat->category_id;
+            $categoriesMap[$cat->slug] = $cat->category_id;
+        }
 
-        // 3. Setup Groups
-        if (isset($this->command)) $this->command->info("Setting up groups...");
-        $groupsMap = $this->setupGroups();
+        // 3. Build Groups Map Dynamically from DB
+        if (isset($this->command)) $this->command->info("Building groups map dynamically...");
+        $groupsMap = [];
+        $attribute = \Illuminate\Support\Facades\DB::table('attributes')->where('code', 'group')->first();
+        if ($attribute) {
+            $options = \Illuminate\Support\Facades\DB::table('attribute_option_translations')
+                ->join('attribute_options', 'attribute_option_translations.attribute_option_id', '=', 'attribute_options.id')
+                ->where('attribute_options.attribute_id', $attribute->id)
+                ->select('attribute_options.id as id', 'attribute_option_translations.label as label')
+                ->get();
+            foreach ($options as $opt) {
+                if (!isset($groupsMap[$opt->id])) {
+                    $groupsMap[$opt->id] = [];
+                }
+                $groupsMap[$opt->id][] = trim($opt->label);
+            }
+        }
 
         // 4. Parse Excel
         if (isset($this->command)) $this->command->info("Extracting data from hilal_ready_products_import_updated.xlsx...");
@@ -109,7 +128,7 @@ class ProductsTableSeeder extends Seeder
             $nameAr = $row['name_ar'] ?? $nameEn;
             $price = (float)($row['price'] ?? 0);
             $qty = (int)($row['inventories'] ?? 0);
-            
+
             // Match Category
             $categorySlug = $row['categories_slug'] ?? '';
             $categoryId = $categoriesMap[$categorySlug] ?? null;
@@ -162,6 +181,8 @@ class ProductsTableSeeder extends Seeder
                 'guest_checkout' => 1,
                 'weight' => (float)($row['weight'] ?? 0),
                 'status' => 1,
+                'new' => 1,
+                'featured' => 1,
                 'visible_individually' => 1,
                 'channel' => 'default',
                 'locale' => 'en',
@@ -190,7 +211,7 @@ class ProductsTableSeeder extends Seeder
                 $updateDataAr['meta_title'] = $row['meta_title_ar'] ?? ($row['meta_title'] ?? '');
                 $updateDataAr['meta_description'] = $row['meta_description_ar'] ?? ($row['meta_description'] ?? '');
                 $updateDataAr['meta_keywords'] = $row['meta_keywords_ar'] ?? ($row['meta_keywords'] ?? '');
-                
+
                 // Using update again with 'ar' locale will insert/update the arabic translations in product_attribute_values
                 $this->productRepository->update($updateDataAr, $product->id);
 
@@ -229,96 +250,5 @@ class ProductsTableSeeder extends Seeder
         }
 
         if (isset($this->command)) $this->command->info("Completed! Added: $addedCount, Updated: $updatedCount.");
-    }
-
-    protected function setupCategories()
-    {
-        $slugs = ['0-2', '3-4', '5-7', '8-10', '11-12', '13+'];
-        $root = $this->categoryRepository->findOneByField('parent_id', null);
-        if (!$root) {
-            if (isset($this->command)) $this->command->error("Root category not found!");
-            return [];
-        }
-
-        $map = [];
-        foreach ($slugs as $slug) {
-            $existingTranslation = \Illuminate\Support\Facades\DB::table('category_translations')->where('name', $slug)->where('locale', 'en')->first();
-            if ($existingTranslation) {
-                $map[$slug] = $existingTranslation->category_id;
-                continue;
-            }
-
-            $category = $this->categoryRepository->create([
-                'status' => 1,
-                'position' => 1,
-                'display_mode' => 'products_and_description',
-                'parent_id' => $root->id
-            ]);
-
-            \Illuminate\Support\Facades\DB::table('category_translations')->updateOrInsert(
-                ['category_id' => $category->id, 'locale' => 'en'],
-                ['name' => $slug, 'slug' => $slug, 'description' => $slug]
-            );
-
-            \Illuminate\Support\Facades\DB::table('category_translations')->updateOrInsert(
-                ['category_id' => $category->id, 'locale' => 'ar'],
-                ['name' => $slug, 'slug' => $slug, 'description' => $slug]
-            );
-
-            $map[$slug] = $category->id;
-        }
-        return $map;
-    }
-
-    protected function setupGroups()
-    {
-        $groups = [
-            ['ar' => 'العاب', 'en' => 'Toys'],
-            ['ar' => 'وصل حديثا', 'en' => 'New Arrivals'],
-            ['ar' => 'تعليم', 'en' => 'Educational'],
-            ['ar' => 'هدايا', 'en' => 'Gifts'],
-            ['ar' => 'اقل من 1 دينار', 'en' => 'Under 1 Dinar'],
-            ['ar' => 'ترفيه', 'en' => 'Entertainment'],
-            ['ar' => 'رياضة', 'en' => 'Sports'],
-        ];
-
-        $groupAttr = $this->attributeRepository->findOneByField('code', 'group');
-        if (!$groupAttr) {
-            if (isset($this->command)) $this->command->error("Group attribute not found!");
-            return [];
-        }
-
-        $map = [];
-        foreach ($groups as $b) {
-            $existingTranslation = \Illuminate\Support\Facades\DB::table('attribute_option_translations')
-                ->where('label', $b['en'])
-                ->first();
-
-            $optionId = null;
-            if ($existingTranslation) {
-                $optionId = $existingTranslation->attribute_option_id;
-            } else {
-                $option = $this->attributeOptionRepository->create([
-                    'attribute_id' => $groupAttr->id,
-                    'admin_name' => $b['en'],
-                    'sort_order' => 1,
-                ]);
-                $optionId = $option->id;
-
-                \Illuminate\Support\Facades\DB::table('attribute_option_translations')->updateOrInsert(
-                    ['attribute_option_id' => $optionId, 'locale' => 'en'],
-                    ['label' => $b['en']]
-                );
-
-                \Illuminate\Support\Facades\DB::table('attribute_option_translations')->updateOrInsert(
-                    ['attribute_option_id' => $optionId, 'locale' => 'ar'],
-                    ['label' => $b['ar']]
-                );
-            }
-
-            $map[$optionId] = [$b['en'], $b['ar']];
-        }
-
-        return $map;
     }
 }

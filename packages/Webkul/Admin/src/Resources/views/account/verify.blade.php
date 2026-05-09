@@ -6,16 +6,16 @@
     <div class="flex h-[100vh] items-center justify-center">
         <div class="flex flex-col items-center gap-5">
             @if ($logo = core()->getConfigData('general.design.admin_logo.logo_image'))
-                <img 
-                    class="h-10 w-[110px]" 
-                    src="{{ Storage::url($logo) }}" 
-                    alt="{{ config('app.name') }}" 
+                <img
+                    class="h-10 w-[110px]"
+                    src="{{ Storage::url($logo) }}"
+                    alt="{{ config('app.name') }}"
                 />
             @else
-                <img 
-                    class="w-max" 
-                    src="{{ bagisto_asset('images/logo.svg') }}" 
-                    alt="{{ config('app.name') }}" 
+                <img
+                    class="w-max"
+                    src="{{ bagisto_asset('images/logo.svg') }}"
+                    alt="{{ config('app.name') }}"
                 />
             @endif
 
@@ -29,9 +29,9 @@
                         @lang('admin::app.users.verify.enter-code')
                     </p>
 
-                    <x-admin::form 
-                        :action="route('admin.two_factor.verifyTwoFactorCode')" 
-                        method="POST" 
+                    <x-admin::form
+                        :action="route('admin.two_factor.verifyTwoFactorCode')"
+                        method="POST"
                         class="w-full"
                     >
                         <x-admin::form.control-group>
@@ -60,7 +60,7 @@
                                 id="adminLogout"
                             >
                             </x-admin::form>
-                        
+
                             <button
                                 type="button"
                                 class="cursor-pointer px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-950 sm:px-5 sm:text-base"
@@ -79,13 +79,14 @@
                     </x-admin::form>
                 </div>
             </div>
-
+            {{--
             <div class="text-sm font-normal">
                 @lang('admin::app.users.sessions.powered-by-description', [
                     'bagisto' => '<a class="text-blue-600 hover:underline" href="https://bagisto.com/en/">Bagisto</a>',
                     'webkul' => '<a class="text-blue-600 hover:underline" href="https://webkul.com/">Webkul</a>',
                 ])
             </div>
+            --}}
         </div>
     </div>
 </x-admin::layouts.anonymous>

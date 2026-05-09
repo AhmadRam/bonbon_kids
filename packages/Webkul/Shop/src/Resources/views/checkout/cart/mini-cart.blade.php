@@ -59,9 +59,11 @@
                         </p>
                     </div>
 
+                    {{--
                     <p class="text-base max-md:text-zinc-500 max-sm:text-xs">
                         {{ core()->getConfigData('sales.checkout.mini_cart.offer_info')}}
                     </p>
+                    --}}
 
                     {!! view_render_event('bagisto.shop.checkout.mini-cart.drawer.header.after') !!}
                 </x-slot>

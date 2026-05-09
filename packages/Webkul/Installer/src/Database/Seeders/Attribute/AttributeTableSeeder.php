@@ -650,6 +650,7 @@ class AttributeTableSeeder extends Seeder
                 'code' => 'group',
                 'admin_name' => 'Group',
                 'type' => 'select',
+                // 'swatch_type' => 'image',
                 'validation' => null,
                 'position' => 29,
                 'is_required' => 0,

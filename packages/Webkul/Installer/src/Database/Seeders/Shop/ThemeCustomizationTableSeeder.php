@@ -47,7 +47,7 @@ class ThemeCustomizationTableSeeder extends Seeder
                 ], [
                     'id' => 2,
                     'type' => 'static_content',
-                    'name' => trans('installer::app.seeders.shop.theme-customizations.offer-information.name', [], $defaultLocale),
+                    'name' => trans('installer::app.seeders.shop.theme-customizations.main-groups.name', [], $defaultLocale),
                     'sort_order' => 2,
                     'status' => 1,
                     'channel_id' => 1,
@@ -55,42 +55,33 @@ class ThemeCustomizationTableSeeder extends Seeder
                     'updated_at' => $now,
                 ], [
                     'id' => 3,
-                    'type' => 'static_content',
-                    'name' => trans('installer::app.seeders.shop.theme-customizations.top-collections.name', [], $defaultLocale),
-                    'sort_order' => 5,
+                    'type' => 'product_carousel',
+                    'name' => trans('installer::app.seeders.shop.theme-customizations.new-arrivals-carousel.name', [], $defaultLocale),
+                    'sort_order' => 3,
                     'status' => 1,
                     'channel_id' => 1,
                     'created_at' => $now,
                     'updated_at' => $now,
                 ], [
                     'id' => 4,
-                    'type' => 'static_content',
-                    'name' => trans('installer::app.seeders.shop.theme-customizations.bold-collections.name', [], $defaultLocale),
-                    'sort_order' => 6,
+                    'type' => 'product_carousel',
+                    'name' => trans('installer::app.seeders.shop.theme-customizations.featured-products.name', [], $defaultLocale),
+                    'sort_order' => 4,
                     'status' => 1,
                     'channel_id' => 1,
                     'created_at' => $now,
                     'updated_at' => $now,
                 ], [
                     'id' => 5,
-                    'type' => 'static_content',
-                    'name' => trans('installer::app.seeders.shop.theme-customizations.game-container.name', [], $defaultLocale),
-                    'sort_order' => 8,
+                    'type' => 'product_carousel',
+                    'name' => trans('installer::app.seeders.shop.theme-customizations.all-products.name', [], $defaultLocale),
+                    'sort_order' => 5,
                     'status' => 1,
                     'channel_id' => 1,
                     'created_at' => $now,
                     'updated_at' => $now,
                 ], [
                     'id' => 6,
-                    'type' => 'static_content',
-                    'name' => trans('installer::app.seeders.shop.theme-customizations.bold-collections.name', [], $defaultLocale),
-                    'sort_order' => 10,
-                    'status' => 1,
-                    'channel_id' => 1,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ], [
-                    'id' => 7,
                     'type' => 'footer_links',
                     'name' => trans('installer::app.seeders.shop.theme-customizations.footer-links.name', [], $defaultLocale),
                     'sort_order' => 11,
@@ -99,7 +90,7 @@ class ThemeCustomizationTableSeeder extends Seeder
                     'created_at' => $now,
                     'updated_at' => $now,
                 ], [
-                    'id' => 8,
+                    'id' => 7,
                     'type' => 'services_content',
                     'name' => trans('installer::app.seeders.shop.theme-customizations.services-content.name', [], $defaultLocale),
                     'sort_order' => 12,
@@ -110,7 +101,9 @@ class ThemeCustomizationTableSeeder extends Seeder
                 ],
             ]);
 
-        $locales = $parameters['allowed_locales'] ?? [$defaultLocale];
+        $locales = $parameters['allowed_locales'] ?? ['en', 'ar'];
+        // Always ensure both languages are seeded so the admin panel shows correct text in both locales
+        $locales = array_unique(array_merge($locales, ['en', 'ar']));
 
         foreach ($locales as $locale) {
             DB::table('theme_customization_translations')
@@ -125,31 +118,31 @@ class ThemeCustomizationTableSeeder extends Seeder
                                 [
                                     'title' => '',
                                     'link' => '',
-                                    'image' => 'https://z-toys.daftara.com/v2/owner/shop_front_media/get_media/239',
+                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/1.webp', 'sliders/en/1.webp'),
                                 ], [
                                     'title' => '',
                                     'link' => '',
-                                    'image' => 'https://z-toys.daftara.com/v2/owner/shop_front_media/get_media/240',
+                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/2.webp', 'sliders/en/2.webp'),
                                 ], [
                                     'title' => '',
                                     'link' => '',
-                                    'image' => 'https://z-toys.daftara.com/v2/owner/shop_front_media/get_media/241',
+                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/3.webp', 'sliders/en/3.webp'),
                                 ], [
                                     'title' => '',
                                     'link' => '',
-                                    'image' => 'https://z-toys.daftara.com/v2/owner/shop_front_media/get_media/242',
+                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/4.webp', 'sliders/en/4.webp'),
                                 ], [
                                     'title' => '',
                                     'link' => '',
-                                    'image' => 'https://z-toys.daftara.com/v2/owner/shop_front_media/get_media/243',
+                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/5.webp', 'sliders/en/5.webp'),
                                 ], [
                                     'title' => '',
                                     'link' => '',
-                                    'image' => 'https://z-toys.daftara.com/v2/owner/shop_front_media/get_media/244',
+                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/6.webp', 'sliders/en/6.webp'),
                                 ], [
                                     'title' => '',
                                     'link' => '',
-                                    'image' => 'https://z-toys.daftara.com/v2/owner/shop_front_media/get_media/245',
+                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/7.webp', 'sliders/en/7.webp'),
                                 ],
                             ],
                         ]),
@@ -159,9 +152,8 @@ class ThemeCustomizationTableSeeder extends Seeder
                         'locale' => $locale,
 
                         'options' => json_encode([
-                            'html' => '<div class="home-offer"><h1>'.trans('installer::app.seeders.shop.theme-customizations.offer-information.content.title', [], $locale).'</h1></div>',
-
-                            'css' => '.home-offer h1 {display: block;font-weight: 500;text-align: center;font-size: 22px;font-family: DM Serif Display;background-color: #E8EDFE;padding-top: 20px;padding-bottom: 20px;}@media (max-width:768px){.home-offer h1 {font-size:18px;padding-top: 10px;padding-bottom: 10px;}@media (max-width:525px) {.home-offer h1 {font-size:14px;padding-top: 6px;padding-bottom: 6px;}}',
+                            'html' => $this->buildGroupsHtml($locale),
+                            'css'  => '.groups-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;text-align:center;padding:28px 16px;}.groups-inner{display:inline-flex;flex-direction:row;gap:28px;}.group-card a{display:flex;flex-direction:column;align-items:center;gap:10px;text-decoration:none;color:inherit;}.group-card .g-img{width:104px;height:104px;transition:transform .25s ease;}.group-card:hover .g-img{transform:scale(1.07);}.group-card span{font-size:14px;font-weight:700;color:#222;}.groups-wrap::-webkit-scrollbar{height:4px;}.groups-wrap::-webkit-scrollbar-track{background:#f1f1f1;}.groups-wrap::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px;}',
                         ]),
                     ], [
                         'theme_customization_id' => 3,
@@ -169,51 +161,12 @@ class ThemeCustomizationTableSeeder extends Seeder
                         'locale' => $locale,
 
                         'options' => json_encode([
-                            'html' => '<div class="top-collection-container">
-                                <div class="top-collection-header">
-                                    <h2>'.trans('installer::app.seeders.shop.theme-customizations.top-collections.content.title', [], $locale).'</h2>
-                                </div>
-
-                                <div class="top-collection-grid container">
-                                    <div class="top-collection-card">
-                                        <a href="#electronics">
-                                            <img src="" data-src="'.$this->storeFileIfExists('theme/5', 'static/'.$locale.'/1.webp', 'static/en/1.webp').'" class="lazy" width="396" height="396" alt="'.trans('installer::app.seeders.shop.theme-customizations.top-collections.content.title', [], $locale).'">
-                                        </a>
-                                    </div>
-
-                                    <div class="top-collection-card">
-                                        <a href="#mens">
-                                            <img src="" data-src="'.$this->storeFileIfExists('theme/5', 'static/'.$locale.'/2.webp', 'static/en/2.webp').'" class="lazy" width="396" height="396" alt="'.trans('installer::app.seeders.shop.theme-customizations.top-collections.content.title', [], $locale).'">
-                                        </a>
-                                    </div>
-
-                                    <div class="top-collection-card">
-                                        <a href="#womens">
-                                            <img src="" data-src="'.$this->storeFileIfExists('theme/5', 'static/'.$locale.'/3.webp', 'static/en/3.webp').'" class="lazy" width="396" height="396" alt="'.trans('installer::app.seeders.shop.theme-customizations.top-collections.content.title', [], $locale).'">
-                                        </a>
-                                    </div>
-
-                                    <div class="top-collection-card">
-                                        <a href="#formal-wear-men">
-                                            <img src="" data-src="'.$this->storeFileIfExists('theme/5', 'static/'.$locale.'/4.webp', 'static/en/4.webp').'" class="lazy" width="396" height="396" alt="'.trans('installer::app.seeders.shop.theme-customizations.top-collections.content.title', [], $locale).'">
-                                        </a>
-                                    </div>
-
-                                    <div class="top-collection-card">
-                                        <a href="#formal-wear-female">
-                                            <img src="" data-src="'.$this->storeFileIfExists('theme/5', 'static/'.$locale.'/5.webp', 'static/en/5.webp').'" class="lazy" width="396" height="396" alt="'.trans('installer::app.seeders.shop.theme-customizations.top-collections.content.title', [], $locale).'">
-                                        </a>
-                                    </div>
-
-                                    <div class="top-collection-card">
-                                        <a href="#wellness">
-                                            <img src="" data-src="'.$this->storeFileIfExists('theme/5', 'static/'.$locale.'/6.webp', 'static/en/6.webp').'" class="lazy" width="396" height="396" alt="'.trans('installer::app.seeders.shop.theme-customizations.top-collections.content.title', [], $locale).'">
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>',
-
-                            'css' => '.top-collection-container {overflow: hidden;}.top-collection-header {padding-left: 15px;padding-right: 15px;text-align: center;font-size: 70px;line-height: 90px;color: #060C3B;margin-top: 80px;}.top-collection-header h2 {max-width: 595px;margin-left: auto;margin-right: auto;font-family: DM Serif Display;}.top-collection-grid {display: flex;flex-wrap: wrap;gap: 32px;justify-content: center;margin-top: 60px;width: 100%;margin-right: auto;margin-left: auto;padding-right: 90px;padding-left: 90px;}.top-collection-card {position: relative;background: #f9fafb;overflow:hidden;border-radius:20px;}.top-collection-card img {border-radius: 16px;max-width: 100%;text-indent:-9999px;transition: transform 300ms ease;transform: scale(1);}.top-collection-card:hover img {transform: scale(1.05);transition: all 300ms ease;}.top-collection-card h3 {color: #060C3B;font-size: 30px;font-family: DM Serif Display;transform: translateX(-50%);width: max-content;left: 50%;bottom: 30px;position: absolute;margin: 0;font-weight: inherit;}@media not all and (min-width: 525px) {.top-collection-header {margin-top: 28px;font-size: 20px;line-height: 1.5;}.top-collection-grid {gap: 10px}}@media not all and (min-width: 768px) {.top-collection-header {margin-top: 30px;font-size: 28px;line-height: 3;}.top-collection-header h2 {line-height:2; margin-bottom:20px;} .top-collection-grid {gap: 14px}} @media not all and (min-width: 1024px) {.top-collection-grid {padding-left: 30px;padding-right: 30px;}}@media (max-width: 768px) {.top-collection-grid { row-gap:15px; column-gap:0px;justify-content: space-between;margin-top: 0px;} .top-collection-card{width:48%} .top-collection-card img {width:100%;} .top-collection-card h3 {font-size:24px; bottom: 16px;}}@media (max-width:520px) { .top-collection-grid{padding-left: 15px;padding-right: 15px;} .top-collection-card h3 {font-size:18px; bottom: 10px;}}',
+                            'title' => trans('installer::app.seeders.shop.theme-customizations.new-arrivals-carousel.name', [], $locale),
+                            'filters' => [
+                                'sort' => 'created_at-desc',
+                                'limit' => 10,
+                                'new' => 1,
+                            ],
                         ]),
                     ], [
                         'theme_customization_id' => 4,
@@ -221,25 +174,12 @@ class ThemeCustomizationTableSeeder extends Seeder
                         'locale' => $locale,
 
                         'options' => json_encode([
-                            'html' => '<div class="section-gap bold-collections container">
-                                <div class="inline-col-wrapper">
-                                    <div class="inline-col-image-wrapper">
-                                        <img src="" data-src="'.$this->storeFileIfExists('theme/6', 'static/'.$locale.'/7.webp', 'static/en/7.webp').'" class="lazy" width="632" height="510" alt="'.trans('installer::app.seeders.shop.theme-customizations.bold-collections.content.title', [], $locale).'">
-                                    </div>
-
-                                    <div class="inline-col-content-wrapper">
-                                        <h2 class="inline-col-title"> '.trans('installer::app.seeders.shop.theme-customizations.bold-collections.content.title', [], $locale).' </h2> 
-                                        
-                                        <p class="inline-col-description">'.trans('installer::app.seeders.shop.theme-customizations.bold-collections.content.description', [], $locale).'</p>
-                                        
-                                        <a href="#wellness">
-                                            <button class="primary-button max-md:rounded-lg max-md:px-4 max-md:py-2.5 max-md:text-sm">'.trans('installer::app.seeders.shop.theme-customizations.bold-collections.content.btn-title', [], $locale).'</button>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>',
-
-                            'css' => '.section-gap{margin-top:80px}.direction-ltr{direction:ltr}.direction-rtl{direction:rtl}.inline-col-wrapper{display:grid;grid-template-columns:auto 1fr;grid-gap:60px;align-items:center}.inline-col-wrapper .inline-col-image-wrapper{overflow:hidden}.inline-col-wrapper .inline-col-image-wrapper img{max-width:100%;height:auto;border-radius:16px;text-indent:-9999px}.inline-col-wrapper .inline-col-content-wrapper{display:flex;flex-wrap:wrap;gap:20px;max-width:464px}.inline-col-wrapper .inline-col-content-wrapper .inline-col-title{max-width:442px;font-size:60px;font-weight:400;color:#060c3b;line-height:70px;font-family:DM Serif Display;margin:0}.inline-col-wrapper .inline-col-content-wrapper .inline-col-description{margin:0;font-size:18px;color:#6e6e6e;font-family:Poppins}@media (max-width:991px){.inline-col-wrapper{grid-template-columns:1fr;grid-gap:16px}.inline-col-wrapper .inline-col-content-wrapper{gap:10px}} @media (max-width:768px){.inline-col-wrapper .inline-col-image-wrapper img {width:100%;} .inline-col-wrapper .inline-col-content-wrapper .inline-col-title{font-size:28px !important;line-height:normal !important}} @media (max-width:525px){.inline-col-wrapper .inline-col-content-wrapper .inline-col-title{font-size:20px !important;} .inline-col-description{font-size:16px} .inline-col-wrapper{grid-gap:10px}}',
+                            'title' => trans('installer::app.seeders.shop.theme-customizations.featured-products.name', [], $locale),
+                            'filters' => [
+                                'sort' => 'created_at-desc',
+                                'limit' => 10,
+                                'featured' => 1,
+                            ],
                         ]),
                     ], [
                         'theme_customization_id' => 5,
@@ -247,62 +187,14 @@ class ThemeCustomizationTableSeeder extends Seeder
                         'locale' => $locale,
 
                         'options' => json_encode([
-                            'html' => '<div class="section-game">
-                                <div class="section-title">
-                                    <h2>'.trans('installer::app.seeders.shop.theme-customizations.game-container.content.title', [], $locale).'</h2> 
-                                </div>
-
-                                <div class="section-gap container">
-                                    <div class="collection-card-wrapper">
-                                        <div class="single-collection-card">
-                                            <a href="#active-wear">
-                                                <img src="" data-src="'.$this->storeFileIfExists('theme/8', 'static/'.$locale.'/8.webp', 'static/en/8.webp').'" class="lazy" width="615" height="600" alt="'.trans('installer::app.seeders.shop.theme-customizations.game-container.content.title', [], $locale).'">
-                                                
-                                                <h3 class="overlay-text">'.trans('installer::app.seeders.shop.theme-customizations.game-container.content.sub-title-1', [], $locale).'</h3> 
-                                            </a>
-                                        </div>
-
-                                        <div class="single-collection-card">
-                                            <a href="#active-wear-female">
-                                                <img src="" data-src="'.$this->storeFileIfExists('theme/8', 'static/'.$locale.'/9.webp', 'static/en/9.webp').'" class="lazy" width="615" height="600" alt="'.trans('installer::app.seeders.shop.theme-customizations.game-container.content.title', [], $locale).'">
-                                                
-                                                <h3 class="overlay-text"> '.trans('installer::app.seeders.shop.theme-customizations.game-container.content.sub-title-2', [], $locale).' </h3> 
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>',
-
-                            'css' => '.section-game {overflow: hidden;}.section-title,.section-title h2{font-weight:400;font-family:DM Serif Display}.section-title{margin-top:80px;padding-left:15px;padding-right:15px;text-align:center;line-height:90px}.section-title h2{font-size:70px;color:#060c3b;max-width:595px;margin:auto}.collection-card-wrapper{display:flex;flex-wrap:wrap;justify-content:center;gap:30px}.collection-card-wrapper .single-collection-card{position:relative}.collection-card-wrapper .single-collection-card img{border-radius:16px;background-color:#f5f5f5;max-width:100%;height:auto;text-indent:-9999px}.collection-card-wrapper .single-collection-card .overlay-text{font-size:50px;font-weight:400;max-width:234px;font-style:italic;color:#060c3b;font-family:DM Serif Display;position:absolute;bottom:30px;left:30px;margin:0}@media (max-width:1024px){.section-title{padding:0 30px}}@media (max-width:991px){.collection-card-wrapper{flex-wrap:wrap}}@media (max-width:768px) {.collection-card-wrapper .single-collection-card .overlay-text{font-size:32px; bottom:20px}.section-title{margin-top:32px}.section-title h2{font-size:28px;line-height:normal}} @media (max-width:525px){.collection-card-wrapper .single-collection-card .overlay-text{font-size:18px; bottom:10px} .section-title{margin-top:28px}.section-title h2{font-size:20px;} .collection-card-wrapper{gap:10px; 15px; row-gap:15px; column-gap:0px;justify-content: space-between;margin-top: 15px;} .collection-card-wrapper .single-collection-card {width:48%;}}',
+                            'title' => trans('installer::app.seeders.shop.theme-customizations.all-products.name', [], $locale),
+                            'filters' => [
+                                'sort' => 'created_at-desc',
+                                'limit' => 12,
+                            ],
                         ]),
-                    ], [
+                    ],[
                         'theme_customization_id' => 6,
-
-                        'locale' => $locale,
-
-                        'options' => json_encode([
-                            'html' => '<div class="section-gap bold-collections container">
-                                <div class="inline-col-wrapper direction-rtl">
-                                    <div class="inline-col-image-wrapper">
-                                        <img src="" data-src="'.$this->storeFileIfExists('theme/10', 'static/'.$locale.'/10.webp', 'static/en/10.webp').'" class="lazy" width="632" height="510" alt="'.trans('installer::app.seeders.shop.theme-customizations.bold-collections-2.content.title', [], $locale).'">
-                                    </div>
-
-                                    <div class="inline-col-content-wrapper direction-ltr">
-                                        <h2 class="inline-col-title">'.trans('installer::app.seeders.shop.theme-customizations.bold-collections-2.content.title', [], $locale).'</h2> 
-                                        
-                                        <p class="inline-col-description">'.trans('installer::app.seeders.shop.theme-customizations.bold-collections-2.content.description', [], $locale).'</p>
-                                        
-                                        <a href="#electronics">
-                                            <button class="primary-button max-md:rounded-lg max-md:px-4 max-md:py-2.5 max-md:text-sm">'.trans('installer::app.seeders.shop.theme-customizations.bold-collections-2.content.btn-title', [], $locale).'</button>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>',
-
-                            'css' => '.section-gap{margin-top:80px}.direction-ltr{direction:ltr}.direction-rtl{direction:rtl}.inline-col-wrapper{display:grid;grid-template-columns:auto 1fr;grid-gap:60px;align-items:center}.inline-col-wrapper .inline-col-image-wrapper{overflow:hidden}.inline-col-wrapper .inline-col-image-wrapper img{max-width:100%;height:auto;border-radius:16px;text-indent:-9999px}.inline-col-wrapper .inline-col-content-wrapper{display:flex;flex-wrap:wrap;gap:20px;max-width:464px}.inline-col-wrapper .inline-col-content-wrapper .inline-col-title{max-width:442px;font-size:60px;font-weight:400;color:#060c3b;line-height:70px;font-family:DM Serif Display;margin:0}.inline-col-wrapper .inline-col-content-wrapper .inline-col-description{margin:0;font-size:18px;color:#6e6e6e;font-family:Poppins}@media (max-width:991px){.inline-col-wrapper{grid-template-columns:1fr;grid-gap:16px}.inline-col-wrapper .inline-col-content-wrapper{gap:10px}}@media (max-width:768px) {.inline-col-wrapper .inline-col-image-wrapper img {max-width:100%;}.inline-col-wrapper .inline-col-content-wrapper{max-width:100%;justify-content:center; text-align:center} .section-gap{padding:0 30px; gap:20px;margin-top:24px} .bold-collections{margin-top:32px;}} @media (max-width:525px){.inline-col-wrapper .inline-col-content-wrapper{gap:10px} .inline-col-wrapper .inline-col-content-wrapper .inline-col-title{font-size:20px;line-height:normal} .section-gap{padding:0 15px; gap:15px;margin-top:10px} .bold-collections{margin-top:28px;}  .inline-col-description{font-size:16px !important} .inline-col-wrapper{grid-gap:15px}',
-                        ]),
-                    ], [
-                        'theme_customization_id' => 7,
 
                         'locale' => $locale,
 
@@ -360,7 +252,7 @@ class ThemeCustomizationTableSeeder extends Seeder
                             ],
                         ]),
                     ], [
-                        'theme_customization_id' => 8,
+                        'theme_customization_id' => 7,
 
                         'locale' => $locale,
 
@@ -587,5 +479,62 @@ class ThemeCustomizationTableSeeder extends Seeder
         if (file_exists(base_path(self::BASE_PATH.$default))) {
             return 'storage/'.Storage::putFile($targetPath, new File(base_path(self::BASE_PATH.$default)));
         }
+    }
+
+    /**
+     * Store a group swatch image from the ProductGroupsTableSeeder data directory.
+     *
+     * @param  string  $targetPath  Storage sub-path (e.g. 'theme/2/groups')
+     * @param  string  $filename    Image filename (e.g. 'toys.png')
+     * @return string|null
+     */
+    public function storeGroupImage(string $targetPath, string $filename): ?string
+    {
+        $groupImagesDir = 'packages/Webkul/Installer/src/Database/Seeders/Product/Data/group-images/';
+        $fullPath = base_path($groupImagesDir.$filename);
+
+        if (file_exists($fullPath)) {
+            return 'storage/'.Storage::putFile($targetPath, new File($fullPath));
+        }
+
+        return null;
+    }
+
+    /**
+     * Build the groups horizontal row HTML for the static_content theme block.
+     * Images are 104 px circles, centered, with bilingual labels.
+     */
+    private function buildGroupsHtml(string $locale): string
+    {
+        $isAr = $locale === 'ar';
+
+        $groups = [
+            ['ar' => 'العاب',          'en' => 'Toys',          'slug' => 'toys',          'file' => 'toys.png'],
+            ['ar' => 'وصل حديثا',      'en' => 'New Arrivals',  'slug' => 'new-arrivals',  'file' => 'new-arrivals.png'],
+            ['ar' => 'تعليمية',        'en' => 'Educational',   'slug' => 'educational',   'file' => 'educational.png'],
+            ['ar' => 'هدايا',          'en' => 'Gifts',         'slug' => 'gifts',         'file' => 'gifts.png'],
+            ['ar' => 'اقل من 1 دينار', 'en' => 'Under 1 Dinar', 'slug' => 'under-1-dinar', 'file' => 'under-1-dinar.png'],
+            ['ar' => 'ترفيه',          'en' => 'Entertainment', 'slug' => 'entertainment', 'file' => 'entertainment.png'],
+            ['ar' => 'رياضة',          'en' => 'Sports',        'slug' => 'sports',        'file' => 'sports.png'],
+            ['ar' => 'عروض',           'en' => 'Offers',        'slug' => 'offers',        'file' => 'offers.png'],
+        ];
+
+        $cards = '';
+        foreach ($groups as $group) {
+            $label = $isAr ? $group['ar'] : $group['en'];
+            $img   = $this->storeGroupImage('theme/2/groups', $group['file']) ?? '';
+            $href  = '/products?group='.$group['slug'];
+
+            $cards .= '<div class="group-card">'
+                .'<a href="'.$href.'">'
+                .'<div class="g-img">'
+                .'<img src="'.$img.'" width="104" height="104" alt="'.htmlspecialchars($label).'" style="width:100%;height:100%;object-fit:cover;">'
+                .'</div>'
+                .'<span>'.htmlspecialchars($label).'</span>'
+                .'</a>'
+                .'</div>';
+        }
+
+        return '<div class="groups-wrap"><div class="groups-inner">'.$cards.'</div></div>';
     }
 }

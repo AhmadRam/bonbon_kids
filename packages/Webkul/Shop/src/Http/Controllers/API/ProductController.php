@@ -35,9 +35,44 @@ class ProductController extends APIController
 
         $query = $searchData['effective_query'] ?? $searchData['original_query'];
 
+        $params = request()->query();
+        if (isset($params['group'])) {
+            $groupValues = explode(',', $params['group']);
+            $mappedIds = [];
+            foreach ($groupValues as $value) {
+                if (is_numeric($value)) {
+                    $mappedIds[] = $value;
+                    continue;
+                }
+
+                $option = \Illuminate\Support\Facades\DB::table('attribute_options')
+                    ->join('attribute_option_translations', 'attribute_options.id', '=', 'attribute_option_translations.attribute_option_id')
+                    ->whereIn('attribute_options.attribute_id', function ($q) {
+                        $q->select('id')->from('attributes')->where('code', 'group');
+                    })
+                    ->where(function ($q) use ($value) {
+                        $q->where('attribute_option_translations.label', $value)
+                          ->orWhere('attribute_options.admin_name', $value)
+                          ->orWhere(\Illuminate\Support\Facades\DB::raw('LOWER(attribute_option_translations.label)'), strtolower($value))
+                          ->orWhere(\Illuminate\Support\Facades\DB::raw('LOWER(attribute_options.admin_name)'), strtolower($value))
+                          ->orWhere(\Illuminate\Support\Facades\DB::raw("REPLACE(LOWER(attribute_options.admin_name), ' ', '-')"), strtolower($value))
+                          ->orWhere(\Illuminate\Support\Facades\DB::raw("REPLACE(LOWER(attribute_option_translations.label), ' ', '-')"), strtolower($value));
+                    })
+                    ->first();
+
+                if ($option) {
+                    $mappedIds[] = $option->attribute_option_id;
+                }
+            }
+
+            if (! empty($mappedIds)) {
+                $params['group'] = implode(',', $mappedIds);
+            }
+        }
+
         $products = $this->productRepository
             ->setSearchEngine($searchEngine)
-            ->getAll(array_merge(request()->query(), [
+            ->getAll(array_merge($params, [
                 'query' => $query,
                 'channel_id' => core()->getCurrentChannel()->id,
                 'status' => 1,

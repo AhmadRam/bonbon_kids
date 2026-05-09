@@ -16,7 +16,7 @@
             v-if="! isLoading && products.length"
         >
             <div class="flex justify-between">
-                <h2 class="font-fredoka text-3xl font-bold text-toyBlue max-md:text-2xl max-sm:text-xl">
+                <h2 class="font-poppins text-3xl font-bold text-toyBlue max-md:text-2xl max-sm:text-xl">
                     @{{ title }}
                 </h2>
 

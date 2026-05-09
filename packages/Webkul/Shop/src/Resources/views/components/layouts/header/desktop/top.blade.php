@@ -18,12 +18,14 @@
             </div>
         </div>
 
+        {{--
         <!-- Offers -->
         <div
             class="shimmer h-6 w-72 rounded py-3"
             role="presentation"
         >
         </div>
+        --}}
 
         <!-- Locales -->
         <div class="flex w-32 items-center justify-between gap-2.5 py-3">
@@ -89,6 +91,7 @@
 
             {!! view_render_event('bagisto.shop.components.layouts.header.desktop.top.currency_switcher.after') !!}
 
+            {{--
             <p
                 class="py-3 text-xs font-medium"
                 v-pre
@@ -103,6 +106,7 @@
                     {{ core()->getConfigData('general.content.header_offer.redirection_title') }}
                 </a>
             </p>
+            --}}
 
             {!! view_render_event('bagisto.shop.components.layouts.header.desktop.top.locale_switcher.before') !!}
 

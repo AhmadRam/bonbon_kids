@@ -46,6 +46,10 @@ Route::get('search', [SearchController::class, 'index'])
     ->name('shop.search.index')
     ->middleware('cache.response');
 
+Route::get('products', [SearchController::class, 'index'])
+    ->name('shop.products.index')
+    ->middleware('cache.response');
+
 Route::post('search/upload', [SearchController::class, 'upload'])->name('shop.search.upload');
 
 /**

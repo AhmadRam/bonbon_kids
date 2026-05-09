@@ -17,7 +17,7 @@ services:
         volumes:
             - '.:/var/www/html'
         networks:
-            - sail
+            - bonbon_network
         depends_on:
             - mysql
             - redis
@@ -41,7 +41,7 @@ services:
         volumes:
             - '.:/var/www/html'
         networks:
-            - sail
+            - bonbon_network
         depends_on:
             - app
             - mysql
@@ -57,7 +57,7 @@ services:
             - './docker/nginx/default.conf:/etc/nginx/templates/default.conf.template:ro'
             - '.:/var/www/html:ro'
         networks:
-            - sail
+            - bonbon_network
         depends_on:
             - app
     mysql:
@@ -72,9 +72,9 @@ services:
             MYSQL_PASSWORD: '${DB_PASSWORD}'
             MYSQL_ALLOW_EMPTY_PASSWORD: 1
         volumes:
-            - 'sail-mysql:/var/lib/mysql'
+            - 'mysql:/var/lib/mysql'
         networks:
-            - sail
+            - bonbon_network
         healthcheck:
             test:
                 - CMD
@@ -88,9 +88,9 @@ services:
         ports:
             - '${FORWARD_REDIS_PORT:-6379}:6379'
         volumes:
-            - 'sail-redis:/data'
+            - 'redis:/data'
         networks:
-            - sail
+            - bonbon_network
         healthcheck:
             test:
                 - CMD
@@ -116,9 +116,9 @@ services:
                 soft: 65536
                 hard: 65536
         volumes:
-            - 'sail-elasticsearch:/var/lib/elasticsearch/data'
+            - 'elasticsearch:/var/lib/elasticsearch/data'
         networks:
-            - sail
+            - bonbon_network
     kibana:
         image: docker.elastic.co/kibana/kibana:7.17.0
         ports:
@@ -126,7 +126,7 @@ services:
         environment:
             ELASTICSEARCH_HOSTS: 'http://elasticsearch:9200'
         networks:
-            - sail
+            - bonbon_network
         depends_on:
             - elasticsearch
     mailpit:
@@ -135,14 +135,11 @@ services:
             - '${FORWARD_MAILPIT_PORT:-1025}:1025'
             - '${FORWARD_MAILPIT_DASHBOARD_PORT:-8025}:8025'
         networks:
-            - sail
+            - bonbon_network
 networks:
-    sail:
+    bonbon_network:
         driver: bridge
 volumes:
-    sail-mysql:
-        driver: local
-    sail-redis:
-        driver: local
-    sail-elasticsearch:
-        driver: local
+    mysql:
+    redis:
+    elasticsearch:

@@ -132,9 +132,9 @@ return [
 
         'core' => [
             'channels' => [
-                'meta-description' => 'Demo store meta description',
-                'meta-keywords' => 'Demo store meta keyword',
-                'meta-title' => 'Demo store',
+                'meta-description' => 'BonBon Toys Store — the best destination for children\'s toys, games, and educational products for all ages.',
+                'meta-keywords' => 'toys, kids toys, children games, educational toys, BonBon, toy store, baby toys, gifts for kids',
+                'meta-title' => 'BonBon Toys Store',
                 'name' => 'Default',
             ],
 
@@ -329,6 +329,22 @@ return [
                     ],
                 ],
 
+                'main-groups' => [
+                    'name' => 'Main Groups',
+                ],
+
+                'new-arrivals-carousel' => [
+                    'name' => 'New Arrivals',
+                ],
+
+                'featured-products' => [
+                    'name' => 'Featured Products',
+                ],
+
+                'all-products' => [
+                    'name' => 'All Products',
+                ],
+
                 'kids-collection' => [
                     'name' => 'STEM & Learning',
 
@@ -355,18 +371,18 @@ return [
 
                 'services-content' => [
                     'description' => [
-                        'emi-available-info' => 'No cost EMI available on all major credit cards',
-                        'free-shipping-info' => 'Enjoy free shipping on all orders',
-                        'product-replace-info' => 'Easy Product Replacement Available!',
-                        'time-support-info' => 'Dedicated 24/7 support via chat and email',
+                        'emi-available-info' => 'Cash on delivery or bank cards',
+                        'free-shipping-info' => 'Enjoy our easy delivery service',
+                        'product-replace-info' => 'Easy product replacement available!',
+                        'time-support-info' => 'Dedicated support 24 hours a day, 7 days a week via chat',
                     ],
 
                     'name' => 'Services Content',
 
                     'title' => [
-                        'emi-available' => 'Emi Available',
-                        'free-shipping' => 'Free Shipping',
-                        'product-replace' => 'Product Replace',
+                        'emi-available' => 'Easy Payment',
+                        'free-shipping' => 'Delivery Service',
+                        'product-replace' => 'Product Replacement',
                         'time-support' => '24/7 Support',
                     ],
                 ],
@@ -402,7 +418,7 @@ return [
             ],
 
             'users' => [
-                'name' => 'Example',
+                'name' => 'Admin',
             ],
         ],
 

@@ -32,7 +32,7 @@ class ChannelTableSeeder extends Seeder
                 'theme' => 'default',
                 'hostname' => config('app.url'),
                 'root_category_id' => 1,
-                'default_locale_id' => 1,
+                'default_locale_id' => 2,
                 'base_currency_id' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
