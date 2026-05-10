@@ -1,6 +1,6 @@
 {!! view_render_event('bagisto.shop.components.layouts.header.desktop.bottom.before') !!}
 
-<div class="flex min-h-[78px] w-full justify-between items-center border-b-2 border-toyYellow bg-toyBlue px-[60px] max-1180:px-8 text-white">
+<div class="flex min-h-[78px] w-full justify-between items-center border-b-2 border-toyBlue bg-white px-[60px] max-1180:px-8 text-navyBlue">
     <!--
         This section will provide categories for the first, second, and third levels. If
         additional levels are required, users can customize them according to their needs.

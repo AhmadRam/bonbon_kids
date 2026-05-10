@@ -8,7 +8,7 @@
     $showWishlist = (bool) core()->getConfigData('customer.settings.wishlist.wishlist_option');
 @endphp
 
-<div class="flex flex-wrap gap-4 px-4 pt-6 pb-4 border-b-2 border-toyYellow bg-toyBlue text-white lg:hidden">
+<div class="flex flex-wrap gap-4 px-4 pt-6 pb-4 border-b-2 border-toyBlue bg-white text-navyBlue lg:hidden">
     <div class="flex items-center justify-between w-full">
         <!-- Left Navigation -->
         <div class="flex items-center gap-x-1.5">
@@ -46,7 +46,7 @@
                     <a
                         href="{{ route('shop.compare.index') }}"
                         aria-label="@lang('shop::app.components.layouts.header.mobile.compare')"
-                        class="text-white"
+                        class="text-navyBlue"
                     >
                         <span class="text-2xl cursor-pointer icon-compare"></span>
                     </a>
