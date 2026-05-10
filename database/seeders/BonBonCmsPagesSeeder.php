@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Webkul\CMS\Models\CmsPageTranslation;
+use Webkul\CMS\Models\PageTranslation;
 use Carbon\Carbon;
 
 class BonBonCmsPagesSeeder extends Seeder
@@ -97,8 +97,8 @@ class BonBonCmsPagesSeeder extends Seeder
         ];
 
         foreach ($pages as $pageData) {
-            $arTranslation = CmsPageTranslation::where('url_key', $pageData['url_key'])->where('locale', 'ar')->first();
-            $enTranslation = CmsPageTranslation::where('url_key', $pageData['url_key'])->where('locale', 'en')->first();
+            $arTranslation = PageTranslation::where('url_key', $pageData['url_key'])->where('locale', 'ar')->first();
+            $enTranslation = PageTranslation::where('url_key', $pageData['url_key'])->where('locale', 'en')->first();
             
             $cmsPageId = null;
 
@@ -121,7 +121,7 @@ class BonBonCmsPagesSeeder extends Seeder
             // If the page doesn't exist at all, we create a core CMS page.
             if (!$cmsPageId) {
                 // Determine if there is any CMS page that already has this url_key to link to
-                $existingTranslation = CmsPageTranslation::where('url_key', $pageData['url_key'])->first();
+                $existingTranslation = PageTranslation::where('url_key', $pageData['url_key'])->first();
                 if ($existingTranslation) {
                     $cmsPageId = $existingTranslation->cms_page_id;
                 } else {
