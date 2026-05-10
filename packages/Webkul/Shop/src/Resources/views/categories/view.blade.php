@@ -255,7 +255,7 @@
 
                 methods: {
                     handleScroll() {
-                        let bottomOfWindow = document.documentElement.scrollTop + window.innerHeight >= document.documentElement.offsetHeight - 200;
+                        let bottomOfWindow = document.documentElement.scrollTop + window.innerHeight >= document.documentElement.offsetHeight - 800;
 
                         if (bottomOfWindow && this.links?.next && !this.loader) {
                             this.loadMoreProducts();
