@@ -170,17 +170,9 @@
 
                         {!! view_render_event('bagisto.shop.categories.view.load_more_button.before') !!}
 
-                        <!-- Load More Button -->
+                        <!-- Infinite Scroll Spinner -->
                         <button
-                            class="secondary-button mx-auto mt-14 block w-max rounded-2xl px-11 py-3 text-center text-base max-md:rounded-lg max-sm:mt-6 max-sm:px-6 max-sm:py-1.5 max-sm:text-sm"
-                            @click="loadMoreProducts"
-                            v-if="links.next && ! loader"
-                        >
-                            @lang('shop::app.categories.view.load-more')
-                        </button>
-
-                        <button
-                            v-else-if="links.next"
+                            v-if="links.next"
                             class="secondary-button mx-auto mt-14 block w-max rounded-2xl px-[74.5px] py-3.5 text-center text-base max-md:rounded-lg max-md:py-3 max-sm:mt-6 max-sm:px-[50.8px] max-sm:py-1.5"
                         >
                             <!-- Spinner -->
@@ -231,6 +223,14 @@
                     }
                 },
 
+                mounted() {
+                    window.addEventListener('scroll', this.handleScroll);
+                },
+
+                beforeUnmount() {
+                    window.removeEventListener('scroll', this.handleScroll);
+                },
+
                 computed: {
                     queryParams() {
                         let queryParams = Object.assign({}, this.filters.filter, this.filters.toolbar.applied);
@@ -254,6 +254,14 @@
                 },
 
                 methods: {
+                    handleScroll() {
+                        let bottomOfWindow = document.documentElement.scrollTop + window.innerHeight >= document.documentElement.offsetHeight - 200;
+
+                        if (bottomOfWindow && this.links?.next && !this.loader) {
+                            this.loadMoreProducts();
+                        }
+                    },
+
                     setFilters(type, filters) {
                         this.filters[type] = filters;
                     },
@@ -302,6 +310,7 @@
 
                                 this.links = response.data.links;
                             }).catch(error => {
+                                this.loader = false;
                                 console.log(error);
                             });
                     },

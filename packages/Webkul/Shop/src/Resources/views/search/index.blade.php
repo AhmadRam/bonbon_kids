@@ -177,13 +177,17 @@
                             </template>
                         </div>
 
-                        <!-- Load More Button -->
+                        <!-- Infinite Scroll Spinner -->
                         <button
-                            class="secondary-button mx-auto mt-[60px] block w-max rounded-2xl px-11 py-3 text-center text-base max-md:rounded-lg max-md:text-sm max-sm:mt-7 max-sm:px-7 max-sm:py-2"
-                            @click="loadMoreProducts"
                             v-if="links.next"
+                            class="secondary-button mx-auto mt-[60px] block w-max rounded-2xl px-[74.5px] py-3.5 text-center text-base max-md:rounded-lg max-md:py-3 max-sm:mt-7 max-sm:px-[50.8px] max-sm:py-1.5"
                         >
-                            @lang('shop::app.categories.view.load-more')
+                            <!-- Spinner -->
+                            <img
+                                class="h-5 w-5 animate-spin text-navyBlue"
+                                src="{{ bagisto_asset('images/spinner.svg') }}"
+                                alt="Loading"
+                            />
                         </button>
                     </div>
                 </div>
@@ -219,7 +223,17 @@
                         products: [],
 
                         links: {},
+
+                        loader: false,
                     }
+                },
+
+                mounted() {
+                    window.addEventListener('scroll', this.handleScroll);
+                },
+
+                beforeUnmount() {
+                    window.removeEventListener('scroll', this.handleScroll);
                 },
 
                 computed: {
@@ -245,6 +259,14 @@
                 },
 
                 methods: {
+                    handleScroll() {
+                        let bottomOfWindow = document.documentElement.scrollTop + window.innerHeight >= document.documentElement.offsetHeight - 200;
+
+                        if (bottomOfWindow && this.links?.next && !this.loader) {
+                            this.loadMoreProducts();
+                        }
+                    },
+
                     setFilters(type, filters) {
                         this.filters[type] = filters;
                     },
@@ -275,15 +297,23 @@
                     },
 
                     loadMoreProducts() {
-                        if (this.links.next) {
-                            this.$axios.get(this.links.next).then(response => {
+                        if (! this.links?.next || this.loader) {
+                            return;
+                        }
+
+                        this.loader = true;
+
+                        this.$axios.get(this.links.next)
+                            .then(response => {
+                                this.loader = false;
+
                                 this.products = [...this.products, ...response.data.data];
 
                                 this.links = response.data.links;
                             }).catch(error => {
+                                this.loader = false;
                                 console.log(error);
                             });
-                        }
                     },
 
                     removeJsonEmptyValues(params) {

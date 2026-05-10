@@ -228,13 +228,8 @@
                                     :review="review"
                                 ></v-product-review-item>
 
-                                <button
-                                    class="mx-auto block w-max rounded-2xl border border-navyBlue bg-white px-11 py-3 text-center text-base font-medium text-navyBlue"
-                                    v-if="links?.next"
-                                    @click="get()"
-                                >
-                                    @lang('shop::app.products.view.reviews.load-more')
-                                </button>
+                                <!-- Infinite scroll sentinel -->
+                                <div ref="loadMoreSentinel"></div>
                             </div>
                         </div>
                     </template>
@@ -521,6 +516,8 @@
                 return {
                     isLoading: true,
 
+                    isFetching: false,
+
                     appliedRatings: 5,
 
                     canReview: false,
@@ -543,10 +540,9 @@
                     entries.forEach(entry => {
                         if (entry.isIntersecting) {
                             this.get();
-                            this.observer.disconnect();
                         }
                     });
-                });
+                }, { threshold: 0.1 });
 
                 this.observer.observe(this.$el);
             },
@@ -559,21 +555,35 @@
 
             methods: {
                 get() {
-                    if (! this.links?.next) {
+                    if (! this.links?.next || this.isFetching) {
                         return;
                     }
+
+                    this.isFetching = true;
 
                     this.$axios.get(this.links.next)
                         .then(response => {
                             this.isLoading = false;
+                            this.isFetching = false;
 
                             this.reviews = [...this.reviews, ...response.data.data];
 
                             this.links = response.data.links;
 
                             this.meta = response.data.meta;
+
+                            // Re-observe the sentinel element after rendering new reviews
+                            if (this.links?.next) {
+                                this.$nextTick(() => {
+                                    if (this.$refs.loadMoreSentinel) {
+                                        this.observer.observe(this.$refs.loadMoreSentinel);
+                                    }
+                                });
+                            }
                         })
-                        .catch(error => {});
+                        .catch(error => {
+                            this.isFetching = false;
+                        });
                 },
 
                 store(params, { resetForm, setErrors }) {
