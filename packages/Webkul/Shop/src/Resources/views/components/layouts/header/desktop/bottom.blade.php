@@ -72,7 +72,7 @@
                     type="text"
                     name="query"
                     value="{{ request('query') }}"
-                    class="block w-full py-3 text-xs font-medium text-gray-900 transition-all border-2 border-transparent rounded-full bg-white px-11 hover:border-toyYellow focus:border-toyYellow focus:ring-2 focus:ring-toyYellow"
+                    class="block w-full py-3 text-xs font-medium text-gray-900 transition-all border-2 border-transparent rounded-full bg-white px-11 hover:border-toyBlue focus:border-toyBlue focus:ring-2 focus:ring-toyBlue"
                     minlength="{{ core()->getConfigData('catalog.products.search.min_query_length') }}"
                     maxlength="{{ core()->getConfigData('catalog.products.search.max_query_length') }}"
                     placeholder="@lang('shop::app.components.layouts.header.desktop.bottom.search-text')"
@@ -282,7 +282,7 @@
             v-else-if="'{{ core()->getConfigData('general.design.categories.category_view') }}' !== 'sidebar'"
         >
             <div
-                class="group relative flex h-[77px] items-center border-b-4 border-transparent hover:border-b-4 hover:border-toyYellow"
+                class="group relative flex h-[77px] items-center border-b-4 border-transparent hover:border-b-4 hover:border-toyBlue"
                 v-for="category in categories"
             >
                 <span>

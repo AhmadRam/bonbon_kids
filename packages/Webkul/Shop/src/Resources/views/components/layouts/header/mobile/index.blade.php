@@ -217,7 +217,7 @@
 
             <input
                 type="text"
-                class="block w-full rounded-full border-2 border-transparent px-11 py-3.5 text-sm font-medium text-gray-900 focus:border-toyYellow focus:ring-2 focus:ring-toyYellow max-md:px-10 max-md:py-3 max-md:font-normal max-sm:text-xs"
+                class="block w-full rounded-full border-2 border-transparent px-11 py-3.5 text-sm font-medium text-gray-900 focus:border-toyBlue focus:ring-2 focus:ring-toyBlue max-md:px-10 max-md:py-3 max-md:font-normal max-sm:text-xs"
                 name="query"
                 value="{{ request('query') }}"
                 placeholder="@lang('shop::app.components.layouts.header.mobile.search-text')"
