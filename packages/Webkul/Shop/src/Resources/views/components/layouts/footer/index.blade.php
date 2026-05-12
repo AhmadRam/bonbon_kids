@@ -98,35 +98,38 @@
                 >
             </a>
 
+            <!-- تحميل مكتبة FontAwesome 6 لعرض الأيقونات -->
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
             <div class="flex flex-wrap justify-center gap-5">
                 <!-- Email -->
                 <a href="mailto:bonbon.MiddleEast@hotmail.com" target="_blank" aria-label="Email" class="hover:-translate-y-1 transition-transform duration-300">
-                    <i class="fa fa-envelope text-[32px]" style="color: #EA4335;"></i>
+                    <i class="fa-solid fa-envelope text-[32px]" style="color: #EA4335;"></i>
                 </a>
                 
                 <!-- WhatsApp -->
                 <a href="https://wa.me/+96592214430" target="_blank" aria-label="WhatsApp" class="hover:-translate-y-1 transition-transform duration-300">
-                    <i class="fa fa-whatsapp text-[32px]" style="color: #25D366;"></i>
+                    <i class="fa-brands fa-whatsapp text-[32px]" style="color: #25D366;"></i>
                 </a>
                 
                 <!-- Facebook -->
                 <a href="https://www.facebook.com/share/1Cw2H6hLBW/?mibextid=wwXIfr" target="_blank" aria-label="Facebook" class="hover:-translate-y-1 transition-transform duration-300">
-                    <i class="fa fa-facebook text-[32px]" style="color: #1877F2;"></i>
+                    <i class="fa-brands fa-facebook text-[32px]" style="color: #1877F2;"></i>
                 </a>
                 
                 <!-- TikTok -->
                 <a href="https://www.tiktok.com/@bonbon.kuwait" target="_blank" aria-label="TikTok" class="hover:-translate-y-1 transition-transform duration-300">
-                    <i class="fa fab fa-tiktok text-[32px]" style="color: #000000;"></i>
+                    <i class="fa-brands fa-tiktok text-[32px]" style="color: #000000;"></i>
                 </a>
                 
                 <!-- Snapchat -->
                 <a href="https://snapchat.com/t/ma2NUtXn" target="_blank" aria-label="Snapchat" class="hover:-translate-y-1 transition-transform duration-300">
-                    <i class="fa fa-snapchat-ghost text-[32px] drop-shadow-md" style="color: #FFFC00;"></i>
+                    <i class="fa-brands fa-snapchat text-[32px] drop-shadow-md" style="color: #FFFC00;"></i>
                 </a>
                 
                 <!-- Instagram -->
                 <a href="https://www.instagram.com/bonbon_kuwait" target="_blank" aria-label="Instagram" class="hover:-translate-y-1 transition-transform duration-300">
-                    <i class="fa fa-instagram text-[32px]" style="color: #E1306C;"></i>
+                    <i class="fa-brands fa-instagram text-[32px]" style="color: #E1306C;"></i>
                 </a>
             </div>
         </div>
