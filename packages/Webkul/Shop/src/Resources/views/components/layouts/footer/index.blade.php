@@ -103,33 +103,33 @@
 
             <div class="flex flex-wrap justify-center gap-5">
                 <!-- Email -->
-                <a href="mailto:bonbon.MiddleEast@hotmail.com" target="_blank" aria-label="Email" class="hover:-translate-y-1 transition-transform duration-300">
-                    <i class="fa-solid fa-envelope text-[32px]" style="color: #EA4335;"></i>
+                <a href="mailto:bonbon.MiddleEast@hotmail.com" target="_blank" aria-label="Email" class="w-14 h-14 bg-white flex items-center justify-center rounded-xl shadow-md hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+                    <i class="fa-solid fa-envelope text-[34px]" style="color: #EA4335;"></i>
                 </a>
                 
                 <!-- WhatsApp -->
-                <a href="https://wa.me/+96592214430" target="_blank" aria-label="WhatsApp" class="hover:-translate-y-1 transition-transform duration-300">
-                    <i class="fa-brands fa-whatsapp text-[32px]" style="color: #25D366;"></i>
+                <a href="https://wa.me/+96592214430" target="_blank" aria-label="WhatsApp" class="w-14 h-14 bg-white flex items-center justify-center rounded-xl shadow-md hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+                    <i class="fa-brands fa-whatsapp text-[36px]" style="color: #25D366;"></i>
                 </a>
                 
                 <!-- Facebook -->
-                <a href="https://www.facebook.com/share/1Cw2H6hLBW/?mibextid=wwXIfr" target="_blank" aria-label="Facebook" class="hover:-translate-y-1 transition-transform duration-300">
-                    <i class="fa-brands fa-facebook text-[32px]" style="color: #1877F2;"></i>
+                <a href="https://www.facebook.com/share/1Cw2H6hLBW/?mibextid=wwXIfr" target="_blank" aria-label="Facebook" class="w-14 h-14 bg-white flex items-center justify-center rounded-xl shadow-md hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+                    <i class="fa-brands fa-facebook text-[36px]" style="color: #1877F2;"></i>
                 </a>
                 
                 <!-- TikTok -->
-                <a href="https://www.tiktok.com/@bonbon.kuwait" target="_blank" aria-label="TikTok" class="hover:-translate-y-1 transition-transform duration-300">
-                    <i class="fa-brands fa-tiktok text-[32px]" style="color: #000000;"></i>
+                <a href="https://www.tiktok.com/@bonbon.kuwait" target="_blank" aria-label="TikTok" class="w-14 h-14 bg-white flex items-center justify-center rounded-xl shadow-md hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+                    <i class="fa-brands fa-tiktok text-[34px]" style="color: #000000;"></i>
                 </a>
                 
                 <!-- Snapchat -->
-                <a href="https://snapchat.com/t/ma2NUtXn" target="_blank" aria-label="Snapchat" class="hover:-translate-y-1 transition-transform duration-300">
-                    <i class="fa-brands fa-snapchat text-[32px] drop-shadow-md" style="color: #FFFC00;"></i>
+                <a href="https://snapchat.com/t/ma2NUtXn" target="_blank" aria-label="Snapchat" class="w-14 h-14 bg-white flex items-center justify-center rounded-xl shadow-md hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+                    <i class="fa-brands fa-snapchat text-[36px]" style="color: #FFFC00; text-shadow: 0px 0px 2px rgba(0,0,0,0.5), 0px 0px 1px rgba(0,0,0,0.8);"></i>
                 </a>
                 
                 <!-- Instagram -->
-                <a href="https://www.instagram.com/bonbon_kuwait" target="_blank" aria-label="Instagram" class="hover:-translate-y-1 transition-transform duration-300">
-                    <i class="fa-brands fa-instagram text-[32px]" style="color: #E1306C;"></i>
+                <a href="https://www.instagram.com/bonbon_kuwait" target="_blank" aria-label="Instagram" class="w-14 h-14 bg-white flex items-center justify-center rounded-xl shadow-md hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+                    <i class="fa-brands fa-instagram text-[36px]" style="color: #E1306C;"></i>
                 </a>
             </div>
         </div>
