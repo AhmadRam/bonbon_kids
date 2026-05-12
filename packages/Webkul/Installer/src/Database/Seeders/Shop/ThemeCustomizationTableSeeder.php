@@ -118,31 +118,43 @@ class ThemeCustomizationTableSeeder extends Seeder
                                 [
                                     'title' => '',
                                     'link' => '',
-                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/1.webp', 'sliders/en/1.webp'),
+                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/1.png', 'sliders/en/1.png'),
                                 ], [
                                     'title' => '',
                                     'link' => '',
-                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/2.webp', 'sliders/en/2.webp'),
+                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/2.png', 'sliders/en/2.png'),
                                 ], [
                                     'title' => '',
                                     'link' => '',
-                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/3.webp', 'sliders/en/3.webp'),
+                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/3.png', 'sliders/en/3.png'),
                                 ], [
                                     'title' => '',
                                     'link' => '',
-                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/4.webp', 'sliders/en/4.webp'),
+                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/4.png', 'sliders/en/4.png'),
                                 ], [
                                     'title' => '',
                                     'link' => '',
-                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/5.webp', 'sliders/en/5.webp'),
+                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/5.png', 'sliders/en/5.png'),
                                 ], [
                                     'title' => '',
                                     'link' => '',
-                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/6.webp', 'sliders/en/6.webp'),
+                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/6.png', 'sliders/en/6.png'),
                                 ], [
                                     'title' => '',
                                     'link' => '',
-                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/7.webp', 'sliders/en/7.webp'),
+                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/7.png', 'sliders/en/7.png'),
+                                ], [
+                                    'title' => '',
+                                    'link' => '',
+                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/8.png', 'sliders/en/8.png'),
+                                ], [
+                                    'title' => '',
+                                    'link' => '',
+                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/9.png', 'sliders/en/9.png'),
+                                ], [
+                                    'title' => '',
+                                    'link' => '',
+                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/10.png', 'sliders/en/10.png'),
                                 ],
                             ],
                         ]),
