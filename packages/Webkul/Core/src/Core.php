@@ -663,7 +663,22 @@ class Core
      */
     public function countries()
     {
-        return DB::table('countries')->where('status', 1)->get();
+        return DB::table('countries')
+            ->leftJoin('country_translations as locale_translation', function ($join) {
+                $join->on('countries.id', '=', 'locale_translation.country_id')
+                    ->where('locale_translation.locale', app()->getLocale());
+            })
+            ->leftJoin('country_translations as fallback_translation', function ($join) {
+                $join->on('countries.id', '=', 'fallback_translation.country_id')
+                    ->where('fallback_translation.locale', config('app.fallback_locale'));
+            })
+            ->where('countries.status', 1)
+            ->select(
+                'countries.id',
+                'countries.code',
+                DB::raw("COALESCE(locale_translation.name, fallback_translation.name, countries.name) as name")
+            )
+            ->get();
     }
 
     /**
@@ -702,7 +717,27 @@ class Core
     {
         $collection = [];
 
-        foreach (DB::table('country_states')->where('status', 1)->get() as $state) {
+        $states = DB::table('country_states')
+            ->leftJoin('country_state_translations as locale_translation', function ($join) {
+                $join->on('country_states.id', '=', 'locale_translation.country_state_id')
+                    ->where('locale_translation.locale', app()->getLocale());
+            })
+            ->leftJoin('country_state_translations as fallback_translation', function ($join) {
+                $join->on('country_states.id', '=', 'fallback_translation.country_state_id')
+                    ->where('fallback_translation.locale', config('app.fallback_locale'));
+            })
+            ->where('country_states.status', 1)
+            ->select(
+                'country_states.id',
+                'country_states.country_id',
+                'country_states.country_code',
+                'country_states.code',
+                'country_states.status',
+                DB::raw("COALESCE(locale_translation.default_name, fallback_translation.default_name, country_states.default_name) as default_name")
+            )
+            ->get();
+
+        foreach ($states as $state) {
             $collection[$state->country_code][] = $state;
         }
 
