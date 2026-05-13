@@ -147,6 +147,7 @@
 
         {!! view_render_event('bagisto.shop.checkout.onepage.summary.delivery_charges.after') !!}
 
+        {{--
         <!-- Taxes -->
         {!! view_render_event('bagisto.shop.checkout.cart.summary.tax.before') !!}
 
@@ -205,6 +206,7 @@
         </div>
 
         {!! view_render_event('bagisto.shop.checkout.cart.summary.tax.after') !!}
+        --}}
    
         <!-- Cart Grand Total -->
         {!! view_render_event('bagisto.shop.checkout.cart.summary.grand_total.before') !!}
