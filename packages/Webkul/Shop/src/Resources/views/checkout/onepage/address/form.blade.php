@@ -28,7 +28,7 @@
 
             {!! view_render_event('bagisto.shop.checkout.onepage.address.form.company_name.after') !!}
 
-            <!-- First Name -->
+            <!-- First Name & Last Name -->
             <div class="grid grid-cols-2 gap-x-5 max-md:grid-cols-1">
                 <x-shop::form.control-group>
                     <x-shop::form.control-group.label class="required !mt-0">
@@ -49,7 +49,6 @@
 
                 {!! view_render_event('bagisto.shop.checkout.onepage.address.form.first_name.after') !!}
 
-                <!-- Last Name -->
                 <x-shop::form.control-group>
                     <x-shop::form.control-group.label class="required !mt-0">
                         @lang('shop::app.checkout.onepage.address.last-name')
@@ -70,27 +69,75 @@
                 {!! view_render_event('bagisto.shop.checkout.onepage.address.form.last_name.after') !!}
             </div>
 
-            <!-- Email -->
-            <x-shop::form.control-group>
-                <x-shop::form.control-group.label class="required !mt-0">
-                    @lang('shop::app.checkout.onepage.address.email')
-                </x-shop::form.control-group.label>
+            <!-- Email & Phone -->
+            <div class="grid grid-cols-2 gap-x-5 max-md:grid-cols-1">
+                <x-shop::form.control-group>
+                    <x-shop::form.control-group.label class="required !mt-0">
+                        @lang('shop::app.checkout.onepage.address.email')
+                    </x-shop::form.control-group.label>
 
-                <x-shop::form.control-group.control
-                    type="email"
-                    ::name="controlName + '.email'"
-                    ::value="address.email"
-                    rules="required|email"
-                    :label="trans('shop::app.checkout.onepage.address.email')"
-                    placeholder="email@example.com"
-                />
+                    <x-shop::form.control-group.control
+                        type="email"
+                        ::name="controlName + '.email'"
+                        ::value="address.email"
+                        rules="required|email"
+                        :label="trans('shop::app.checkout.onepage.address.email')"
+                        placeholder="email@example.com"
+                    />
 
-                <x-shop::form.control-group.error ::name="controlName + '.email'" />
-            </x-shop::form.control-group>
+                    <x-shop::form.control-group.error ::name="controlName + '.email'" />
+                </x-shop::form.control-group>
 
-            {!! view_render_event('bagisto.shop.checkout.onepage.address.form.email.after') !!}
+                {!! view_render_event('bagisto.shop.checkout.onepage.address.form.email.after') !!}
 
-            <!-- Vat ID -->
+                <x-shop::form.control-group>
+                    <x-shop::form.control-group.label class="required !mt-0">
+                        @lang('shop::app.checkout.onepage.address.telephone')
+                    </x-shop::form.control-group.label>
+
+                    <div class="flex gap-x-2">
+                        <div class="w-[130px] min-w-[130px]">
+                            <x-shop::form.control-group.control
+                                type="select"
+                                ::name="controlName + '.phone_prefix'"
+                                v-model="phonePrefix"
+                                class="!mb-0"
+                            >
+                                <option
+                                    v-for="country in availableCountriesWithPhoneCodes"
+                                    :key="'prefix-' + country.code"
+                                    :value="countryPhoneCodes[country.code]"
+                                >
+                                    @{{ country.code }} (@{{ countryPhoneCodes[country.code] }})
+                                </option>
+                            </x-shop::form.control-group.control>
+                        </div>
+
+                        <div class="flex-1">
+                            <x-shop::form.control-group.control
+                                type="text"
+                                ::name="controlName + '.phone_number'"
+                                v-model="phoneNumber"
+                                rules="required|numeric"
+                                :label="trans('shop::app.checkout.onepage.address.telephone')"
+                                :placeholder="trans('shop::app.checkout.onepage.address.telephone')"
+                            />
+
+                            <x-shop::form.control-group.control 
+                                type="hidden" 
+                                ::name="controlName + '.phone'" 
+                                v-model="address.phone"
+                            />
+                        </div>
+                    </div>
+
+                    <x-shop::form.control-group.error ::name="controlName + '.phone_number'" />
+                </x-shop::form.control-group>
+
+                {!! view_render_event('bagisto.shop.checkout.onepage.address.form.phone.after') !!}
+            </div>
+
+            <!-- Vat ID (Hidden) -->
             <template v-if="controlName=='billing'">
                 <x-shop::form.control-group class="hidden">
                     <x-shop::form.control-group.label>
@@ -111,8 +158,8 @@
                 {!! view_render_event('bagisto.shop.checkout.onepage.address.form.vat_id.after') !!}
             </template>
 
-            <div class="grid grid-cols-2 gap-x-5 max-md:grid-cols-1">
-                <!-- Country -->
+            <!-- Country, State, City -->
+            <div class="grid grid-cols-3 gap-x-5 max-md:grid-cols-1">
                 <x-shop::form.control-group class="!mb-4">
                     <x-shop::form.control-group.label class="{{ core()->isCountryRequired() ? 'required' : '' }} !mt-0">
                         @lang('shop::app.checkout.onepage.address.country')
@@ -140,7 +187,6 @@
 
                 {!! view_render_event('bagisto.shop.checkout.onepage.address.form.country.after') !!}
 
-                <!-- State -->
                 <x-shop::form.control-group>
                     <x-shop::form.control-group.label class="{{ core()->isStateRequired() ? 'required' : '' }} !mt-0">
                         @lang('shop::app.checkout.onepage.address.state')
@@ -184,10 +230,7 @@
                 </x-shop::form.control-group>
 
                 {!! view_render_event('bagisto.shop.checkout.onepage.address.form.state.after') !!}
-            </div>
 
-            <div class="grid grid-cols-2 gap-x-5 max-md:grid-cols-1">
-                <!-- City -->
                 <x-shop::form.control-group>
                     <x-shop::form.control-group.label class="required !mt-0">
                         @lang('shop::app.checkout.onepage.address.city')
@@ -296,52 +339,6 @@
 
                 {!! view_render_event('bagisto.shop.checkout.onepage.address.form.postcode.after') !!}
             </div>
-
-            <x-shop::form.control-group>
-                <x-shop::form.control-group.label class="required !mt-0">
-                    @lang('shop::app.checkout.onepage.address.telephone')
-                </x-shop::form.control-group.label>
-
-                <div class="flex gap-x-2">
-                    <div class="w-[130px] min-w-[130px]">
-                        <x-shop::form.control-group.control
-                            type="select"
-                            ::name="controlName + '.phone_prefix'"
-                            v-model="phonePrefix"
-                            class="!mb-0"
-                        >
-                            <option
-                                v-for="country in availableCountriesWithPhoneCodes"
-                                :key="'prefix-' + country.code"
-                                :value="countryPhoneCodes[country.code]"
-                            >
-                                @{{ country.code }} (@{{ countryPhoneCodes[country.code] }})
-                            </option>
-                        </x-shop::form.control-group.control>
-                    </div>
-
-                    <div class="flex-1">
-                        <x-shop::form.control-group.control
-                            type="text"
-                            ::name="controlName + '.phone_number'"
-                            v-model="phoneNumber"
-                            rules="required|numeric"
-                            :label="trans('shop::app.checkout.onepage.address.telephone')"
-                            :placeholder="trans('shop::app.checkout.onepage.address.telephone')"
-                        />
-
-                        <x-shop::form.control-group.control 
-                            type="hidden" 
-                            ::name="controlName + '.phone'" 
-                            v-model="address.phone"
-                        />
-                    </div>
-                </div>
-
-                <x-shop::form.control-group.error ::name="controlName + '.phone_number'" />
-            </x-shop::form.control-group>
-
-            {!! view_render_event('bagisto.shop.checkout.onepage.address.form.phone.after') !!}
         </div>
     </script>
 
