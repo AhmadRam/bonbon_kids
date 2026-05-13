@@ -51,6 +51,7 @@
                                     :value="payment.payment"
                                     :id="payment.method"
                                     class="peer hidden"
+                                    :checked="payment.method == selectedMethod"
                                     @change="store(payment)"
                                 >
     
@@ -123,10 +124,31 @@
                 },
             },
 
+            data() {
+                return {
+                    selectedMethod: null,
+                };
+            },
+
             emits: ['processing', 'processed'],
+
+            watch: {
+                methods: {
+                    handler(newVal) {
+                        if (newVal && newVal.length > 0) {
+                            if (! this.selectedMethod) {
+                                this.store(newVal[0]);
+                            }
+                        }
+                    },
+                    deep: true
+                }
+            },
 
             methods: {
                 store(selectedMethod) {
+                    this.selectedMethod = selectedMethod.method;
+
                     this.$emit('processing', 'review');
 
                     this.$axios.post("{{ route('shop.checkout.onepage.payment_methods.store') }}", {

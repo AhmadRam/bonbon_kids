@@ -50,6 +50,7 @@
                                         :id="rate.method"
                                         :value="rate.method"
                                         class="peer hidden"
+                                        :checked="rate.method == selectedMethod"
                                         @change="store(rate.method)"
                                     >
 
@@ -98,10 +99,39 @@
                 },
             },
 
+            data() {
+                return {
+                    selectedMethod: null,
+                };
+            },
+
             emits: ['processing', 'processed'],
+
+            watch: {
+                methods: {
+                    handler(newVal) {
+                        if (newVal && Object.keys(newVal).length > 0) {
+                            for (let carrier in newVal) {
+                                if (newVal[carrier].rates && newVal[carrier].rates.length > 0) {
+                                    let firstRate = newVal[carrier].rates[0];
+                                    
+                                    if (this.selectedMethod != firstRate.method) {
+                                        this.store(firstRate.method);
+                                    }
+                                    
+                                    break;
+                                }
+                            }
+                        }
+                    },
+                    deep: true
+                }
+            },
 
             methods: {
                 store(selectedMethod) {
+                    this.selectedMethod = selectedMethod;
+
                     this.$emit('processing', 'payment');
 
                     this.$axios.post("{{ route('shop.checkout.onepage.shipping_methods.store') }}", {    
