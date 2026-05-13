@@ -115,7 +115,7 @@
                                 </x-shop::form.control-group>
 
                                 <!-- Password -->
-                                <x-shop::form.control-group :class="isRegister ? '' : '!mb-0'">
+                                <x-shop::form.control-group ::class="isRegister ? '' : '!mb-0'">
                                     <x-shop::form.control-group.label class="required">
                                         @lang('shop::app.checkout.login.password')
                                     </x-shop::form.control-group.label>
