@@ -29,6 +29,9 @@ class CitiesTableSeeder extends Seeder
             return;
         }
 
+        $cities = [];
+        $translations = [];
+
         foreach ($data as $countryData) {
             $countryCode = $countryData['code'];
             $countryId = $countryData['id'];
@@ -65,8 +68,7 @@ class CitiesTableSeeder extends Seeder
                         }
                     }
 
-                    // Build data for the model with translations
-                    $cityInfo = [
+                    $cities[] = [
                         'id'               => $cityData['id'],
                         'country_id'       => $countryId,
                         'country_code'     => $countryCode,
@@ -78,16 +80,18 @@ class CitiesTableSeeder extends Seeder
                     ];
 
                     foreach ($cityData['translations'] as $translation) {
-                        $cityInfo[$translation['locale']] = [
-                            'name' => $translation['name'],
+                        $translations[] = [
+                            'country_state_city_id' => $cityData['id'],
+                            'locale'                => $translation['locale'],
+                            'name'                  => $translation['name'],
                         ];
                     }
-
-                    // Use the model to handle translations correctly
-                    \Webkul\Core\Models\CountryCity::create($cityInfo);
                 }
             }
         }
+
+        DB::table('country_state_cities')->insert($cities);
+        DB::table('country_city_translations')->insert($translations);
     }
 
     private function resolveDefaultNameFromTranslations(array $translations): string

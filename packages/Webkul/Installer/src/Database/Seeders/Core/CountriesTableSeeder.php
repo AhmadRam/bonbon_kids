@@ -29,26 +29,31 @@ class CountriesTableSeeder extends Seeder
             return;
         }
 
+        $countries = [];
+        $translations = [];
+
         foreach ($data as $countryData) {
             $countryCode = $countryData['code'];
+            $defaultName = $this->resolveDefaultNameFromTranslations($countryData['translations']);
             
-            // Build data for the model with translations
-            $countryInfo = [
+            $countries[] = [
                 'id'     => $countryData['id'],
                 'code'   => $countryCode,
-                'name'   => $this->resolveDefaultNameFromTranslations($countryData['translations']),
+                'name'   => $defaultName,
                 'status' => ($countryCode === 'KW') ? 1 : 0,
             ];
 
             foreach ($countryData['translations'] as $translation) {
-                $countryInfo[$translation['locale']] = [
-                    'name' => $translation['name'],
+                $translations[] = [
+                    'country_id' => $countryData['id'],
+                    'locale'     => $translation['locale'],
+                    'name'       => $translation['name'],
                 ];
             }
-
-            // Use the model to handle translations correctly
-            \Webkul\Core\Models\Country::create($countryInfo);
         }
+
+        DB::table('countries')->insert($countries);
+        DB::table('country_translations')->insert($translations);
     }
 
     private function resolveDefaultNameFromTranslations(array $translations): string

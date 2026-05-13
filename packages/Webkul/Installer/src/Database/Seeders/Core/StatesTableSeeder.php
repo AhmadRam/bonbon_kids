@@ -29,6 +29,9 @@ class StatesTableSeeder extends Seeder
             return;
         }
 
+        $states = [];
+        $translations = [];
+
         foreach ($data as $countryData) {
             $countryCode = $countryData['code'];
             $countryId = $countryData['id'];
@@ -38,26 +41,29 @@ class StatesTableSeeder extends Seeder
             }
 
             foreach ($countryData['states'] as $stateData) {
-                // Build data for the model with translations
-                $stateInfo = [
+                $defaultName = $this->resolveDefaultNameFromTranslations($stateData['translations']);
+
+                $states[] = [
                     'id'           => $stateData['id'],
                     'country_id'   => $countryId,
                     'country_code' => $countryCode,
                     'code'         => $stateData['code'],
-                    'default_name' => $this->resolveDefaultNameFromTranslations($stateData['translations']),
+                    'default_name' => $defaultName,
                     'status'       => ($countryCode === 'KW') ? 1 : 0,
                 ];
 
                 foreach ($stateData['translations'] as $translation) {
-                    $stateInfo[$translation['locale']] = [
-                        'default_name' => $translation['name'],
+                    $translations[] = [
+                        'country_state_id' => $stateData['id'],
+                        'locale'           => $translation['locale'],
+                        'default_name'     => $translation['name'],
                     ];
                 }
-
-                // Use the model to handle translations correctly
-                \Webkul\Core\Models\CountryState::create($stateInfo);
             }
         }
+
+        DB::table('country_states')->insert($states);
+        DB::table('country_state_translations')->insert($translations);
     }
 
     private function resolveDefaultNameFromTranslations(array $translations): string
