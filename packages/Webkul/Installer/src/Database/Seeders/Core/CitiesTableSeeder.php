@@ -73,6 +73,7 @@ class CitiesTableSeeder extends Seeder
                         'country_state_id' => $stateId,
                         'state_code'       => $stateCode,
                         'code'             => $fullCode,
+                        'default_name'     => $defaultName,
                         'status'           => ($countryCode === 'KW') ? 1 : 0,
                     ];
 

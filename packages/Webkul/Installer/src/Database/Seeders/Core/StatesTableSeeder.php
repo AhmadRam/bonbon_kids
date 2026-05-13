@@ -44,6 +44,7 @@ class StatesTableSeeder extends Seeder
                     'country_id'   => $countryId,
                     'country_code' => $countryCode,
                     'code'         => $stateData['code'],
+                    'default_name' => $this->resolveDefaultNameFromTranslations($stateData['translations']),
                     'status'       => ($countryCode === 'KW') ? 1 : 0,
                 ];
 
@@ -57,5 +58,16 @@ class StatesTableSeeder extends Seeder
                 \Webkul\Core\Models\CountryState::create($stateInfo);
             }
         }
+    }
+
+    private function resolveDefaultNameFromTranslations(array $translations): string
+    {
+        foreach ($translations as $translation) {
+            if ($translation['locale'] === 'en') {
+                return $translation['name'];
+            }
+        }
+
+        return $translations[0]['name'] ?? '';
     }
 }

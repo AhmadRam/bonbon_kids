@@ -36,6 +36,7 @@ class CountriesTableSeeder extends Seeder
             $countryInfo = [
                 'id'     => $countryData['id'],
                 'code'   => $countryCode,
+                'name'   => $this->resolveDefaultNameFromTranslations($countryData['translations']),
                 'status' => ($countryCode === 'KW') ? 1 : 0,
             ];
 
@@ -48,5 +49,16 @@ class CountriesTableSeeder extends Seeder
             // Use the model to handle translations correctly
             \Webkul\Core\Models\Country::create($countryInfo);
         }
+    }
+
+    private function resolveDefaultNameFromTranslations(array $translations): string
+    {
+        foreach ($translations as $translation) {
+            if ($translation['locale'] === 'en') {
+                return $translation['name'];
+            }
+        }
+
+        return $translations[0]['name'] ?? '';
     }
 }
