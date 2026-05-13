@@ -19,82 +19,65 @@ class CountriesTableSeeder extends Seeder
         DB::table('countries')->delete();
         DB::table('country_translations')->delete();
 
-        $csvFile = __DIR__ . '/Data/countries.csv';
-        if (! file_exists($csvFile)) {
+        $jsonFile = __DIR__ . '/Data/locations_export_2026_05_13_103424.json';
+        if (! file_exists($jsonFile)) {
             return;
         }
 
-        $handle = fopen($csvFile, 'r');
-        $header = fgetcsv($handle);
+        $data = json_decode(file_get_contents($jsonFile), true);
+        if (! $data) {
+            return;
+        }
         
         $countries = [];
         $translations = [];
         $generatedCodes = [];
 
-        while (($row = fgetcsv($handle)) !== false) {
-            $data = array_combine($header, $row);
-
-            $defaultName = $this->resolveDefaultName($data['default_name'], $data['translations']);
-            $countryCode = $this->resolveCountryCode($data, $defaultName, $generatedCodes);
+        foreach ($data as $countryData) {
+            $defaultName = $this->resolveDefaultNameFromTranslations($countryData['translations']);
+            $countryCode = $countryData['code'] ?: $this->resolveCountryCode($countryData, $defaultName, $generatedCodes);
 
             // Set status to 1 for Kuwait (KW), 0 for others
             $status = ($countryCode === 'KW') ? 1 : 0;
             
             $countries[] = [
-                'id' => $data['country_id'],
-                'code' => $countryCode,
-                'name' => $defaultName,
+                'id'     => $countryData['id'],
+                'code'   => $countryCode,
+                'name'   => $defaultName,
                 'status' => $status,
             ];
 
-            // Parse translations e.g. "ar:الكويت | en:Kuwait"
-            $transParts = explode(' | ', $data['translations']);
-            foreach ($transParts as $part) {
-                if (empty(trim($part))) continue;
-                list($locale, $name) = explode(':', trim($part));
+            foreach ($countryData['translations'] as $translation) {
                 $translations[] = [
-                    'country_id' => $data['country_id'],
-                    'locale' => trim($locale),
-                    'name' => trim($name),
+                    'country_id' => $countryData['id'],
+                    'locale'     => $translation['locale'],
+                    'name'       => $translation['name'],
                 ];
             }
         }
-        fclose($handle);
 
         DB::table('countries')->insert($countries);
         DB::table('country_translations')->insert($translations);
     }
 
-    private function resolveDefaultName(?string $defaultName, ?string $translations): string
+    private function resolveDefaultNameFromTranslations(array $translations): string
     {
-        if (! empty($defaultName)) {
-            return $defaultName;
-        }
-
-        if (! empty($translations)) {
-            foreach (explode(' | ', $translations) as $part) {
-                $part = trim($part);
-
-                if (str_starts_with($part, 'en:')) {
-                    return trim(substr($part, 3));
-                }
+        foreach ($translations as $translation) {
+            if ($translation['locale'] === 'en') {
+                return $translation['name'];
             }
         }
 
-        return '';
+        return $translations[0]['name'] ?? '';
     }
 
     private function resolveCountryCode(array $data, string $defaultName, array &$generatedCodes): string
     {
-        if (! empty($data['country_code'])) {
-            return $data['country_code'];
-        }
-
         $baseCode = $this->makeCodeToken($defaultName, 'CTRY');
         $code = $baseCode;
 
         if (in_array($code, $generatedCodes, true)) {
-            $code = $baseCode.'-'.$data['country_id'];
+            $code = $baseCode.'-'.$data['id'];
         }
 
         $generatedCodes[] = $code;

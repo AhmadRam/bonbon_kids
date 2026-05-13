@@ -19,85 +19,76 @@ class StatesTableSeeder extends Seeder
         DB::table('country_states')->delete();
         DB::table('country_state_translations')->delete();
 
-        $csvFile = __DIR__ . '/Data/states.csv';
-        if (! file_exists($csvFile)) {
+        $jsonFile = __DIR__ . '/Data/locations_export_2026_05_13_103424.json';
+        if (! file_exists($jsonFile)) {
             return;
         }
 
-        $handle = fopen($csvFile, 'r');
-        $header = fgetcsv($handle);
+        $data = json_decode(file_get_contents($jsonFile), true);
+        if (! $data) {
+            return;
+        }
         
         $states = [];
         $translations = [];
         $generatedCodes = [];
 
-        while (($row = fgetcsv($handle)) !== false) {
-            $data = array_combine($header, $row);
-            $defaultName = $this->resolveDefaultName($data['default_name'], $data['translations']);
-            $countryCode = $data['country_code'];
-            $stateCode = $this->resolveStateCode($data, $countryCode, $defaultName, $generatedCodes);
+        foreach ($data as $countryData) {
+            $countryCode = $countryData['code'];
+            $countryId = $countryData['id'];
 
-            // Set status to 1 for Kuwait (KW), 0 for others
-            $status = ($countryCode === 'KW') ? 1 : 0;
+            if (empty($countryData['states'])) {
+                continue;
+            }
 
-            $states[] = [
-                'id' => $data['state_id'],
-                'country_id' => $data['country_id'],
-                'country_code' => $countryCode,
-                'code' => $stateCode,
-                'default_name' => $defaultName,
-                'status' => $status,
-            ];
+            foreach ($countryData['states'] as $stateData) {
+                $defaultName = $stateData['default_name'] ?: $this->resolveDefaultNameFromTranslations($stateData['translations']);
+                $stateCode = $stateData['code'] ?: $this->resolveStateCode($stateData, $countryCode, $defaultName, $generatedCodes);
 
-            // Parse translations e.g. "ar:الكويت | en:Kuwait"
-            $transParts = explode(' | ', $data['translations']);
-            foreach ($transParts as $part) {
-                if (empty(trim($part))) continue;
-                list($locale, $name) = explode(':', trim($part));
-                $translations[] = [
-                    'country_state_id' => $data['state_id'],
-                    'locale' => trim($locale),
-                    'default_name' => trim($name),
+                // Set status to 1 for Kuwait (KW), 0 for others
+                $status = ($countryCode === 'KW') ? 1 : 0;
+
+                $states[] = [
+                    'id'           => $stateData['id'],
+                    'country_id'   => $countryId,
+                    'country_code' => $countryCode,
+                    'code'         => $stateCode,
+                    'default_name' => $defaultName,
+                    'status'       => $status,
                 ];
+
+                foreach ($stateData['translations'] as $translation) {
+                    $translations[] = [
+                        'country_state_id' => $stateData['id'],
+                        'locale'           => $translation['locale'],
+                        'default_name'     => $translation['name'],
+                    ];
+                }
             }
         }
-        fclose($handle);
 
         DB::table('country_states')->insert($states);
         DB::table('country_state_translations')->insert($translations);
     }
 
-    private function resolveDefaultName(?string $defaultName, ?string $translations): string
+    private function resolveDefaultNameFromTranslations(array $translations): string
     {
-        if (! empty($defaultName)) {
-            return $defaultName;
-        }
-
-        if (! empty($translations)) {
-            foreach (explode(' | ', $translations) as $part) {
-                $part = trim($part);
-
-                if (str_starts_with($part, 'en:')) {
-                    return trim(substr($part, 3));
-                }
+        foreach ($translations as $translation) {
+            if ($translation['locale'] === 'en') {
+                return $translation['name'];
             }
         }
 
-        return '';
+        return $translations[0]['name'] ?? '';
     }
 
     private function resolveStateCode(array $data, string $countryCode, string $defaultName, array &$generatedCodes): string
     {
-        if (! empty($data['state_code'])) {
-            return $data['state_code'];
-        }
-
-        $countryPrefix = $data['state_country_code'] ?: $countryCode ?: 'STATE';
-        $baseCode = $countryPrefix.'-'.$this->makeCodeToken($defaultName, 'STATE');
+        $baseCode = $countryCode.'-'.$this->makeCodeToken($defaultName, 'STATE');
         $code = $baseCode;
 
         if (in_array($code, $generatedCodes, true)) {
-            $code = $baseCode.'-'.$data['state_id'];
+            $code = $baseCode.'-'.$data['id'];
         }
 
         $generatedCodes[] = $code;
