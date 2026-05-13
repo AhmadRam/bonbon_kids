@@ -14,6 +14,8 @@ class CountryCity extends TranslatableModel implements CountryCityContract
      */
     protected $table = 'country_state_cities';
 
+    protected $translationForeignKey = 'country_state_city_id';
+
     public $translatedAttributes = [
         'name',
     ];
