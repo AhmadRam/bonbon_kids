@@ -49,7 +49,7 @@ class CitiesTableSeeder extends Seeder
                 }
 
                 foreach ($stateData['cities'] as $cityData) {
-                    $defaultName = $cityData['default_name'] ?: $this->resolveDefaultNameFromTranslations($cityData['translations']);
+                    $defaultName = $cityData['default_name'] ?: $this->resolveDefaultNameFromTranslations($cityData['translations'], $countryCode);
                     
                     // Fallback code generation logic if code is missing
                     if (! empty($cityData['code'])) {
@@ -97,8 +97,17 @@ class CitiesTableSeeder extends Seeder
         DB::table('country_city_translations')->insert($translations);
     }
 
-    private function resolveDefaultNameFromTranslations(array $translations): string
+    private function resolveDefaultNameFromTranslations(array $translations, string $countryCode = ''): string
     {
+        // For Kuwait, we prioritize Arabic to ensure it shows correctly in fallbacks
+        if ($countryCode === 'KW') {
+            foreach ($translations as $translation) {
+                if ($translation['locale'] === 'ar') {
+                    return $translation['name'];
+                }
+            }
+        }
+
         foreach ($translations as $translation) {
             if ($translation['locale'] === 'en') {
                 return $translation['name'];

@@ -42,7 +42,7 @@ class StatesTableSeeder extends Seeder
             }
 
             foreach ($countryData['states'] as $stateData) {
-                $defaultName = $stateData['default_name'] ?: $this->resolveDefaultNameFromTranslations($stateData['translations']);
+                $defaultName = $stateData['default_name'] ?: $this->resolveDefaultNameFromTranslations($stateData['translations'], $countryCode);
                 $stateCode = $stateData['code'] ?: $this->resolveStateCode($stateData, $countryCode, $defaultName, $generatedCodes);
 
                 // Set status to 1 for Kuwait (KW), 0 for others
@@ -71,8 +71,17 @@ class StatesTableSeeder extends Seeder
         DB::table('country_state_translations')->insert($translations);
     }
 
-    private function resolveDefaultNameFromTranslations(array $translations): string
+    private function resolveDefaultNameFromTranslations(array $translations, string $countryCode = ''): string
     {
+        // For Kuwait, we prioritize Arabic to ensure it shows correctly in fallbacks
+        if ($countryCode === 'KW') {
+            foreach ($translations as $translation) {
+                if ($translation['locale'] === 'ar') {
+                    return $translation['name'];
+                }
+            }
+        }
+
         foreach ($translations as $translation) {
             if ($translation['locale'] === 'en') {
                 return $translation['name'];
