@@ -28,9 +28,6 @@ class CitiesTableSeeder extends Seeder
         if (! $data) {
             return;
         }
-        
-        $cities = [];
-        $translations = [];
 
         foreach ($data as $countryData) {
             $countryCode = $countryData['code'];
@@ -49,10 +46,7 @@ class CitiesTableSeeder extends Seeder
                 }
 
                 foreach ($stateData['cities'] as $cityData) {
-                    // For Kuwait, we ignore the English default_name from JSON and use our translation resolver
-                    $defaultName = ($countryCode === 'KW') 
-                        ? $this->resolveDefaultNameFromTranslations($cityData['translations'], $countryCode)
-                        : ($cityData['default_name'] ?: $this->resolveDefaultNameFromTranslations($cityData['translations'], $countryCode));
+                    $defaultName = $cityData['default_name'] ?: $this->resolveDefaultNameFromTranslations($cityData['translations']);
                     
                     // Fallback code generation logic if code is missing
                     if (! empty($cityData['code'])) {
@@ -71,46 +65,32 @@ class CitiesTableSeeder extends Seeder
                         }
                     }
 
-                    // Set status to 1 for Kuwait (KW), 0 for others
-                    $status = ($countryCode === 'KW') ? 1 : 0;
-                    
-                    $cities[] = [
+                    // Build data for the model with translations
+                    $cityInfo = [
                         'id'               => $cityData['id'],
                         'country_id'       => $countryId,
                         'country_code'     => $countryCode,
                         'country_state_id' => $stateId,
                         'state_code'       => $stateCode,
                         'code'             => $fullCode,
-                        'default_name'     => $defaultName,
-                        'status'           => $status,
+                        'status'           => ($countryCode === 'KW') ? 1 : 0,
                     ];
 
                     foreach ($cityData['translations'] as $translation) {
-                        $translations[] = [
-                            'country_state_city_id' => $cityData['id'],
-                            'locale'                => $translation['locale'],
-                            'name'                  => $translation['name'],
+                        $cityInfo[$translation['locale']] = [
+                            'name' => $translation['name'],
                         ];
                     }
+
+                    // Use the model to handle translations correctly
+                    \Webkul\Core\Models\CountryCity::create($cityInfo);
                 }
             }
         }
-
-        DB::table('country_state_cities')->insert($cities);
-        DB::table('country_city_translations')->insert($translations);
     }
 
-    private function resolveDefaultNameFromTranslations(array $translations, string $countryCode = ''): string
+    private function resolveDefaultNameFromTranslations(array $translations): string
     {
-        // For Kuwait, we prioritize Arabic to ensure it shows correctly in fallbacks
-        if ($countryCode === 'KW') {
-            foreach ($translations as $translation) {
-                if ($translation['locale'] === 'ar') {
-                    return $translation['name'];
-                }
-            }
-        }
-
         foreach ($translations as $translation) {
             if ($translation['locale'] === 'en') {
                 return $translation['name'];
