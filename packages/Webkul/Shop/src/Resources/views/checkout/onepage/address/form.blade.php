@@ -311,10 +311,9 @@
                             class="!mb-0"
                         >
                             <option
-                                v-for="country in countries"
+                                v-for="country in availableCountriesWithPhoneCodes"
                                 :key="'prefix-' + country.code"
                                 :value="countryPhoneCodes[country.code]"
-                                v-if="countryPhoneCodes[country.code]"
                             >
                                 @{{ country.code }} (@{{ countryPhoneCodes[country.code] }})
                             </option>
@@ -435,6 +434,10 @@
 
                 haveCities() {
                     return this.currentCities.length > 0;
+                },
+
+                availableCountriesWithPhoneCodes() {
+                    return this.countries.filter(country => this.countryPhoneCodes[country.code]);
                 },
             },
 
