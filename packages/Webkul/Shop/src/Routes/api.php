@@ -98,6 +98,8 @@ Route::group(['prefix' => 'api'], function () {
      */
     Route::controller(CustomerController::class)->prefix('customer')->group(function () {
         Route::post('login', 'login')->name('shop.api.customers.session.create');
+
+        Route::post('register', 'register')->name('shop.api.customers.store');
     });
 
     Route::group(['middleware' => ['customer'], 'prefix' => 'customer'], function () {
