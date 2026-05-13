@@ -95,13 +95,13 @@
                         @lang('shop::app.checkout.onepage.address.telephone')
                     </x-shop::form.control-group.label>
 
-                    <div class="flex gap-x-2">
+                    <div class="flex gap-x-2" style="direction: ltr !important;">
                         <div class="w-[130px] min-w-[130px]">
-                            <x-shop::form.control-group.control
-                                type="select"
-                                ::name="controlName + '.phone_prefix'"
+                            <select
+                                :name="controlName + '.phone_prefix'"
                                 v-model="phonePrefix"
-                                class="!mb-0"
+                                class="!mb-0 w-full rounded-lg border border-zinc-200 bg-white px-3 py-3 text-base text-gray-600 transition-all hover:border-gray-400 focus-visible:outline-none max-md:py-2 max-sm:px-4 max-sm:text-sm appearance-none"
+                                style="appearance: none; -webkit-appearance: none; -moz-appearance: none; background-image: none;"
                             >
                                 <option
                                     v-for="country in availableCountriesWithPhoneCodes"
@@ -110,7 +110,7 @@
                                 >
                                     @{{ country.code }} (@{{ countryPhoneCodes[country.code] }})
                                 </option>
-                            </x-shop::form.control-group.control>
+                            </select>
                         </div>
 
                         <div class="flex-1">
@@ -121,6 +121,7 @@
                                 rules="required|numeric"
                                 :label="trans('shop::app.checkout.onepage.address.telephone')"
                                 :placeholder="trans('shop::app.checkout.onepage.address.telephone')"
+                                class="!text-left"
                             />
 
                             <x-shop::form.control-group.control 
