@@ -49,7 +49,10 @@ class CitiesTableSeeder extends Seeder
                 }
 
                 foreach ($stateData['cities'] as $cityData) {
-                    $defaultName = $cityData['default_name'] ?: $this->resolveDefaultNameFromTranslations($cityData['translations'], $countryCode);
+                    // For Kuwait, we ignore the English default_name from JSON and use our translation resolver
+                    $defaultName = ($countryCode === 'KW') 
+                        ? $this->resolveDefaultNameFromTranslations($cityData['translations'], $countryCode)
+                        : ($cityData['default_name'] ?: $this->resolveDefaultNameFromTranslations($cityData['translations'], $countryCode));
                     
                     // Fallback code generation logic if code is missing
                     if (! empty($cityData['code'])) {

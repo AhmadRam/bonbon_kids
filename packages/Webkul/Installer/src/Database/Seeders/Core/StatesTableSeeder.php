@@ -42,7 +42,11 @@ class StatesTableSeeder extends Seeder
             }
 
             foreach ($countryData['states'] as $stateData) {
-                $defaultName = $stateData['default_name'] ?: $this->resolveDefaultNameFromTranslations($stateData['translations'], $countryCode);
+                // For Kuwait, we ignore the English default_name from JSON and use our translation resolver
+                $defaultName = ($countryCode === 'KW') 
+                    ? $this->resolveDefaultNameFromTranslations($stateData['translations'], $countryCode)
+                    : ($stateData['default_name'] ?: $this->resolveDefaultNameFromTranslations($stateData['translations'], $countryCode));
+
                 $stateCode = $stateData['code'] ?: $this->resolveStateCode($stateData, $countryCode, $defaultName, $generatedCodes);
 
                 // Set status to 1 for Kuwait (KW), 0 for others
