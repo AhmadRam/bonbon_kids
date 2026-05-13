@@ -303,19 +303,21 @@
                 </x-shop::form.control-group.label>
 
                 <div class="flex gap-x-2">
-                    <div class="w-[100px] min-w-[100px]">
+                    <div class="w-[130px] min-w-[130px]">
                         <x-shop::form.control-group.control
                             type="select"
                             ::name="controlName + '.phone_prefix'"
                             v-model="phonePrefix"
                             class="!mb-0"
                         >
-                            <option value="+965">KW (+965)</option>
-                            <option value="+966">SA (+966)</option>
-                            <option value="+971">AE (+971)</option>
-                            <option value="+974">QA (+974)</option>
-                            <option value="+973">BH (+973)</option>
-                            <option value="+968">OM (+968)</option>
+                            <option
+                                v-for="country in countries"
+                                :key="'prefix-' + country.code"
+                                :value="countryPhoneCodes[country.code]"
+                                v-if="countryPhoneCodes[country.code]"
+                            >
+                                @{{ country.code }} (@{{ countryPhoneCodes[country.code] }})
+                            </option>
                         </x-shop::form.control-group.control>
                     </div>
 
@@ -383,6 +385,15 @@
 
                     cities: {},
 
+                    countryPhoneCodes: {
+                        'KW': '+965',
+                        'SA': '+966',
+                        'AE': '+971',
+                        'QA': '+974',
+                        'BH': '+973',
+                        'OM': '+968',
+                    },
+
                     phonePrefix: '+965',
 
                     phoneNumber: '',
@@ -431,6 +442,10 @@
                 selectedCountry(newVal) {
                     this.address.country = newVal;
                     this.syncStateSelection();
+
+                    if (this.countryPhoneCodes[newVal]) {
+                        this.phonePrefix = this.countryPhoneCodes[newVal];
+                    }
                 },
 
                 'address.state': function(newVal, oldVal) {
@@ -462,7 +477,7 @@
             methods: {
                 initPhone() {
                     if (this.address.phone) {
-                        const prefixes = ['+965', '+966', '+971', '+974', '+973', '+968'];
+                        const prefixes = Object.values(this.countryPhoneCodes);
                         let found = false;
 
                         for (const prefix of prefixes) {
@@ -589,4 +604,3 @@
         });
     </script>
 @endPushOnce
-
