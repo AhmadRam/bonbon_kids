@@ -125,7 +125,7 @@
                         <!-- Shipping Address Block if have stockable items -->
                         <template v-if="cart.have_stockable_items">
                             <!-- Use for Shipping Checkbox -->
-                            <x-shop::form.control-group class="!mb-0 mt-5 flex items-center gap-2.5">
+                            {{-- <x-shop::form.control-group class="!mb-0 mt-5 flex items-center gap-2.5">
                                 <x-shop::form.control-group.control
                                     type="checkbox"
                                     name="billing.use_for_shipping"
@@ -142,7 +142,7 @@
                                 >
                                     @lang('shop::app.checkout.onepage.address.same-as-billing')
                                 </label>
-                            </x-shop::form.control-group>
+                            </x-shop::form.control-group> --}}
 
 
                             <!-- Customer Shipping Address -->
@@ -364,9 +364,10 @@
             },
 
             created() {
-                if (this.cart.billing_address) {
-                    this.useBillingAddressForShipping = this.cart.billing_address.use_for_shipping;
-                }
+                this.useBillingAddressForShipping = true;
+                // if (this.cart.billing_address) {
+                //     this.useBillingAddressForShipping = this.cart.billing_address.use_for_shipping;
+                // }
             },
 
             mounted() {

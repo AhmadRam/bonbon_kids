@@ -40,7 +40,7 @@
                     ></v-checkout-address-form>
 
                     <!-- Use for Shipping Checkbox -->
-                    <x-shop::form.control-group
+                    {{-- <x-shop::form.control-group
                         class="!mb-0 flex items-center gap-2.5"
                         v-if="cart.have_stockable_items"
                     >
@@ -60,7 +60,7 @@
                         >
                             @lang('shop::app.checkout.onepage.address.same-as-billing')
                         </label>
-                    </x-shop::form.control-group>
+                    </x-shop::form.control-group> --}}
 
                     {!! view_render_event('bagisto.shop.checkout.onepage.address.guest.billing.after') !!}
                 </div>
@@ -120,9 +120,10 @@
             },
 
             created() {
-                if (this.cart.billing_address) {
-                    this.useBillingAddressForShipping = this.cart.billing_address.use_for_shipping;
-                }
+                this.useBillingAddressForShipping = true;
+                // if (this.cart.billing_address) {
+                //     this.useBillingAddressForShipping = this.cart.billing_address.use_for_shipping;
+                // }
             },
 
             methods: {
