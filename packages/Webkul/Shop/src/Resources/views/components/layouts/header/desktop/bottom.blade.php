@@ -278,17 +278,21 @@
 
         <!-- Default category layout -->
         <div
-            class="flex items-center"
+            class="flex items-center gap-2"
             v-else-if="'{{ core()->getConfigData('general.design.categories.category_view') }}' !== 'sidebar'"
         >
+            <span class="text-[22px] font-bold text-[#1f1f1f] whitespace-nowrap ltr:mr-4 rtl:ml-4">
+                @lang('shop::app.components.layouts.header.desktop.bottom.shop-by-age')
+            </span>
+
             <div
-                class="group relative flex h-[77px] items-center border-b-4 border-transparent hover:border-b-4 hover:border-toyBlue"
+                class="group relative flex h-[77px] items-center"
                 v-for="category in categories"
             >
                 <span>
                     <a
                         :href="category.url"
-                        class="inline-block px-5 uppercase"
+                        class="inline-block px-5 py-1.5 uppercase bg-[#2841B5] text-white rounded-full font-bold text-lg hover:bg-opacity-90 transition whitespace-nowrap"
                     >
                         @{{ category.name }}
                     </a>
@@ -333,16 +337,19 @@
         <!-- Sidebar category layout -->
         <div v-else>
             <!-- Categories Navigation -->
-            <div class="flex items-center">
+            <div class="flex items-center gap-2">
+                <span class="text-[22px] font-bold text-[#1f1f1f] whitespace-nowrap ltr:mr-4 rtl:ml-4">
+                    @lang('shop::app.components.layouts.header.desktop.bottom.shop-by-age')
+                </span>
 
                 <div
-                    class="group relative flex h-[77px] items-center border-b-4 border-transparent hover:border-b-4 hover:border-navyBlue"
+                    class="group relative flex h-[77px] items-center"
                     v-for="category in categories"
                 >
                     <span>
                         <a
                             :href="category.url"
-                            class="inline-block px-5 uppercase"
+                            class="inline-block px-5 py-1.5 uppercase bg-[#2841B5] text-white rounded-full font-bold text-lg hover:bg-opacity-90 transition whitespace-nowrap"
                         >
                             @{{ category.name }}
                         </a>

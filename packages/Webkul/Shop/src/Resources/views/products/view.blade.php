@@ -472,6 +472,13 @@
                                     {!! view_render_event('bagisto.shop.products.view.compare.after', ['product' => $product]) !!}
                                 </div>
 
+                                <!-- SKU Display -->
+                                <div class="mt-5 flex max-sm:justify-center">
+                                    <p class="text-xl text-zinc-500 max-sm:text-lg">
+                                        {{ app()->getLocale() == 'ar' ? 'الرمز' : 'SKU' }} : {{ $product->sku }}
+                                    </p>
+                                </div>
+
                                 {!! view_render_event('bagisto.shop.products.view.additional_actions.after', ['product' => $product]) !!}
                             </div>
                         </div>

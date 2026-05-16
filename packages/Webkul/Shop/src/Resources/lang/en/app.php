@@ -567,7 +567,8 @@ return [
                         'profile' => 'Profile',
                         'search' => 'Search',
                         'search-text' => 'Search products here',
-                        'sign-in' => 'Sign In',
+                        'shop-by-age' => 'Shop By Age',
+                        'sign-in'     => 'Sign In',
                         'sign-up' => 'Sign Up',
                         'submit' => 'Submit',
                         'welcome' => 'Welcome',
@@ -992,7 +993,7 @@ return [
 
     'checkout' => [
         'success' => [
-            'info' => 'We will email you, your order details and tracking information',
+            'info' => 'We will send your order details and tracking information to your phone number',
             'order-id-info' => 'Your order id is #:order_id',
             'thanks' => 'Thank you for your order!',
             'title' => 'Order successfully placed',
@@ -1112,9 +1113,16 @@ return [
                 'shipping-address' => 'Shipping Address',
                 'state' => 'State',
                 'street-address' => 'Street Address',
-                'telephone' => 'Telephone',
-                'title' => 'Address',
-                'vat-id' => 'Vat ID',
+                'telephone'      => 'Telephone',
+                'governorate'    => 'Governorate',
+                'block'          => 'Block',
+                'street'         => 'Street',
+                'house'          => 'House',
+                'floor'          => 'Floor',
+                'apartment'      => 'Apartment',
+                'notes'          => 'Notes (Special Mark)',
+                'title'          => 'Address',
+                'vat-id'         => 'Vat ID',
             ],
 
             'index' => [

@@ -27,6 +27,9 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Custom PHP configuration
+COPY docker/php/custom.ini /usr/local/etc/php/conf.d/custom.ini
+
 # OPcache configuration
 RUN { \
     echo 'opcache.memory_consumption=256'; \

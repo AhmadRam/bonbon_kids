@@ -72,7 +72,7 @@
             <!-- Email & Phone -->
             <div class="grid grid-cols-2 gap-x-5 max-md:grid-cols-1">
                 <x-shop::form.control-group>
-                    <x-shop::form.control-group.label class="required !mt-0">
+                    <x-shop::form.control-group.label class="!mt-0">
                         @lang('shop::app.checkout.onepage.address.email')
                     </x-shop::form.control-group.label>
 
@@ -80,7 +80,7 @@
                         type="email"
                         ::name="controlName + '.email'"
                         ::value="address.email"
-                        rules="required|email"
+                        rules="email"
                         :label="trans('shop::app.checkout.onepage.address.email')"
                         placeholder="email@example.com"
                     />
@@ -159,38 +159,31 @@
                 {!! view_render_event('bagisto.shop.checkout.onepage.address.form.vat_id.after') !!}
             </template>
 
-            <!-- Country, State, City -->
-            <div class="grid grid-cols-3 gap-x-5 max-md:grid-cols-1">
-                <x-shop::form.control-group class="!mb-4">
-                    <x-shop::form.control-group.label class="{{ core()->isCountryRequired() ? 'required' : '' }} !mt-0">
-                        @lang('shop::app.checkout.onepage.address.country')
-                    </x-shop::form.control-group.label>
-
-                    <x-shop::form.control-group.control
-                        type="select"
-                        ::name="controlName + '.country'"
-                        ::value="address.country"
-                        v-model="selectedCountry"
-                        rules="{{ core()->isCountryRequired() ? 'required' : '' }}"
-                        :label="trans('shop::app.checkout.onepage.address.country')"
+            <!-- Country (Hidden) -->
+            <x-shop::form.control-group class="hidden">
+                <x-shop::form.control-group.control
+                    type="select"
+                    ::name="controlName + '.country'"
+                    ::value="address.country"
+                    v-model="selectedCountry"
+                    rules="required"
+                >
+                    <option
+                        v-for="country in countries"
+                        :key="country.code"
+                        :value="country.code"
                     >
-                        <option
-                            v-for="country in countries"
-                            :key="country.code"
-                            :value="country.code"
-                        >
-                            @{{ country.name }}
-                        </option>
-                    </x-shop::form.control-group.control>
+                        @{{ country.name }}
+                    </option>
+                </x-shop::form.control-group.control>
+            </x-shop::form.control-group>
 
-                    <x-shop::form.control-group.error ::name="controlName + '.country'" />
-                </x-shop::form.control-group>
-
-                {!! view_render_event('bagisto.shop.checkout.onepage.address.form.country.after') !!}
-
+            <!-- State, City, Street -->
+            <div class="grid grid-cols-3 gap-x-5 max-md:grid-cols-1">
+                <!-- State -->
                 <x-shop::form.control-group>
-                    <x-shop::form.control-group.label class="{{ core()->isStateRequired() ? 'required' : '' }} !mt-0">
-                        @lang('shop::app.checkout.onepage.address.state')
+                    <x-shop::form.control-group.label class="required !mt-0">
+                        @lang('shop::app.checkout.onepage.address.governorate')
                     </x-shop::form.control-group.label>
 
                     <template v-if="haveStates">
@@ -200,9 +193,9 @@
                             ::name="controlName + '.state'"
                             v-model="address.state"
                             @change="handleStateChange"
-                            rules="{{ core()->isStateRequired() ? 'required' : '' }}"
+                            rules="required"
                             ::value="address.state"
-                            :label="trans('shop::app.checkout.onepage.address.state')"
+                            :label="trans('shop::app.checkout.onepage.address.governorate')"
                         >
                             <option
                                 v-for='(state, index) in currentStates'
@@ -221,9 +214,9 @@
                             ::name="controlName + '.state'"
                             v-model="address.state"
                             ::value="address.state"
-                            rules="{{ core()->isStateRequired() ? 'required' : '' }}"
-                            :label="trans('shop::app.checkout.onepage.address.state')"
-                            :placeholder="trans('shop::app.checkout.onepage.address.state')"
+                            rules="required"
+                            :label="trans('shop::app.checkout.onepage.address.governorate')"
+                            :placeholder="trans('shop::app.checkout.onepage.address.governorate')"
                         />
                     </template>
 
@@ -232,9 +225,10 @@
 
                 {!! view_render_event('bagisto.shop.checkout.onepage.address.form.state.after') !!}
 
+                <!-- City -->
                 <x-shop::form.control-group>
                     <x-shop::form.control-group.label class="required !mt-0">
-                        @lang('shop::app.checkout.onepage.address.city')
+                        @lang('shop::app.checkout.onepage.address.block')
                     </x-shop::form.control-group.label>
 
                     <template v-if="haveCities">
@@ -267,8 +261,8 @@
                             ::name="controlName + '.city'"
                             v-model="address.city"
                             rules="required"
-                            :label="trans('shop::app.checkout.onepage.address.city')"
-                            :placeholder="trans('shop::app.checkout.onepage.address.city')"
+                            :label="trans('shop::app.checkout.onepage.address.block')"
+                            :placeholder="trans('shop::app.checkout.onepage.address.block')"
                         />
                     </template>
 
@@ -276,44 +270,113 @@
                 </x-shop::form.control-group>
 
                 {!! view_render_event('bagisto.shop.checkout.onepage.address.form.city.after') !!}
+
+                <!-- Street -->
+                <x-shop::form.control-group>
+                    <x-shop::form.control-group.label class="required !mt-0">
+                        @lang('shop::app.checkout.onepage.address.street')
+                    </x-shop::form.control-group.label>
+
+                    <x-shop::form.control-group.control
+                        type="text"
+                        ::name="controlName + '.address.[0]'"
+                        ::value="address.address[0]"
+                        rules="required|address"
+                        :label="trans('shop::app.checkout.onepage.address.street')"
+                        :placeholder="trans('shop::app.checkout.onepage.address.street')"
+                    />
+
+                    <x-shop::form.control-group.error
+                        class="mb-2"
+                        ::name="controlName + '.address.[0]'"
+                    />
+                </x-shop::form.control-group>
             </div>
 
-            <!-- Street Address -->
-            <x-shop::form.control-group>
-                <x-shop::form.control-group.label class="required !mt-0">
-                    @lang('shop::app.checkout.onepage.address.street-address')
+            <!-- Custom Address Inputs Row 2 (House, Floor, Apartment) -->
+            <div class="grid grid-cols-3 gap-x-5 max-md:grid-cols-1 mt-2">
+                <!-- House -->
+                <x-shop::form.control-group>
+                    <x-shop::form.control-group.label class="required !mt-0">
+                        @lang('shop::app.checkout.onepage.address.house')
+                    </x-shop::form.control-group.label>
+
+                    <x-shop::form.control-group.control
+                        type="text"
+                        ::name="controlName + '.address.[1]'"
+                        ::value="address.address[1]"
+                        rules="required|address"
+                        :label="trans('shop::app.checkout.onepage.address.house')"
+                        :placeholder="trans('shop::app.checkout.onepage.address.house')"
+                    />
+
+                    <x-shop::form.control-group.error
+                        class="mb-2"
+                        ::name="controlName + '.address.[1]'"
+                    />
+                </x-shop::form.control-group>
+
+                <!-- Floor -->
+                <x-shop::form.control-group>
+                    <x-shop::form.control-group.label class="required !mt-0">
+                        @lang('shop::app.checkout.onepage.address.floor')
+                    </x-shop::form.control-group.label>
+
+                    <x-shop::form.control-group.control
+                        type="text"
+                        ::name="controlName + '.address.[2]'"
+                        ::value="address.address[2]"
+                        rules="required|address"
+                        :label="trans('shop::app.checkout.onepage.address.floor')"
+                        :placeholder="trans('shop::app.checkout.onepage.address.floor')"
+                    />
+
+                    <x-shop::form.control-group.error
+                        class="mb-2"
+                        ::name="controlName + '.address.[2]'"
+                    />
+                </x-shop::form.control-group>
+
+                <!-- Apartment -->
+                <x-shop::form.control-group>
+                    <x-shop::form.control-group.label class="required !mt-0">
+                        @lang('shop::app.checkout.onepage.address.apartment')
+                    </x-shop::form.control-group.label>
+
+                    <x-shop::form.control-group.control
+                        type="text"
+                        ::name="controlName + '.address.[3]'"
+                        ::value="address.address[3]"
+                        rules="required|address"
+                        :label="trans('shop::app.checkout.onepage.address.apartment')"
+                        :placeholder="trans('shop::app.checkout.onepage.address.apartment')"
+                    />
+
+                    <x-shop::form.control-group.error
+                        class="mb-2"
+                        ::name="controlName + '.address.[3]'"
+                    />
+                </x-shop::form.control-group>
+            </div>
+
+            <!-- Notes -->
+            <x-shop::form.control-group class="mt-2">
+                <x-shop::form.control-group.label class="!mt-0">
+                    @lang('shop::app.checkout.onepage.address.notes')
                 </x-shop::form.control-group.label>
 
                 <x-shop::form.control-group.control
                     type="text"
-                    ::name="controlName + '.address.[0]'"
-                    ::value="address.address[0]"
-                    rules="required|address"
-                    :label="trans('shop::app.checkout.onepage.address.street-address')"
-                    :placeholder="trans('shop::app.checkout.onepage.address.street-address')"
+                    ::name="controlName + '.notes'"
+                    ::value="address.notes"
+                    :label="trans('shop::app.checkout.onepage.address.notes')"
+                    :placeholder="trans('shop::app.checkout.onepage.address.notes')"
                 />
 
                 <x-shop::form.control-group.error
                     class="mb-2"
-                    ::name="controlName + '.address.[0]'"
+                    ::name="controlName + '.notes'"
                 />
-
-                @if (core()->getConfigData('customer.address.information.street_lines') > 1)
-                    @for ($i = 1; $i < core()->getConfigData('customer.address.information.street_lines'); $i++)
-                        <x-shop::form.control-group.control
-                            type="text"
-                            ::name="controlName + '.address.[{{ $i }}]'"
-                            rules="address"
-                            :label="trans('shop::app.checkout.onepage.address.street-address')"
-                            :placeholder="trans('shop::app.checkout.onepage.address.street-address')"
-                        />
-
-                        <x-shop::form.control-group.error
-                            class="mb-2"
-                            ::name="controlName + '.address.[{{ $i }}]'"
-                        />
-                    @endfor
-                @endif
             </x-shop::form.control-group>
 
             {!! view_render_event('bagisto.shop.checkout.onepage.address.form.address.after') !!}
@@ -368,6 +431,7 @@
                         city: '',
                         postcode: '',
                         phone: '',
+                        notes: '',
                     }),
                 },
             },
@@ -579,8 +643,8 @@
                     this.$axios.get("{{ route('shop.api.core.countries') }}")
                         .then(response => {
                             this.countries = response.data.data;
-                            this.selectedCountry = this.resolveSelectedCountry();
-                            this.address.country = this.selectedCountry;
+                            this.selectedCountry = 'KW';
+                            this.address.country = 'KW';
 
                             return this.$axios.get("{{ route('shop.api.core.states') }}");
                         })
