@@ -139,22 +139,6 @@ class ThemeCustomizationTableSeeder extends Seeder
                                     'title' => '',
                                     'link' => '',
                                     'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/6.png', 'sliders/en/6.png'),
-                                ], [
-                                    'title' => '',
-                                    'link' => '',
-                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/7.png', 'sliders/en/7.png'),
-                                ], [
-                                    'title' => '',
-                                    'link' => '',
-                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/8.png', 'sliders/en/8.png'),
-                                ], [
-                                    'title' => '',
-                                    'link' => '',
-                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/9.png', 'sliders/en/9.png'),
-                                ], [
-                                    'title' => '',
-                                    'link' => '',
-                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/10.png', 'sliders/en/10.png'),
                                 ],
                             ],
                         ]),
