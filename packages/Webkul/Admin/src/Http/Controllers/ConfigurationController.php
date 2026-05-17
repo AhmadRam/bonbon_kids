@@ -58,7 +58,7 @@ class ConfigurationController extends Controller
             $atLeastOneCarrierEnabled = false;
 
             foreach ($data['sales']['carriers'] as $carrier) {
-                if ($carrier['active']) {
+                if (isset($carrier['active']) && $carrier['active']) {
                     $atLeastOneCarrierEnabled = true;
 
                     break;
@@ -74,7 +74,7 @@ class ConfigurationController extends Controller
             $atLeastOnePaymentMethodEnabled = false;
 
             foreach ($data['sales']['payment_methods'] as $paymentMethod) {
-                if ($paymentMethod['active']) {
+                if (isset($paymentMethod['active']) && $paymentMethod['active']) {
                     $atLeastOnePaymentMethodEnabled = true;
 
                     break;
