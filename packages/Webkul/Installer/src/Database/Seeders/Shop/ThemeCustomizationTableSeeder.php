@@ -505,14 +505,14 @@ class ThemeCustomizationTableSeeder extends Seeder
         $isAr = $locale === 'ar';
 
         $groups = [
-            ['ar' => 'العاب',          'en' => 'Toys',          'slug' => 'toys',          'file' => 'toys.png'],
-            ['ar' => 'وصل حديثا',      'en' => 'New Arrivals',  'slug' => 'new-arrivals',  'file' => 'new-arrivals.png'],
-            ['ar' => 'تعليمية',        'en' => 'Educational',   'slug' => 'educational',   'file' => 'educational.png'],
-            ['ar' => 'هدايا',          'en' => 'Gifts',         'slug' => 'gifts',         'file' => 'gifts.png'],
-            ['ar' => 'اقل من 1 دينار', 'en' => 'Under 1 Dinar', 'slug' => 'under-1-dinar', 'file' => 'under-1-dinar.png'],
-            ['ar' => 'ترفيه',          'en' => 'Entertainment', 'slug' => 'entertainment', 'file' => 'entertainment.png'],
-            ['ar' => 'رياضة',          'en' => 'Sports',        'slug' => 'sports',        'file' => 'sports.png'],
-            ['ar' => 'عروض',           'en' => 'Offers',        'slug' => 'offers',        'file' => 'offers.png'],
+            ['ar' => 'ألعاب أولاد',    'en' => 'Boys Toys',        'slug' => 'boys-toys',        'file' => 'boys.png'],
+            ['ar' => 'ألعاب ذكية',    'en' => 'Smart Toys',       'slug' => 'smart-toys',       'file' => 'smart.png'],
+            ['ar' => 'ألعاب تعليمية', 'en' => 'Educational Toys', 'slug' => 'educational-toys', 'file' => 'educational.png'],
+            ['ar' => 'ألعاب مواليد',   'en' => 'Toddlers Toys',    'slug' => 'toddlers-toys',    'file' => 'toddlers.png'],
+            ['ar' => 'اقل من 1 دينار', 'en' => 'Under 1 Dinar',    'slug' => 'under-1-dinar',    'file' => 'under-1-dinar.png'],
+            ['ar' => 'ألعاب بنات',    'en' => 'Girls Toys',       'slug' => 'girls-toys',       'file' => 'girls.png'],
+            ['ar' => 'ألعاب خارجية',  'en' => 'Outdoor Toys',     'slug' => 'outdoor-toys',     'file' => 'outdoor.png'],
+            ['ar' => 'عروض',           'en' => 'Offers',           'slug' => 'offers',           'file' => 'offers.png'],
         ];
 
         $cards = '';
