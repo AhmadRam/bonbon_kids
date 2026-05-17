@@ -60,6 +60,19 @@ class ProductsTableSeeder extends Seeder
             $this->command->info("Starting Import Process from new Excel file...");
         }
 
+        // Delete all existing products to start completely fresh
+        if (isset($this->command)) {
+            $this->command->info("Deleting all existing products to start completely fresh...");
+        }
+        $products = $this->productRepository->all();
+        foreach ($products as $product) {
+            try {
+                $this->productRepository->delete($product->id);
+            } catch (\Exception $e) {
+                // Ignore
+            }
+        }
+
         // 1. Delete old files
         $oldFiles = [
             'First patch invoice with pictures.xlsx',

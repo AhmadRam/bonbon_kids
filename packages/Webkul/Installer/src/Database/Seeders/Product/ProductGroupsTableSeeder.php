@@ -26,13 +26,13 @@ class ProductGroupsTableSeeder extends Seeder
     public function run()
     {
         $groups = [
-            ['ar' => 'العاب', 'en' => 'Toys', 'file' => 'toys.png'],
-            ['ar' => 'وصل حديثا', 'en' => 'New Arrivals', 'file' => 'new-arrivals.png'],
-            ['ar' => 'تعليمية', 'en' => 'Educational', 'file' => 'educational.png'],
-            ['ar' => 'هدايا', 'en' => 'Gifts', 'file' => 'gifts.png'],
+            ['ar' => 'ألعاب أولاد', 'en' => 'Boys Toys', 'file' => 'boys.png'],
+            ['ar' => 'ألعاب ذكية', 'en' => 'Smart Toys', 'file' => 'smart.png'],
+            ['ar' => 'ألعاب تعليمية', 'en' => 'Educational Toys', 'file' => 'educational.png'],
+            ['ar' => 'ألعاب مواليد', 'en' => 'Toddlers Toys', 'file' => 'toddlers.png'],
             ['ar' => 'اقل من 1 دينار', 'en' => 'Under 1 Dinar', 'file' => 'under-1-dinar.png'],
-            ['ar' => 'ترفيه', 'en' => 'Entertainment', 'file' => 'entertainment.png'],
-            ['ar' => 'رياضة', 'en' => 'Sports', 'file' => 'sports.png'],
+            ['ar' => 'ألعاب بنات', 'en' => 'Girls Toys', 'file' => 'girls.png'],
+            ['ar' => 'ألعاب خارجية', 'en' => 'Outdoor Toys', 'file' => 'outdoor.png'],
             ['ar' => 'عروض', 'en' => 'Offers', 'file' => 'offers.png'],
         ];
 
@@ -43,6 +43,16 @@ class ProductGroupsTableSeeder extends Seeder
             }
 
             return;
+        }
+
+        // Delete existing options of the group attribute to start fresh
+        $options = $this->attributeOptionRepository->findByField('attribute_id', $groupAttr->id);
+        foreach ($options as $option) {
+            try {
+                $this->attributeOptionRepository->delete($option->id);
+            } catch (\Exception $e) {
+                // Ignore exception
+            }
         }
 
         $now = Carbon::now();
