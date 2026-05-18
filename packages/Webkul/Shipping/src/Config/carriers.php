@@ -5,7 +5,7 @@ return [
         'code' => 'flatrate',
         'title' => 'Flat Rate',
         'description' => 'Flat Rate Shipping',
-        'active' => true,
+        'active' => false,
         'default_rate' => '10',
         'type' => 'per_unit',
         'class' => 'Webkul\Shipping\Carriers\FlatRate',
