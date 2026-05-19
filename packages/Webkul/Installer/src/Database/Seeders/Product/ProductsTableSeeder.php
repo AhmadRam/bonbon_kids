@@ -134,6 +134,18 @@ class ProductsTableSeeder extends Seeder
         $addedCount = 0;
         $updatedCount = 0;
 
+        // Prepare image map for case-insensitive matching
+        $imageMap = [];
+        $imageDir = __DIR__ . '/Data/imgs';
+        if (is_dir($imageDir)) {
+            $files = scandir($imageDir);
+            foreach ($files as $file) {
+                if ($file === '.' || $file === '..') continue;
+                $filename = pathinfo($file, PATHINFO_FILENAME);
+                $imageMap[strtolower(trim($filename))] = $imageDir . '/' . $file;
+            }
+        }
+
         foreach ($rows as $row) {
             $sku = trim((string)($row['sku'] ?? ''));
             if (empty($sku)) continue;
@@ -241,20 +253,20 @@ class ProductsTableSeeder extends Seeder
                 ], $product);
 
                 // Images
-                $extensions = ['jpg', 'jpeg', 'png', 'webp', 'JPG', 'PNG', 'JPEG'];
-                foreach ($extensions as $ext) {
-                    $imagePath = __DIR__ . "/Data/imgs/{$sku}.{$ext}";
+                // Images
+                $searchSku = strtolower(trim($sku));
+                if (isset($imageMap[$searchSku])) {
+                    $imagePath = $imageMap[$searchSku];
                     if (file_exists($imagePath)) {
                         $file = new \Illuminate\Http\UploadedFile(
                             $imagePath,
-                            "{$sku}.{$ext}",
+                            basename($imagePath),
                             mime_content_type($imagePath),
                             null,
                             true // test mode to bypass is_uploaded_file check
                         );
                         $this->productImageRepository->upload(['images' => ['files' => [$file]]], $product, 'images');
                         if (isset($this->command)) $this->command->info("Uploaded image for SKU: $sku");
-                        break;
                     }
                 }
 
