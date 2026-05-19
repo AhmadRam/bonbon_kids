@@ -568,26 +568,15 @@
 
             methods: {
                 getMaxPrice() {
-                    this.$axios.get('{{ route("shop.api.categories.max_price", isset($category) && $category->id ? $category->id : null) }}')
-                        .then((response) => {
-                            this.isLoading = false;
+                    this.isLoading = false;
+                    
+                    this.allowedMaxPrice = 100;
 
-                            /**
-                             * If data is zero, then default price will be displayed.
-                             */
-                            if (response.data.data.max_price) {
-                                this.allowedMaxPrice = response.data.data.max_price;
-                            }
+                    if (! this.defaultPriceRange) {
+                        this.priceRange = [0, this.allowedMaxPrice].join(',');
+                    }
 
-                            if (! this.defaultPriceRange) {
-                                this.priceRange = [0, this.allowedMaxPrice].join(',');
-                            }
-
-                            ++this.refreshKey;
-                        })
-                        .catch((error) => {
-                            console.log(error);
-                        });
+                    ++this.refreshKey;
                 },
 
                 setPriceRange($event) {
