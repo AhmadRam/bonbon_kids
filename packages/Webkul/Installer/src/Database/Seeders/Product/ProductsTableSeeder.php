@@ -55,6 +55,7 @@ class ProductsTableSeeder extends Seeder
     public function run()
     {
         Model::reguard();
+        ini_set('memory_limit', '-1');
 
         if (isset($this->command)) {
             $this->command->info("Starting Import Process from new Excel file...");
