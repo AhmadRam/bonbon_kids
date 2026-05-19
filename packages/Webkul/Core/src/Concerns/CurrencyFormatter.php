@@ -26,6 +26,8 @@ trait CurrencyFormatter
     {
         $formatter = new \NumberFormatter(app()->getLocale(), \NumberFormatter::CURRENCY);
 
+        $formatter->setAttribute(\NumberFormatter::FRACTION_DIGITS, $currency->decimal ?? 3);
+
         if ($currency->symbol) {
             /**
              * If, somehow, the currency symbol mentioned matches with the user-defined symbol,
@@ -52,7 +54,7 @@ trait CurrencyFormatter
 
         $formatter->setSymbol(\NumberFormatter::CURRENCY_SYMBOL, '');
 
-        $formatter->setAttribute(\NumberFormatter::FRACTION_DIGITS, $currency->decimal ?? 2);
+        $formatter->setAttribute(\NumberFormatter::FRACTION_DIGITS, $currency->decimal ?? 3);
 
         $formattedCurrency = preg_replace('/^\s+|\s+$/u', '', $formatter->format($price));
 
