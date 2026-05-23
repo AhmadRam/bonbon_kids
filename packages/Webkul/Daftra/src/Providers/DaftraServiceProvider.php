@@ -16,6 +16,17 @@ class DaftraServiceProvider extends ServiceProvider
         include __DIR__ . '/../Http/routes.php';
 
         $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'daftra');
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                \Webkul\Daftra\Console\Commands\SyncDaftraQuantities::class,
+            ]);
+
+            $this->app->booted(function () {
+                $schedule = $this->app->make(\Illuminate\Console\Scheduling\Schedule::class);
+                $schedule->command('daftra:sync-quantities')->cron('0 */3 * * *');
+            });
+        }
     }
 
     /**
