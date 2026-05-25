@@ -81,7 +81,7 @@
                                 type="file"
                                 class="hidden"
                                 :id="$.uid + '_imageInput'"
-                                accept="image/*"
+                                accept=".bmp,.jpeg,.jpg,.png,.webp,image/bmp,image/jpeg,image/png,image/webp"
                                 :multiple="allowMultiple"
                                 :ref="$.uid + '_imageInput'"
                                 @change="add"
@@ -390,7 +390,7 @@
                         type="file"
                         :name="name + '[]'"
                         class="hidden"
-                        accept="image/*"
+                        accept=".bmp,.jpeg,.jpg,.png,.webp,image/bmp,image/jpeg,image/png,image/webp"
                         :id="$.uid + '_imageInput_' + index"
                         :ref="$.uid + '_imageInput_' + index"
                         @change="edit"
@@ -500,6 +500,21 @@
             },
 
             methods: {
+                isValidImageFile(file) {
+                    const allowedMimeTypes = ['image/bmp', 'image/jpeg', 'image/png', 'image/webp'];
+                    const allowedExtensions = ['bmp', 'jpeg', 'jpg', 'png', 'webp'];
+                    const extension = file.name.split('.').pop()?.toLowerCase();
+
+                    return allowedMimeTypes.includes(file.type) || allowedExtensions.includes(extension);
+                },
+
+                showInvalidImageMessage() {
+                    this.$emitter.emit('add-flash', {
+                        type: 'warning',
+                        message: "@lang('admin::app.components.media.images.not-allowed-error')",
+                    });
+                },
+
                 add() {
                     let imageInput = this.$refs[this.$.uid + '_imageInput'];
 
@@ -507,22 +522,24 @@
                         return;
                     }
 
-                    const validFiles = Array.from(imageInput.files).every(file => file.type.includes('image/'));
+                    const files = Array.from(imageInput.files);
+                    const validFiles = files.filter(file => this.isValidImageFile(file));
 
-                    if (! validFiles) {
-                        this.$emitter.emit('add-flash', {
-                            type: 'warning',
-                            message: "@lang('admin::app.components.media.images.not-allowed-error')"
-                        });
+                    if (! validFiles.length) {
+                        this.showInvalidImageMessage();
 
                         return;
                     }
 
-                    imageInput.files.forEach((file, index) => {
+                    if (validFiles.length !== files.length) {
+                        this.showInvalidImageMessage();
+                    }
+
+                    validFiles.forEach((file) => {
                         this.images.push({
                             id: 'image_' + this.images.length,
                             url: '',
-                            file: file
+                            file: file,
                         });
                     });
                 },
@@ -617,6 +634,21 @@
             },
 
             methods: {
+                isValidImageFile(file) {
+                    const allowedMimeTypes = ['image/bmp', 'image/jpeg', 'image/png', 'image/webp'];
+                    const allowedExtensions = ['bmp', 'jpeg', 'jpg', 'png', 'webp'];
+                    const extension = file.name.split('.').pop()?.toLowerCase();
+
+                    return allowedMimeTypes.includes(file.type) || allowedExtensions.includes(extension);
+                },
+
+                showInvalidImageMessage() {
+                    this.$emitter.emit('add-flash', {
+                        type: 'warning',
+                        message: "@lang('admin::app.components.media.images.not-allowed-error')",
+                    });
+                },
+
                 edit() {
                     let imageInput = this.$refs[this.$.uid + '_imageInput_' + this.index];
 
@@ -624,13 +656,8 @@
                         return;
                     }
 
-                    const validFiles = Array.from(imageInput.files).every(file => file.type.includes('image/'));
-
-                    if (! validFiles) {
-                        this.$emitter.emit('add-flash', {
-                            type: 'warning',
-                            message: "@lang('admin::app.components.media.images.not-allowed-error')"
-                        });
+                    if (! this.isValidImageFile(imageInput.files[0])) {
+                        this.showInvalidImageMessage();
 
                         return;
                     }
@@ -659,7 +686,16 @@
 
                     reader.onload = (e) => {
                         this.image.url = e.target.result;
-                    }
+                    };
+
+                    reader.onerror = () => {
+                        this.remove();
+
+                        this.$emitter.emit('add-flash', {
+                            type: 'error',
+                            message: 'Unable to preview this image. Please convert it to JPG, PNG, WEBP, or BMP and try again.',
+                        });
+                    };
 
                     reader.readAsDataURL(file);
                 },

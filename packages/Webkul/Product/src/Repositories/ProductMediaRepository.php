@@ -3,6 +3,7 @@
 namespace Webkul\Product\Repositories;
 
 use Exception;
+use Throwable;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -55,11 +56,16 @@ class ProductMediaRepository extends Repository
             foreach ($data[$uploadFileType]['files'] as $indexOrModelId => $file) {
                 if ($file instanceof UploadedFile) {
                     if (Str::contains($file->getMimeType(), 'image')) {
-                        $encoded = image_manager()->read($file)->encodeByExtension('webp');
+                        try {
+                            $encoded = image_manager()->read($file)->encodeByExtension('webp');
 
-                        $path = $this->getProductDirectory($product).'/'.Str::random(40).'.webp';
+                            $path = $this->getProductDirectory($product).'/'.Str::random(40).'.webp';
 
-                        Storage::put($path, (string) $encoded);
+                            Storage::put($path, (string) $encoded);
+                        } catch (Throwable) {
+                            // Fall back to the original file when WEBP conversion is unsupported.
+                            $path = $file->store($this->getProductDirectory($product));
+                        }
                     } else {
                         $path = $file->store($this->getProductDirectory($product));
                     }

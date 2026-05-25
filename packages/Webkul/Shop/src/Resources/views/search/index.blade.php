@@ -88,6 +88,13 @@
 
                     <!-- Product Listing Container -->
                     <div class="flex-1">
+                        <!-- Return to Home Page Link -->
+                        <div class="mb-4 flex justify-end">
+                            <a href="{{ route('shop.home.index') }}" class="secondary-button flex items-center gap-2 rounded-lg px-4 py-2 text-sm">
+                                @lang('shop::app.errors.go-to-home')
+                            </a>
+                        </div>
+
                         <!-- Desktop Product Listing Toolbar -->
                         <div class="max-md:hidden">
                             @include('shop::categories.toolbar')
@@ -129,6 +136,10 @@
                                         >
                                             @lang('shop::app.categories.view.empty')
                                         </p>
+
+                                        <a href="{{ route('shop.home.index') }}" class="primary-button mt-4 block w-max mx-auto rounded-lg px-6 py-2">
+                                            @lang('shop::app.errors.go-to-home')
+                                        </a>
                                     </div>
                                 </template>
                             </template>
@@ -172,6 +183,10 @@
                                         >
                                             @lang('shop::app.categories.view.empty')
                                         </p>
+
+                                        <a href="{{ route('shop.home.index') }}" class="primary-button mt-4 block w-max mx-auto rounded-lg px-6 py-2">
+                                            @lang('shop::app.errors.go-to-home')
+                                        </a>
                                     </div>
                                 </template>
                             </template>

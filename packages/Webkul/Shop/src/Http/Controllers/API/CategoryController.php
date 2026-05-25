@@ -102,6 +102,22 @@ class CategoryController extends APIController
             });
         }
 
+        if ($categoryId = request('category_id')) {
+            $query->whereExists(function ($query) use ($attribute, $categoryId) {
+                $query->select(\Illuminate\Support\Facades\DB::raw(1))
+                    ->from('product_attribute_values')
+                    ->join('products', 'products.id', '=', 'product_attribute_values.product_id')
+                    ->join('product_categories', 'product_categories.product_id', '=', 'products.id')
+                    ->where('product_attribute_values.attribute_id', $attribute->id)
+                    ->where('products.status', 1)
+                    ->where('product_categories.category_id', $categoryId)
+                    ->where(function ($q) {
+                        $q->whereColumn('product_attribute_values.integer_value', 'attribute_options.id')
+                          ->orWhereRaw('FIND_IN_SET(attribute_options.id, product_attribute_values.text_value)');
+                    });
+            });
+        }
+
         $query->orderBy('sort_order');
 
         return AttributeOptionResource::collection($query->paginate());

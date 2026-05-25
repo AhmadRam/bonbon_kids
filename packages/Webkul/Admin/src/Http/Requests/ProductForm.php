@@ -53,7 +53,8 @@ class ProductForm extends FormRequest
         protected ProductRepository $productRepository,
         protected ProductAttributeValueRepository $productAttributeValueRepository
     ) {
-        $this->maxVideoFileSize = core()->getConfigData('catalog.products.attribute.file_attribute_upload_size') ?: '2048';
+        $this->maxVideoFileSize = core()->getConfigData('catalog.products.attribute.file_attribute_upload_size')
+            ?: $this->convertPhpSizeToKilobytes(ini_get('upload_max_filesize'));
     }
 
     /**
@@ -197,6 +198,23 @@ class ProductForm extends FormRequest
             'videos.files.*' => 'video',
             'variants.*.sku' => 'sku',
         ];
+    }
+
+    /**
+     * Convert a PHP size string like 128M into kilobytes for Laravel validation.
+     */
+    protected function convertPhpSizeToKilobytes(string $size): int
+    {
+        $size = trim($size);
+        $value = (int) $size;
+        $unit = strtolower(substr($size, -1));
+
+        return match ($unit) {
+            'g' => $value * 1024 * 1024,
+            'm' => $value * 1024,
+            'k' => $value,
+            default => (int) ceil($value / 1024),
+        };
     }
 
     /**

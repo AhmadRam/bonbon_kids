@@ -120,6 +120,7 @@ class ProductDataGrid extends DataGrid
             'index' => 'sku',
             'label' => trans('admin::app.catalog.products.index.datagrid.sku'),
             'type' => 'string',
+            'searchable' => true,
             'filterable' => true,
             'sortable' => true,
         ]);
@@ -372,10 +373,6 @@ class ProductDataGrid extends DataGrid
                 continue;
             }
 
-            if ($attribute == 'all') {
-                $attribute = 'name';
-            }
-
             $filters['filter'][] = $this->getFilterValue($attribute, $value);
         }
 
@@ -401,6 +398,25 @@ class ProductDataGrid extends DataGrid
                         'attribute_family_id' => $values,
                     ],
                 ];
+
+            case 'all':
+                $filters = [];
+
+                foreach ($values as $value) {
+                    $filters['bool']['should'][] = [
+                        'match_phrase_prefix' => [
+                            'name' => $value,
+                        ],
+                    ];
+
+                    $filters['bool']['should'][] = [
+                        'match_phrase_prefix' => [
+                            'sku' => $value,
+                        ],
+                    ];
+                }
+
+                return $filters;
 
             case 'sku':
             case 'name':
