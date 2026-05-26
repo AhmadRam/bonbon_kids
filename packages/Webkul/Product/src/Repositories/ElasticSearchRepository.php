@@ -163,6 +163,15 @@ class ElasticSearchRepository
                     return '"'.$synonym.'"';
                 }, $synonyms);
 
+                if ($attribute->code == 'name' && isset($params['query'])) {
+                    return [
+                        'query_string' => [
+                            'query' => implode(' OR ', $synonyms),
+                            'fields' => ['name', 'sku'],
+                        ],
+                    ];
+                }
+
                 return [
                     'query_string' => [
                         'query' => implode(' OR ', $synonyms),

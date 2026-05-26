@@ -109,7 +109,6 @@ class CategoryController extends APIController
                     ->join('products', 'products.id', '=', 'product_attribute_values.product_id')
                     ->join('product_categories', 'product_categories.product_id', '=', 'products.id')
                     ->where('product_attribute_values.attribute_id', $attribute->id)
-                    ->where('products.status', 1)
                     ->where('product_categories.category_id', $categoryId)
                     ->where(function ($q) {
                         $q->whereColumn('product_attribute_values.integer_value', 'attribute_options.id')
