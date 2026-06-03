@@ -10,7 +10,6 @@ use Webkul\Category\Repositories\CategoryRepository;
 use Webkul\Attribute\Repositories\AttributeRepository;
 use Webkul\Attribute\Repositories\AttributeOptionRepository;
 use Webkul\Attribute\Repositories\AttributeOptionTranslationRepository;
-use Webkul\Product\Repositories\ProductImageRepository;
 use Illuminate\Database\Eloquent\Model;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Concerns\ToArray;
@@ -32,7 +31,6 @@ class ProductsTableSeeder extends Seeder
     protected $attributeRepository;
     protected $attributeOptionRepository;
     protected $attributeOptionTranslationRepository;
-    protected $productImageRepository;
 
     public function __construct(
         ProductRepository $productRepository,
@@ -40,8 +38,7 @@ class ProductsTableSeeder extends Seeder
         CategoryRepository $categoryRepository,
         AttributeRepository $attributeRepository,
         AttributeOptionRepository $attributeOptionRepository,
-        AttributeOptionTranslationRepository $attributeOptionTranslationRepository,
-        ProductImageRepository $productImageRepository
+        AttributeOptionTranslationRepository $attributeOptionTranslationRepository
     ) {
         $this->productRepository = $productRepository;
         $this->productInventoryRepository = $productInventoryRepository;
@@ -49,7 +46,6 @@ class ProductsTableSeeder extends Seeder
         $this->attributeRepository = $attributeRepository;
         $this->attributeOptionRepository = $attributeOptionRepository;
         $this->attributeOptionTranslationRepository = $attributeOptionTranslationRepository;
-        $this->productImageRepository = $productImageRepository;
     }
 
     public function run()
@@ -134,17 +130,8 @@ class ProductsTableSeeder extends Seeder
         $addedCount = 0;
         $updatedCount = 0;
 
-        // Prepare image map for case-insensitive matching
-        $imageMap = [];
-        $imageDir = __DIR__ . '/Data/imgs';
-        if (is_dir($imageDir)) {
-            $files = scandir($imageDir);
-            foreach ($files as $file) {
-                if ($file === '.' || $file === '..') continue;
-                $filename = pathinfo($file, PATHINFO_FILENAME);
-                $imageMap[strtolower(trim($filename))] = $imageDir . '/' . $file;
-            }
-        }
+        $addedCount = 0;
+        $updatedCount = 0;
 
         foreach ($rows as $row) {
             $sku = trim((string)($row['sku'] ?? ''));
@@ -251,24 +238,6 @@ class ProductsTableSeeder extends Seeder
                 $this->productInventoryRepository->saveInventories([
                     'inventories' => [1 => $qty]
                 ], $product);
-
-                // Images
-                // Images
-                $searchSku = strtolower(trim($sku));
-                if (isset($imageMap[$searchSku])) {
-                    $imagePath = $imageMap[$searchSku];
-                    if (file_exists($imagePath)) {
-                        $file = new \Illuminate\Http\UploadedFile(
-                            $imagePath,
-                            basename($imagePath),
-                            mime_content_type($imagePath),
-                            null,
-                            true // test mode to bypass is_uploaded_file check
-                        );
-                        $this->productImageRepository->upload(['images' => ['files' => [$file]]], $product, 'images');
-                        if (isset($this->command)) $this->command->info("Uploaded image for SKU: $sku");
-                    }
-                }
 
             } catch (\Exception $e) {
                 if (isset($this->command)) $this->command->error("Failed to update SKU: $sku - Error: " . $e->getMessage());

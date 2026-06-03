@@ -47,5 +47,6 @@ class DatabaseSeeder extends Seeder
         $this->call(\Webkul\Installer\Database\Seeders\Product\ProductCategoriesTableSeeder::class, false, ['parameters' => $parameters]);
         $this->call(\Webkul\Installer\Database\Seeders\Product\ProductGroupsTableSeeder::class, false, ['parameters' => $parameters]);
         $this->call(\Webkul\Installer\Database\Seeders\Product\ProductsTableSeeder::class, false, ['parameters' => $parameters]);
+        $this->call(\Webkul\Installer\Database\Seeders\Product\ProductImagesTableSeeder::class, false, ['parameters' => $parameters]);
     }
 }
