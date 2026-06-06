@@ -25,6 +25,87 @@
 
         {!! view_render_event('bagisto.shop.components.layouts.header.desktop.bottom.category.before') !!}
 
+        <!-- CUSTOM MEGA MENU START -->
+        <div class="flex items-center gap-6 z-[100]">
+            <!-- Categories / Groups -->
+            <div class="group relative flex h-[77px] items-center">
+                <a href="{{ route('shop.search.index') }}" class="text-[16px] font-bold text-navyBlue whitespace-nowrap hover:text-[#2841B5] transition cursor-pointer">
+                    {{ core()->getCurrentLocale()->code == 'ar' ? 'الفئات' : 'Categories' }}
+                    <span class="icon-arrow-down text-sm ml-1 rtl:mr-1 rtl:ml-0"></span>
+                </a>
+                <div class="pointer-events-none absolute top-[78px] z-[100] min-w-[250px] translate-y-1 overflow-auto border border-b-0 border-l-0 border-r-0 border-t border-[#F3F3F3] bg-white p-6 opacity-0 shadow-[0_6px_6px_1px_rgba(0,0,0,.3)] transition duration-300 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-hover:duration-200 group-hover:ease-in ltr:-left-4 rtl:-right-4">
+                    <ul class="grid grid-cols-1 gap-3">
+                        @php
+                            $rootCategory = app('Webkul\Category\Repositories\CategoryRepository')->findOneByField('parent_id', null);
+                            $groups = $rootCategory ? app('Webkul\Category\Repositories\CategoryRepository')->findByField('parent_id', $rootCategory->id) : [];
+                        @endphp
+                        @foreach ($groups as $group)
+                            <li>
+                                <a href="{{ route('shop.product_or_category.index', $group->slug) }}" class="text-base font-medium text-navyBlue hover:text-[#2841B5] transition block">
+                                    {{ $group->name }}
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Ages -->
+            <div class="group relative flex h-[77px] items-center">
+                <a class="text-[16px] font-bold text-navyBlue whitespace-nowrap hover:text-[#2841B5] transition cursor-pointer">
+                    {{ core()->getCurrentLocale()->code == 'ar' ? 'الأعمار' : 'Ages' }}
+                    <span class="icon-arrow-down text-sm ml-1 rtl:mr-1 rtl:ml-0"></span>
+                </a>
+                <div class="pointer-events-none absolute top-[78px] z-[100] min-w-[200px] translate-y-1 overflow-auto border border-b-0 border-l-0 border-r-0 border-t border-[#F3F3F3] bg-white p-6 opacity-0 shadow-[0_6px_6px_1px_rgba(0,0,0,.3)] transition duration-300 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-hover:duration-200 group-hover:ease-in ltr:-left-4 rtl:-right-4">
+                    <ul class="grid grid-cols-1 gap-3">
+                        @php
+                            $ageAttr = app('Webkul\Attribute\Repositories\AttributeRepository')->findOneByField('code', 'age_group');
+                            $ageOptions = $ageAttr ? app('Webkul\Attribute\Repositories\AttributeOptionRepository')->findByField('attribute_id', $ageAttr->id) : [];
+                        @endphp
+                        @foreach ($ageOptions as $opt)
+                            <li>
+                                <a href="{{ route('shop.search.index') }}?age_group[]={{ $opt->id }}" class="text-base font-medium text-navyBlue hover:text-[#2841B5] transition block">
+                                    {{ $opt->admin_name }}
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Suitable For -->
+            <div class="group relative flex h-[77px] items-center">
+                <a class="text-[16px] font-bold text-navyBlue whitespace-nowrap hover:text-[#2841B5] transition cursor-pointer">
+                    {{ core()->getCurrentLocale()->code == 'ar' ? 'مناسب لـ' : 'Suitable For' }}
+                    <span class="icon-arrow-down text-sm ml-1 rtl:mr-1 rtl:ml-0"></span>
+                </a>
+                <div class="pointer-events-none absolute top-[78px] z-[100] min-w-[200px] translate-y-1 overflow-auto border border-b-0 border-l-0 border-r-0 border-t border-[#F3F3F3] bg-white p-6 opacity-0 shadow-[0_6px_6px_1px_rgba(0,0,0,.3)] transition duration-300 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-hover:duration-200 group-hover:ease-in ltr:-left-4 rtl:-right-4">
+                    <ul class="grid grid-cols-1 gap-3">
+                        @php
+                            $suitableAttr = app('Webkul\Attribute\Repositories\AttributeRepository')->findOneByField('code', 'suitable_for');
+                            $suitableOptions = $suitableAttr ? app('Webkul\Attribute\Repositories\AttributeOptionRepository')->findByField('attribute_id', $suitableAttr->id) : [];
+                        @endphp
+                        @foreach ($suitableOptions as $opt)
+                            <li>
+                                <a href="{{ route('shop.search.index') }}?suitable_for[]={{ $opt->id }}" class="text-base font-medium text-navyBlue hover:text-[#2841B5] transition block">
+                                    {{ $opt->admin_name }}
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+
+            <!-- All Products -->
+            <div class="flex h-[77px] items-center">
+                <a href="{{ route('shop.search.index') }}" class="text-[16px] font-bold text-navyBlue whitespace-nowrap hover:text-[#2841B5] transition cursor-pointer">
+                    {{ core()->getCurrentLocale()->code == 'ar' ? 'كل المنتجات' : 'All Products' }}
+                </a>
+            </div>
+        </div>
+        <!-- CUSTOM MEGA MENU END -->
+
+        <!--
         <v-desktop-category>
             <div class="flex items-center gap-5">
                 <span
@@ -43,6 +124,7 @@
                 ></span>
             </div>
         </v-desktop-category>
+        -->
 
         {!! view_render_event('bagisto.shop.components.layouts.header.desktop.bottom.category.after') !!}
     </div>

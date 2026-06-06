@@ -57,7 +57,25 @@ class ThemeCustomizationTableSeeder extends Seeder
                     'id' => 3,
                     'type' => 'product_carousel',
                     'name' => trans('installer::app.seeders.shop.theme-customizations.new-arrivals-carousel.name', [], $defaultLocale),
+                    'sort_order' => 5,
+                    'status' => 1,
+                    'channel_id' => 1,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ], [
+                    'id' => 14,
+                    'type' => 'static_content',
+                    'name' => 'Age Groups',
                     'sort_order' => 3,
+                    'status' => 1,
+                    'channel_id' => 1,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ], [
+                    'id' => 15,
+                    'type' => 'static_content',
+                    'name' => 'Suitable For',
+                    'sort_order' => 4,
                     'status' => 1,
                     'channel_id' => 1,
                     'created_at' => $now,
@@ -149,6 +167,24 @@ class ThemeCustomizationTableSeeder extends Seeder
 
                         'options' => json_encode([
                             'html' => $this->buildGroupsHtml($locale),
+                            'css'  => '.groups-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;text-align:center;padding:28px 16px;}.groups-inner{display:inline-flex;flex-direction:row;gap:28px;}.group-card a{display:flex;flex-direction:column;align-items:center;gap:10px;text-decoration:none;color:inherit;}.group-card .g-img{width:104px;height:104px;transition:transform .25s ease;}.group-card:hover .g-img{transform:scale(1.07);}.group-card span{font-size:14px;font-weight:700;color:#222;}.groups-wrap::-webkit-scrollbar{height:4px;}.groups-wrap::-webkit-scrollbar-track{background:#f1f1f1;}.groups-wrap::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px;}',
+                        ]),
+                    ], [
+                        'theme_customization_id' => 14,
+
+                        'locale' => $locale,
+
+                        'options' => json_encode([
+                            'html' => $this->buildAgeGroupsHtml($locale),
+                            'css'  => '.groups-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;text-align:center;padding:28px 16px;}.groups-inner{display:inline-flex;flex-direction:row;gap:28px;}.group-card a{display:flex;flex-direction:column;align-items:center;gap:10px;text-decoration:none;color:inherit;}.group-card .g-img{width:104px;height:104px;transition:transform .25s ease;}.group-card:hover .g-img{transform:scale(1.07);}.group-card span{font-size:14px;font-weight:700;color:#222;}.groups-wrap::-webkit-scrollbar{height:4px;}.groups-wrap::-webkit-scrollbar-track{background:#f1f1f1;}.groups-wrap::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px;}',
+                        ]),
+                    ], [
+                        'theme_customization_id' => 15,
+
+                        'locale' => $locale,
+
+                        'options' => json_encode([
+                            'html' => $this->buildSuitableForHtml($locale),
                             'css'  => '.groups-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;text-align:center;padding:28px 16px;}.groups-inner{display:inline-flex;flex-direction:row;gap:28px;}.group-card a{display:flex;flex-direction:column;align-items:center;gap:10px;text-decoration:none;color:inherit;}.group-card .g-img{width:104px;height:104px;transition:transform .25s ease;}.group-card:hover .g-img{transform:scale(1.07);}.group-card span{font-size:14px;font-weight:700;color:#222;}.groups-wrap::-webkit-scrollbar{height:4px;}.groups-wrap::-webkit-scrollbar-track{background:#f1f1f1;}.groups-wrap::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px;}',
                         ]),
                     ], [
@@ -519,18 +555,71 @@ class ThemeCustomizationTableSeeder extends Seeder
         foreach ($groups as $group) {
             $label = $isAr ? $group['ar'] : $group['en'];
             $img   = $this->storeGroupImage('theme/2/groups', $group['file']) ?? '';
-            $href  = '/products?group='.$group['slug'];
+            $href  = '/' . $group['slug'];
 
             $cards .= '<div class="group-card">'
                 .'<a href="'.$href.'">'
                 .'<div class="g-img">'
-                .'<img src="'.$img.'" width="104" height="104" alt="'.htmlspecialchars($label).'" style="width:100%;height:100%;object-fit:cover;">'
+                .'<img src="'.$img.'" width="104" height="104" alt="'.htmlspecialchars($label).'" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">'
                 .'</div>'
                 .'<span>'.htmlspecialchars($label).'</span>'
                 .'</a>'
                 .'</div>';
         }
 
+        return '<div class="groups-wrap"><div class="groups-inner">'.$cards.'</div></div>';
+    }
+
+    private function buildAgeGroupsHtml(string $locale): string
+    {
+        $isAr = $locale === 'ar';
+        $ages = [
+            ['id' => 10, 'label_en' => '0-2 Years', 'label_ar' => '0-2 سنة'],
+            ['id' => 11, 'label_en' => '3-5 Years', 'label_ar' => '3-5 سنوات'],
+            ['id' => 12, 'label_en' => '6-8 Years', 'label_ar' => '6-8 سنوات'],
+            ['id' => 13, 'label_en' => '9-12 Years', 'label_ar' => '9-12 سنة'],
+        ];
+
+        $cards = '';
+        foreach ($ages as $age) {
+            $label = $isAr ? $age['label_ar'] : $age['label_en'];
+            $href  = '/products?age_group='.$age['id'];
+
+            $cards .= '<div class="group-card">'
+                .'<a href="'.$href.'">'
+                .'<div class="g-img" style="background:#f5f5f5; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#333; font-weight:bold; font-size:18px;">'
+                .htmlspecialchars($label)
+                .'</div>'
+                .'<span></span>'
+                .'</a>'
+                .'</div>';
+        }
+        return '<div class="groups-wrap"><div class="groups-inner">'.$cards.'</div></div>';
+    }
+
+    private function buildSuitableForHtml(string $locale): string
+    {
+        $isAr = $locale === 'ar';
+        $audiences = [
+            ['id' => 14, 'label_en' => 'Boys', 'label_ar' => 'أولاد'],
+            ['id' => 15, 'label_en' => 'Girls', 'label_ar' => 'بنات'],
+            ['id' => 16, 'label_en' => 'Unisex', 'label_ar' => 'محايد'],
+        ];
+
+        $cards = '';
+        foreach ($audiences as $aud) {
+            $label = $isAr ? $aud['label_ar'] : $aud['label_en'];
+            $href  = '/products?suitable_for='.$aud['id'];
+
+            $cards .= '<div class="group-card">'
+                .'<a href="'.$href.'">'
+                .'<div class="g-img" style="background:#eef5ff; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#0056b3; font-weight:bold; font-size:20px;">'
+                .htmlspecialchars($label)
+                .'</div>'
+                .'<span></span>'
+                .'</a>'
+                .'</div>';
+        }
         return '<div class="groups-wrap"><div class="groups-inner">'.$cards.'</div></div>';
     }
 }

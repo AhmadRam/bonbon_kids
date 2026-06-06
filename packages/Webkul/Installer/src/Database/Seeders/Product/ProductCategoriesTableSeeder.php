@@ -8,6 +8,7 @@ use Illuminate\Http\File;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Webkul\Category\Repositories\CategoryRepository;
+use Illuminate\Support\Str;
 
 class ProductCategoriesTableSeeder extends Seeder
 {
@@ -29,8 +30,8 @@ class ProductCategoriesTableSeeder extends Seeder
             return;
         }
 
-        // Delete existing age categories if any exist
-        $slugsToDelete = ['0-2', '3-4', '5-7', '8-10', '11-12', '13+', '11+'];
+        // Delete existing sample categories if any exist to start fresh
+        $slugsToDelete = ['boys-toys', 'smart-toys', 'educational-toys', 'toddlers-toys', 'under-1-dinar', 'girls-toys', 'outdoor-toys', 'offers', '0-2', '3-4', '5-7', '8-10', '11-12', '13+', '11+'];
         foreach ($slugsToDelete as $slugToDelete) {
             $translation = DB::table('category_translations')
                 ->where('slug', $slugToDelete)
@@ -46,43 +47,32 @@ class ProductCategoriesTableSeeder extends Seeder
         }
 
         $categoriesData = [
-            '0-2' => [
-                'image'   => '0-2.png',
-                'name_en' => '0-2',
-                'name_ar' => '2-0',
-            ],
-            '3-4' => [
-                'image'   => '3-4.png',
-                'name_en' => '3-4',
-                'name_ar' => '4-3',
-            ],
-            '5-7' => [
-                'image'   => '5-7.png',
-                'name_en' => '5-7',
-                'name_ar' => '7-5',
-            ],
-            '8-10' => [
-                'image'   => '8-10.png',
-                'name_en' => '8-10',
-                'name_ar' => '10-8',
-            ],
-            '11+' => [
-                'image'   => '11+.png',
-                'name_en' => '11+',
-                'name_ar' => '+11',
-            ],
+            ['ar' => 'ألعاب أولاد', 'en' => 'Boys Toys', 'file' => 'boys.png'],
+            ['ar' => 'ألعاب ذكية', 'en' => 'Smart Toys', 'file' => 'smart.png'],
+            ['ar' => 'ألعاب تعليمية', 'en' => 'Educational Toys', 'file' => 'educational.png'],
+            ['ar' => 'ألعاب مواليد', 'en' => 'Toddlers Toys', 'file' => 'toddlers.png'],
+            ['ar' => 'اقل من 1 دينار', 'en' => 'Under 1 Dinar', 'file' => 'under-1-dinar.png'],
+            ['ar' => 'ألعاب بنات', 'en' => 'Girls Toys', 'file' => 'girls.png'],
+            ['ar' => 'ألعاب خارجية', 'en' => 'Outdoor Toys', 'file' => 'outdoor.png'],
+            ['ar' => 'عروض', 'en' => 'Offers', 'file' => 'offers.png'],
         ];
 
-        foreach ($categoriesData as $slug => $data) {
+        foreach ($categoriesData as $index => $data) {
+            $slug = Str::slug($data['en']);
+            
             $category = $this->categoryRepository->create([
                 'status'       => 1,
-                'position'     => 1,
+                'position'     => $index + 1,
                 'display_mode' => 'products_and_description',
                 'parent_id'    => $root->id,
             ]);
 
-            // Copy category image if exists
-            $imagePath = __DIR__ . '/Data/category-images/' . $data['image'];
+            // Try to copy category image from previous group-images directory if exists
+            $imagePath = __DIR__ . '/Data/group-images/' . $data['file'];
+            if (!file_exists($imagePath)) {
+                // fallback to category-images if they moved it
+                $imagePath = __DIR__ . '/Data/category-images/' . $data['file'];
+            }
             if (file_exists($imagePath)) {
                 $storedPath = Storage::putFile('category/' . $category->id, new File($imagePath));
                 $category->logo_path = $storedPath;
@@ -92,18 +82,18 @@ class ProductCategoriesTableSeeder extends Seeder
             DB::table('category_translations')->updateOrInsert(
                 ['category_id' => $category->id, 'locale' => 'en'],
                 [
-                    'name'        => $data['name_en'],
+                    'name'        => $data['en'],
                     'slug'        => $slug,
-                    'description' => $data['name_en'],
+                    'description' => $data['en'],
                 ]
             );
 
             DB::table('category_translations')->updateOrInsert(
                 ['category_id' => $category->id, 'locale' => 'ar'],
                 [
-                    'name'        => $data['name_ar'],
+                    'name'        => $data['ar'],
                     'slug'        => $slug,
-                    'description' => $data['name_ar'],
+                    'description' => $data['ar'],
                 ]
             );
         }

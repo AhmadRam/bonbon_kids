@@ -67,6 +67,41 @@ class AttributeOptionTableSeeder extends Seeder
                 'admin_name' => trans('installer::app.seeders.attribute.attribute-options.xl', [], $defaultLocale),
                 'sort_order' => 4,
                 'attribute_id' => 24,
+            ], [
+                'id' => 10,
+                'admin_name' => '0-2 Years',
+                'sort_order' => 1,
+                'attribute_id' => 32,
+            ], [
+                'id' => 11,
+                'admin_name' => '3-5 Years',
+                'sort_order' => 2,
+                'attribute_id' => 32,
+            ], [
+                'id' => 12,
+                'admin_name' => '6-8 Years',
+                'sort_order' => 3,
+                'attribute_id' => 32,
+            ], [
+                'id' => 13,
+                'admin_name' => '9-12 Years',
+                'sort_order' => 4,
+                'attribute_id' => 32,
+            ], [
+                'id' => 14,
+                'admin_name' => 'Boys',
+                'sort_order' => 1,
+                'attribute_id' => 33,
+            ], [
+                'id' => 15,
+                'admin_name' => 'Girls',
+                'sort_order' => 2,
+                'attribute_id' => 33,
+            ], [
+                'id' => 16,
+                'admin_name' => 'Unisex',
+                'sort_order' => 3,
+                'attribute_id' => 33,
             ],
         ]);
 
@@ -110,6 +145,34 @@ class AttributeOptionTableSeeder extends Seeder
                     'locale' => $locale,
                     'label' => trans('installer::app.seeders.attribute.attribute-options.xl', [], $locale),
                     'attribute_option_id' => 9,
+                ], [
+                    'locale' => $locale,
+                    'label' => '0-2 ' . ($locale == 'ar' ? 'سنة' : 'Years'),
+                    'attribute_option_id' => 10,
+                ], [
+                    'locale' => $locale,
+                    'label' => '3-5 ' . ($locale == 'ar' ? 'سنوات' : 'Years'),
+                    'attribute_option_id' => 11,
+                ], [
+                    'locale' => $locale,
+                    'label' => '6-8 ' . ($locale == 'ar' ? 'سنوات' : 'Years'),
+                    'attribute_option_id' => 12,
+                ], [
+                    'locale' => $locale,
+                    'label' => '9-12 ' . ($locale == 'ar' ? 'سنة' : 'Years'),
+                    'attribute_option_id' => 13,
+                ], [
+                    'locale' => $locale,
+                    'label' => $locale == 'ar' ? 'أولاد' : 'Boys',
+                    'attribute_option_id' => 14,
+                ], [
+                    'locale' => $locale,
+                    'label' => $locale == 'ar' ? 'بنات' : 'Girls',
+                    'attribute_option_id' => 15,
+                ], [
+                    'locale' => $locale,
+                    'label' => $locale == 'ar' ? 'محايد' : 'Unisex',
+                    'attribute_option_id' => 16,
                 ],
             ]);
         }

@@ -91,10 +91,10 @@ class ProductsTableSeeder extends Seeder
             $categoriesMap[$cat->slug] = $cat->category_id;
         }
 
-        // 3. Build Groups Map Dynamically from DB
-        if (isset($this->command)) $this->command->info("Building groups map dynamically...");
-        $groupsMap = [];
-        $attribute = \Illuminate\Support\Facades\DB::table('attributes')->where('code', 'group')->first();
+        // 3. Build Age Groups Map Dynamically from DB
+        if (isset($this->command)) $this->command->info("Building age groups map dynamically...");
+        $ageGroupsMap = [];
+        $attribute = \Illuminate\Support\Facades\DB::table('attributes')->where('code', 'age_group')->first();
         if ($attribute) {
             $options = \Illuminate\Support\Facades\DB::table('attribute_option_translations')
                 ->join('attribute_options', 'attribute_option_translations.attribute_option_id', '=', 'attribute_options.id')
@@ -102,10 +102,29 @@ class ProductsTableSeeder extends Seeder
                 ->select('attribute_options.id as id', 'attribute_option_translations.label as label')
                 ->get();
             foreach ($options as $opt) {
-                if (!isset($groupsMap[$opt->id])) {
-                    $groupsMap[$opt->id] = [];
+                if (!isset($ageGroupsMap[$opt->id])) {
+                    $ageGroupsMap[$opt->id] = [];
                 }
-                $groupsMap[$opt->id][] = trim($opt->label);
+                $ageGroupsMap[$opt->id][] = trim($opt->label);
+                $ageGroupsMap[$opt->id][] = trim(str_replace('Years', '', $opt->label));
+                $ageGroupsMap[$opt->id][] = trim(str_replace(['سنة', 'سنوات'], '', $opt->label));
+            }
+        }
+        
+        // Build Suitable For Map Dynamically from DB
+        $suitableForMap = [];
+        $attributeSuitable = \Illuminate\Support\Facades\DB::table('attributes')->where('code', 'suitable_for')->first();
+        if ($attributeSuitable) {
+            $options = \Illuminate\Support\Facades\DB::table('attribute_option_translations')
+                ->join('attribute_options', 'attribute_option_translations.attribute_option_id', '=', 'attribute_options.id')
+                ->where('attribute_options.attribute_id', $attributeSuitable->id)
+                ->select('attribute_options.id as id', 'attribute_option_translations.label as label')
+                ->get();
+            foreach ($options as $opt) {
+                if (!isset($suitableForMap[$opt->id])) {
+                    $suitableForMap[$opt->id] = [];
+                }
+                $suitableForMap[$opt->id][] = trim($opt->label);
             }
         }
 
@@ -142,21 +161,27 @@ class ProductsTableSeeder extends Seeder
             $price = (float)($row['price'] ?? 0);
             $qty = (int)($row['inventories'] ?? 0);
 
-            // Match Category
-            $categorySlug = $row['categories_slug'] ?? '';
-            $categoryId = $categoriesMap[$categorySlug] ?? null;
-
-            // Match Group
-            $groupName = $row['group'] ?? ($row['brand'] ?? ''); // Fallback to brand column if group column is not created yet
-            $groupId = null;
+            // The old group column was the Group. We'll map it to the Categories.
+            $groupName = $row['group'] ?? ($row['brand'] ?? '');
+            $categoryId = null;
             if (!empty($groupName)) {
-                foreach ($groupsMap as $gId => $labels) {
-                    if (in_array(trim($groupName), $labels)) {
-                        $groupId = $gId;
+                $categoryId = $categoriesMap[$groupName] ?? null;
+            }
+
+            // The old category slug was the Age. We'll map it to the Age Group Attribute.
+            $ageGroupRaw = $row['categories_slug'] ?? '';
+            $ageGroupId = null;
+            if (!empty($ageGroupRaw)) {
+                foreach ($ageGroupsMap as $gId => $labels) {
+                    if (in_array(trim($ageGroupRaw), $labels) || in_array(trim($ageGroupRaw) . ' Years', $labels)) {
+                        $ageGroupId = $gId;
                         break;
                     }
                 }
             }
+            
+            // Map gender/suitable_for if provided, or leave null for now
+            $suitableForId = null;
 
             // Create or Find Product
             $product = $this->productRepository->findOneByField('sku', $sku);
@@ -204,7 +229,8 @@ class ProductsTableSeeder extends Seeder
                 'description' => $row['description_en'] ?? '',
                 'short_description' => $row['short_description_en'] ?? '',
                 'dealer_price' => (float)($row['dealer_price'] ?? 0),
-                'group' => $groupId,
+                'age_group' => $ageGroupId,
+                'suitable_for' => $suitableForId,
                 'brand' => null,
                 'meta_title' => $row['meta_title_en'] ?? ($row['meta_title'] ?? ''),
                 'meta_description' => $row['meta_description_en'] ?? ($row['meta_description'] ?? ''),
