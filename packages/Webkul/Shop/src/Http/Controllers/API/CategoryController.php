@@ -74,13 +74,19 @@ class CategoryController extends APIController
         $filterableAttributes = collect($filterableAttributes->all());
         
         $categoryAttribute = new \Webkul\Attribute\Models\Attribute([
-            'id' => 999999,
             'code' => 'category_id',
             'type' => 'select',
             'admin_name' => app()->getLocale() == 'ar' ? 'الفئات' : 'Categories',
         ]);
+        $categoryAttribute->id = 999999;
         
-        $filterableAttributes->prepend($categoryAttribute);
+        $filterableAttributes->push($categoryAttribute);
+
+        // Sort attributes based on user request: Price, Category, Age Group, Suitable For
+        $order = ['price' => 1, 'category_id' => 2, 'age_group' => 3, 'suitable_for' => 4];
+        $filterableAttributes = $filterableAttributes->sortBy(function ($attribute) use ($order) {
+            return $order[$attribute->code] ?? 99;
+        })->values();
 
         return AttributeResource::collection($filterableAttributes);
     }
@@ -104,11 +110,12 @@ class CategoryController extends APIController
             $categories = $query->paginate();
 
             $options = $categories->getCollection()->map(function ($category) {
-                return new \Webkul\Attribute\Models\AttributeOption([
-                    'id' => $category->id,
+                $option = new \Webkul\Attribute\Models\AttributeOption([
                     'admin_name' => $category->name,
                     'sort_order' => $category->position,
                 ]);
+                $option->id = $category->id;
+                return $option;
             });
             $categories->setCollection($options);
 

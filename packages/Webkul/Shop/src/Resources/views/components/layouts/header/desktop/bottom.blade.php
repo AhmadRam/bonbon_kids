@@ -38,7 +38,7 @@
                         @php
                             $rootCategory = app('Webkul\Category\Repositories\CategoryRepository')->findOneByField('parent_id', null);
                             $groups = $rootCategory ? app('Webkul\Category\Repositories\CategoryRepository')->findByField('parent_id', $rootCategory->id) : collect([]);
-                            
+
                             $desiredOrder = [
                                 'toddlers-toys', 'boys-toys', 'girls-toys', 'educational-toys', 'smart-toys', 'outdoor-toys', 'under-1-dinar', 'offers'
                             ];
@@ -72,7 +72,7 @@
                         @endphp
                         @foreach ($ageOptions as $opt)
                             <li>
-                                <a href="{{ route('shop.search.index') }}?age_group[]={{ $opt->id }}" class="text-base font-medium text-navyBlue hover:text-[#2841B5] transition block whitespace-nowrap" dir="auto">
+                                <a href="{{ route('shop.search.index') }}?age_group={{ $opt->id }}" class="text-base font-medium text-navyBlue hover:text-[#2841B5] transition block whitespace-nowrap" dir="auto">
                                     {!! preg_replace('/(\d+-\d+|\d+\+)/', '<span dir="ltr">$1</span>', $opt->label ?? $opt->admin_name) !!}
                                 </a>
                             </li>
