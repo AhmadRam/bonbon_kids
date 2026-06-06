@@ -296,7 +296,7 @@
 
                         this.isLoading = true;
 
-                        this.$axios.get("{{ route('shop.api.products.index', ['category_id' => $category->id]) }}", {
+                        this.$axios.get("{{ route('shop.api.products.index') }}", {
                             params: this.queryParams
                         })
                             .then(response => {

@@ -387,6 +387,12 @@
                         }
                     });
 
+                    @if(isset($category))
+                    if (!this.filters.applied['category_id'] && window.location.search.indexOf('category_id') === -1) {
+                        this.filters.applied['category_id'] = ['{{ $category->id }}'];
+                    }
+                    @endif
+
                     this.$emit('filter-applied', this.filters.applied);
                 },
 

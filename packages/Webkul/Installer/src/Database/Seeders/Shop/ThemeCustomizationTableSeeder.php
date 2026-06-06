@@ -604,8 +604,8 @@ class ThemeCustomizationTableSeeder extends Seeder
         $title = $isAr ? 'لمن تتسوق؟' : 'Who are you shopping for?';
 
         $audiences = [
-            ['id' => 14, 'label_en' => 'Boys', 'label_ar' => 'أولاد', 'file' => 'gender_boys.png'],
-            ['id' => 15, 'label_en' => 'Girls', 'label_ar' => 'بنات', 'file' => 'gender_girls.png'],
+            ['id' => 14, 'label_en' => 'Boys', 'label_ar' => 'أولاد', 'file' => 'boys.png'],
+            ['id' => 15, 'label_en' => 'Girls', 'label_ar' => 'بنات', 'file' => 'girls.png'],
         ];
 
         $cards = '';

@@ -62,17 +62,25 @@ class CategoryController extends APIController
     {
         if (! request('category_id')) {
             $filterableAttributes = $this->attributeRepository->getFilterableAttributes();
+        } else {
+            $category = $this->categoryRepository->findOrFail(request('category_id'));
+            $filterableAttributes = $category->filterableAttributes;
 
-            return AttributeResource::collection($filterableAttributes);
+            if ($filterableAttributes->isEmpty()) {
+                $filterableAttributes = $this->attributeRepository->getFilterableAttributes();
+            }
         }
 
-        $category = $this->categoryRepository->findOrFail(request('category_id'));
-
-        $filterableAttributes = $category->filterableAttributes;
-
-        if ($filterableAttributes->isEmpty()) {
-            $filterableAttributes = $this->attributeRepository->getFilterableAttributes();
-        }
+        $filterableAttributes = collect($filterableAttributes->all());
+        
+        $categoryAttribute = new \Webkul\Attribute\Models\Attribute([
+            'id' => 999999,
+            'code' => 'category_id',
+            'type' => 'select',
+            'admin_name' => app()->getLocale() == 'ar' ? 'الفئات' : 'Categories',
+        ]);
+        
+        $filterableAttributes->prepend($categoryAttribute);
 
         return AttributeResource::collection($filterableAttributes);
     }
@@ -82,6 +90,31 @@ class CategoryController extends APIController
      */
     public function getAttributeOptions(int $attributeId): mixed
     {
+        if ($attributeId === 999999) {
+            $query = $this->categoryRepository->getModel()->where('parent_id', 1);
+
+            if ($search = request('search')) {
+                $query->whereHas('translations', function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%");
+                });
+            }
+
+            $query->orderBy('position');
+
+            $categories = $query->paginate();
+
+            $options = $categories->getCollection()->map(function ($category) {
+                return new \Webkul\Attribute\Models\AttributeOption([
+                    'id' => $category->id,
+                    'admin_name' => $category->name,
+                    'sort_order' => $category->position,
+                ]);
+            });
+            $categories->setCollection($options);
+
+            return AttributeOptionResource::collection($categories);
+        }
+
         $attribute = $this->attributeRepository->findOrFail($attributeId);
 
         if ($attribute->type === AttributeTypeEnum::BOOLEAN->value) {

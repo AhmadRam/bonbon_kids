@@ -37,7 +37,15 @@
                     <ul class="grid grid-cols-1 gap-3">
                         @php
                             $rootCategory = app('Webkul\Category\Repositories\CategoryRepository')->findOneByField('parent_id', null);
-                            $groups = $rootCategory ? app('Webkul\Category\Repositories\CategoryRepository')->findByField('parent_id', $rootCategory->id) : [];
+                            $groups = $rootCategory ? app('Webkul\Category\Repositories\CategoryRepository')->findByField('parent_id', $rootCategory->id) : collect([]);
+                            
+                            $desiredOrder = [
+                                'toddlers-toys', 'boys-toys', 'girls-toys', 'educational-toys', 'smart-toys', 'outdoor-toys', 'under-1-dinar', 'offers'
+                            ];
+                            $groups = $groups->sortBy(function($group) use ($desiredOrder) {
+                                $pos = array_search($group->slug, $desiredOrder);
+                                return $pos === false ? 999 : $pos;
+                            });
                         @endphp
                         @foreach ($groups as $group)
                             <li>
@@ -65,7 +73,7 @@
                         @foreach ($ageOptions as $opt)
                             <li>
                                 <a href="{{ route('shop.search.index') }}?age_group[]={{ $opt->id }}" class="text-base font-medium text-navyBlue hover:text-[#2841B5] transition block whitespace-nowrap" dir="auto">
-                                    <bdi>{{ $opt->label ?? $opt->admin_name }}</bdi>
+                                    {!! preg_replace('/(\d+-\d+|\d+\+)/', '<span dir="ltr">$1</span>', $opt->label ?? $opt->admin_name) !!}
                                 </a>
                             </li>
                         @endforeach
@@ -87,7 +95,7 @@
                         @endphp
                         @foreach ($suitableOptions as $opt)
                             <li>
-                                <a href="{{ route('shop.search.index') }}?suitable_for[]={{ $opt->id }}" class="text-base font-medium text-navyBlue hover:text-[#2841B5] transition block whitespace-nowrap" dir="auto">
+                                <a href="{{ route('shop.search.index') }}?suitable_for={{ $opt->id }}" class="text-base font-medium text-navyBlue hover:text-[#2841B5] transition block whitespace-nowrap" dir="auto">
                                     <bdi>{{ $opt->label ?? $opt->admin_name }}</bdi>
                                 </a>
                             </li>
