@@ -57,7 +57,7 @@ class ThemeCustomizationTableSeeder extends Seeder
                     'id' => 3,
                     'type' => 'product_carousel',
                     'name' => trans('installer::app.seeders.shop.theme-customizations.new-arrivals-carousel.name', [], $defaultLocale),
-                    'sort_order' => 5,
+                    'sort_order' => 6,
                     'status' => 1,
                     'channel_id' => 1,
                     'created_at' => $now,
@@ -84,7 +84,7 @@ class ThemeCustomizationTableSeeder extends Seeder
                     'id' => 4,
                     'type' => 'product_carousel',
                     'name' => trans('installer::app.seeders.shop.theme-customizations.featured-products.name', [], $defaultLocale),
-                    'sort_order' => 4,
+                    'sort_order' => 5,
                     'status' => 1,
                     'channel_id' => 1,
                     'created_at' => $now,
@@ -93,7 +93,7 @@ class ThemeCustomizationTableSeeder extends Seeder
                     'id' => 5,
                     'type' => 'product_carousel',
                     'name' => trans('installer::app.seeders.shop.theme-customizations.all-products.name', [], $defaultLocale),
-                    'sort_order' => 5,
+                    'sort_order' => 7,
                     'status' => 1,
                     'channel_id' => 1,
                     'created_at' => $now,
@@ -564,7 +564,7 @@ class ThemeCustomizationTableSeeder extends Seeder
                 .'</div>';
         }
 
-        return '<div class="groups-wrap"><h2 style="font-size: 24px; font-weight: bold; margin-bottom: 20px; text-align: '.($isAr ? 'right' : 'left').'; padding: 0 16px;">'.$title.'</h2><div class="groups-inner">'.$cards.'</div></div>';
+        return '<div class="groups-wrap"><h2 style="font-size: 24px; font-weight: bold; margin-bottom: 20px; text-align: center; padding: 0 16px;">'.$title.'</h2><div class="groups-inner">'.$cards.'</div></div>';
     }
 
     private function buildAgeGroupsHtml(string $locale): string
@@ -573,11 +573,11 @@ class ThemeCustomizationTableSeeder extends Seeder
         $title = $isAr ? 'تسوق من خلال الأعمار' : 'Shop by Age';
 
         $ages = [
-            ['id' => 10, 'label_en' => '0-2 Years', 'label_ar' => '0-2 سنة', 'file' => 'age_0_2.png'],
-            ['id' => 11, 'label_en' => '3-4 Years', 'label_ar' => '3-4 سنوات', 'file' => 'age_3_5.png'],
-            ['id' => 12, 'label_en' => '5-7 Years', 'label_ar' => '5-7 سنوات', 'file' => 'age_6_8.png'],
-            ['id' => 13, 'label_en' => '8-10 Years', 'label_ar' => '8-10 سنوات', 'file' => 'age_9_12.png'],
-            ['id' => 17, 'label_en' => '11+ Years', 'label_ar' => '11+ سنة', 'file' => 'age_11_plus.png'],
+            ['id' => 10, 'label_en' => '0-2 Years', 'label_ar' => "\u{202A}0-2\u{202C} سنة", 'file' => 'age_0_2.png'],
+            ['id' => 11, 'label_en' => '3-4 Years', 'label_ar' => "\u{202A}3-4\u{202C} سنوات", 'file' => 'age_3_5.png'],
+            ['id' => 12, 'label_en' => '5-7 Years', 'label_ar' => "\u{202A}5-7\u{202C} سنوات", 'file' => 'age_6_8.png'],
+            ['id' => 13, 'label_en' => '8-10 Years', 'label_ar' => "\u{202A}8-10\u{202C} سنوات", 'file' => 'age_9_12.png'],
+            ['id' => 17, 'label_en' => '11+ Years', 'label_ar' => "\u{202A}11+\u{202C} سنة", 'file' => 'age_11_plus.png'],
         ];
 
         $cards = '';
@@ -595,7 +595,7 @@ class ThemeCustomizationTableSeeder extends Seeder
                 .'</a>'
                 .'</div>';
         }
-        return '<div class="groups-wrap"><h2 style="font-size: 24px; font-weight: bold; margin-bottom: 20px; margin-top: 20px; text-align: '.($isAr ? 'right' : 'left').'; padding: 0 16px;">'.$title.'</h2><div class="groups-inner">'.$cards.'</div></div>';
+        return '<div class="groups-wrap"><h2 style="font-size: 24px; font-weight: bold; margin-bottom: 20px; margin-top: 20px; text-align: center; padding: 0 16px;">'.$title.'</h2><div class="groups-inner">'.$cards.'</div></div>';
     }
 
     private function buildSuitableForHtml(string $locale): string
@@ -604,9 +604,8 @@ class ThemeCustomizationTableSeeder extends Seeder
         $title = $isAr ? 'لمن تتسوق؟' : 'Who are you shopping for?';
 
         $audiences = [
-            ['id' => 14, 'label_en' => 'Boys', 'label_ar' => 'أولاد', 'file' => 'boys.png'],
-            ['id' => 15, 'label_en' => 'Girls', 'label_ar' => 'بنات', 'file' => 'girls.png'],
-            ['id' => 16, 'label_en' => 'Unisex', 'label_ar' => 'محايد', 'file' => 'unisex.png'],
+            ['id' => 14, 'label_en' => 'Boys', 'label_ar' => 'أولاد', 'file' => 'gender_boys.png'],
+            ['id' => 15, 'label_en' => 'Girls', 'label_ar' => 'بنات', 'file' => 'gender_girls.png'],
         ];
 
         $cards = '';
@@ -624,6 +623,6 @@ class ThemeCustomizationTableSeeder extends Seeder
                 .'</a>'
                 .'</div>';
         }
-        return '<div class="groups-wrap"><h2 style="font-size: 24px; font-weight: bold; margin-bottom: 20px; margin-top: 20px; text-align: '.($isAr ? 'right' : 'left').'; padding: 0 16px;">'.$title.'</h2><div class="groups-inner">'.$cards.'</div></div>';
+        return '<div class="groups-wrap"><h2 style="font-size: 24px; font-weight: bold; margin-bottom: 20px; margin-top: 20px; text-align: center; padding: 0 16px;">'.$title.'</h2><div class="groups-inner">'.$cards.'</div></div>';
     }
 }

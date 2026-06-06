@@ -98,11 +98,6 @@ class AttributeOptionTableSeeder extends Seeder
                 'sort_order' => 2,
                 'attribute_id' => 33,
             ], [
-                'id' => 16,
-                'admin_name' => 'Unisex',
-                'sort_order' => 3,
-                'attribute_id' => 33,
-            ], [
                 'id' => 17,
                 'admin_name' => '11+',
                 'sort_order' => 5,
@@ -152,19 +147,19 @@ class AttributeOptionTableSeeder extends Seeder
                     'attribute_option_id' => 9,
                 ], [
                     'locale' => $locale,
-                    'label' => '0-2 ' . ($locale == 'ar' ? 'سنة' : 'Years'),
+                    'label' => ($locale == 'ar' ? "\u{202A}0-2\u{202C} سنة" : '0-2 Years'),
                     'attribute_option_id' => 10,
                 ], [
                     'locale' => $locale,
-                    'label' => '3-4 ' . ($locale == 'ar' ? 'سنوات' : 'Years'),
+                    'label' => ($locale == 'ar' ? "\u{202A}3-4\u{202C} سنوات" : '3-4 Years'),
                     'attribute_option_id' => 11,
                 ], [
                     'locale' => $locale,
-                    'label' => '5-7 ' . ($locale == 'ar' ? 'سنوات' : 'Years'),
+                    'label' => ($locale == 'ar' ? "\u{202A}5-7\u{202C} سنوات" : '5-7 Years'),
                     'attribute_option_id' => 12,
                 ], [
                     'locale' => $locale,
-                    'label' => '8-10 ' . ($locale == 'ar' ? 'سنوات' : 'Years'),
+                    'label' => ($locale == 'ar' ? "\u{202A}8-10\u{202C} سنوات" : '8-10 Years'),
                     'attribute_option_id' => 13,
                 ], [
                     'locale' => $locale,
@@ -176,11 +171,7 @@ class AttributeOptionTableSeeder extends Seeder
                     'attribute_option_id' => 15,
                 ], [
                     'locale' => $locale,
-                    'label' => $locale == 'ar' ? 'محايد' : 'Unisex',
-                    'attribute_option_id' => 16,
-                ], [
-                    'locale' => $locale,
-                    'label' => '11+ ' . ($locale == 'ar' ? 'سنة' : 'Years'),
+                    'label' => ($locale == 'ar' ? "\u{202A}11+\u{202C} سنة" : '11+ Years'),
                     'attribute_option_id' => 17,
                 ],
             ]);
