@@ -573,11 +573,11 @@ class ThemeCustomizationTableSeeder extends Seeder
         $title = $isAr ? 'تسوق من خلال الأعمار' : 'Shop by Age';
 
         $ages = [
-            ['id' => 10, 'label_en' => '0-2 Years', 'label_ar' => "\u{202A}0-2\u{202C} سنة", 'file' => 'age_0_2.png'],
-            ['id' => 11, 'label_en' => '3-4 Years', 'label_ar' => "\u{202A}3-4\u{202C} سنوات", 'file' => 'age_3_5.png'],
-            ['id' => 12, 'label_en' => '5-7 Years', 'label_ar' => "\u{202A}5-7\u{202C} سنوات", 'file' => 'age_6_8.png'],
-            ['id' => 13, 'label_en' => '8-10 Years', 'label_ar' => "\u{202A}8-10\u{202C} سنوات", 'file' => 'age_9_12.png'],
-            ['id' => 17, 'label_en' => '11+ Years', 'label_ar' => "\u{202A}11+\u{202C} سنة", 'file' => 'age_11_plus.png'],
+            ['id' => 10, 'label_en' => '0-2 Years', 'label_ar' => "2-0 سنة", 'file' => 'age_0_2.png'],
+            ['id' => 11, 'label_en' => '3-4 Years', 'label_ar' => "4-3 سنوات", 'file' => 'age_3_5.png'],
+            ['id' => 12, 'label_en' => '5-7 Years', 'label_ar' => "7-5 سنوات", 'file' => 'age_6_8.png'],
+            ['id' => 13, 'label_en' => '8-10 Years', 'label_ar' => "10-8 سنوات", 'file' => 'age_9_12.png'],
+            ['id' => 17, 'label_en' => '11+ Years', 'label_ar' => "11+ سنة", 'file' => 'age_11_plus.png'],
         ];
 
         $cards = '';

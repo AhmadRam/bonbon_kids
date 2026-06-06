@@ -147,19 +147,19 @@ class AttributeOptionTableSeeder extends Seeder
                     'attribute_option_id' => 9,
                 ], [
                     'locale' => $locale,
-                    'label' => ($locale == 'ar' ? "\u{202A}0-2\u{202C} سنة" : '0-2 Years'),
+                    'label' => ($locale == 'ar' ? "2-0 سنة" : '0-2 Years'),
                     'attribute_option_id' => 10,
                 ], [
                     'locale' => $locale,
-                    'label' => ($locale == 'ar' ? "\u{202A}3-4\u{202C} سنوات" : '3-4 Years'),
+                    'label' => ($locale == 'ar' ? "4-3 سنوات" : '3-4 Years'),
                     'attribute_option_id' => 11,
                 ], [
                     'locale' => $locale,
-                    'label' => ($locale == 'ar' ? "\u{202A}5-7\u{202C} سنوات" : '5-7 Years'),
+                    'label' => ($locale == 'ar' ? "7-5 سنوات" : '5-7 Years'),
                     'attribute_option_id' => 12,
                 ], [
                     'locale' => $locale,
-                    'label' => ($locale == 'ar' ? "\u{202A}8-10\u{202C} سنوات" : '8-10 Years'),
+                    'label' => ($locale == 'ar' ? "10-8 سنوات" : '8-10 Years'),
                     'attribute_option_id' => 13,
                 ], [
                     'locale' => $locale,
@@ -171,7 +171,7 @@ class AttributeOptionTableSeeder extends Seeder
                     'attribute_option_id' => 15,
                 ], [
                     'locale' => $locale,
-                    'label' => ($locale == 'ar' ? "\u{202A}11+\u{202C} سنة" : '11+ Years'),
+                    'label' => ($locale == 'ar' ? "11+ سنة" : '11+ Years'),
                     'attribute_option_id' => 17,
                 ],
             ]);
