@@ -102,6 +102,11 @@ class AttributeOptionTableSeeder extends Seeder
                 'admin_name' => 'Unisex',
                 'sort_order' => 3,
                 'attribute_id' => 33,
+            ], [
+                'id' => 17,
+                'admin_name' => '11+',
+                'sort_order' => 5,
+                'attribute_id' => 32,
             ],
         ]);
 
@@ -151,15 +156,15 @@ class AttributeOptionTableSeeder extends Seeder
                     'attribute_option_id' => 10,
                 ], [
                     'locale' => $locale,
-                    'label' => '3-5 ' . ($locale == 'ar' ? 'سنوات' : 'Years'),
+                    'label' => '3-4 ' . ($locale == 'ar' ? 'سنوات' : 'Years'),
                     'attribute_option_id' => 11,
                 ], [
                     'locale' => $locale,
-                    'label' => '6-8 ' . ($locale == 'ar' ? 'سنوات' : 'Years'),
+                    'label' => '5-7 ' . ($locale == 'ar' ? 'سنوات' : 'Years'),
                     'attribute_option_id' => 12,
                 ], [
                     'locale' => $locale,
-                    'label' => '9-12 ' . ($locale == 'ar' ? 'سنة' : 'Years'),
+                    'label' => '8-10 ' . ($locale == 'ar' ? 'سنوات' : 'Years'),
                     'attribute_option_id' => 13,
                 ], [
                     'locale' => $locale,
@@ -173,6 +178,10 @@ class AttributeOptionTableSeeder extends Seeder
                     'locale' => $locale,
                     'label' => $locale == 'ar' ? 'محايد' : 'Unisex',
                     'attribute_option_id' => 16,
+                ], [
+                    'locale' => $locale,
+                    'label' => '11+ ' . ($locale == 'ar' ? 'سنة' : 'Years'),
+                    'attribute_option_id' => 17,
                 ],
             ]);
         }

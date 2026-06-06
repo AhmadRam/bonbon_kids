@@ -56,7 +56,7 @@
                     {{ core()->getCurrentLocale()->code == 'ar' ? 'الأعمار' : 'Ages' }}
                     <span class="icon-arrow-down text-sm ml-1 rtl:mr-1 rtl:ml-0"></span>
                 </a>
-                <div class="pointer-events-none absolute top-[78px] z-[100] min-w-[200px] translate-y-1 overflow-auto border border-b-0 border-l-0 border-r-0 border-t border-[#F3F3F3] bg-white p-6 opacity-0 shadow-[0_6px_6px_1px_rgba(0,0,0,.3)] transition duration-300 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-hover:duration-200 group-hover:ease-in ltr:-left-4 rtl:-right-4">
+                <div class="pointer-events-none absolute top-[78px] z-[100] w-max min-w-[200px] translate-y-1 overflow-auto border border-b-0 border-l-0 border-r-0 border-t border-[#F3F3F3] bg-white p-6 opacity-0 shadow-[0_6px_6px_1px_rgba(0,0,0,.3)] transition duration-300 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-hover:duration-200 group-hover:ease-in ltr:-left-4 rtl:-right-4">
                     <ul class="grid grid-cols-1 gap-3">
                         @php
                             $ageAttr = app('Webkul\Attribute\Repositories\AttributeRepository')->findOneByField('code', 'age_group');
@@ -64,8 +64,8 @@
                         @endphp
                         @foreach ($ageOptions as $opt)
                             <li>
-                                <a href="{{ route('shop.search.index') }}?age_group[]={{ $opt->id }}" class="text-base font-medium text-navyBlue hover:text-[#2841B5] transition block">
-                                    {{ $opt->admin_name }}
+                                <a href="{{ route('shop.search.index') }}?age_group[]={{ $opt->id }}" class="text-base font-medium text-navyBlue hover:text-[#2841B5] transition block whitespace-nowrap" dir="auto">
+                                    <bdi>{{ $opt->label ?? $opt->admin_name }}</bdi>
                                 </a>
                             </li>
                         @endforeach
@@ -79,7 +79,7 @@
                     {{ core()->getCurrentLocale()->code == 'ar' ? 'مناسب لـ' : 'Suitable For' }}
                     <span class="icon-arrow-down text-sm ml-1 rtl:mr-1 rtl:ml-0"></span>
                 </a>
-                <div class="pointer-events-none absolute top-[78px] z-[100] min-w-[200px] translate-y-1 overflow-auto border border-b-0 border-l-0 border-r-0 border-t border-[#F3F3F3] bg-white p-6 opacity-0 shadow-[0_6px_6px_1px_rgba(0,0,0,.3)] transition duration-300 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-hover:duration-200 group-hover:ease-in ltr:-left-4 rtl:-right-4">
+                <div class="pointer-events-none absolute top-[78px] z-[100] w-max min-w-[200px] translate-y-1 overflow-auto border border-b-0 border-l-0 border-r-0 border-t border-[#F3F3F3] bg-white p-6 opacity-0 shadow-[0_6px_6px_1px_rgba(0,0,0,.3)] transition duration-300 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-hover:duration-200 group-hover:ease-in ltr:-left-4 rtl:-right-4">
                     <ul class="grid grid-cols-1 gap-3">
                         @php
                             $suitableAttr = app('Webkul\Attribute\Repositories\AttributeRepository')->findOneByField('code', 'suitable_for');
@@ -87,8 +87,8 @@
                         @endphp
                         @foreach ($suitableOptions as $opt)
                             <li>
-                                <a href="{{ route('shop.search.index') }}?suitable_for[]={{ $opt->id }}" class="text-base font-medium text-navyBlue hover:text-[#2841B5] transition block">
-                                    {{ $opt->admin_name }}
+                                <a href="{{ route('shop.search.index') }}?suitable_for[]={{ $opt->id }}" class="text-base font-medium text-navyBlue hover:text-[#2841B5] transition block whitespace-nowrap" dir="auto">
+                                    <bdi>{{ $opt->label ?? $opt->admin_name }}</bdi>
                                 </a>
                             </li>
                         @endforeach

@@ -532,13 +532,10 @@ class ThemeCustomizationTableSeeder extends Seeder
         return null;
     }
 
-    /**
-     * Build the groups horizontal row HTML for the static_content theme block.
-     * Images are 104 px circles, centered, with bilingual labels.
-     */
     private function buildGroupsHtml(string $locale): string
     {
         $isAr = $locale === 'ar';
+        $title = $isAr ? 'تسوق من خلال الفئات' : 'Shop by Categories';
 
         $groups = [
             ['ar' => 'ألعاب مواليد',   'en' => 'Toddlers Toys',    'slug' => 'toddlers-toys',    'file' => 'toddlers.png'],
@@ -567,59 +564,66 @@ class ThemeCustomizationTableSeeder extends Seeder
                 .'</div>';
         }
 
-        return '<div class="groups-wrap"><div class="groups-inner">'.$cards.'</div></div>';
+        return '<div class="groups-wrap"><h2 style="font-size: 24px; font-weight: bold; margin-bottom: 20px; text-align: '.($isAr ? 'right' : 'left').'; padding: 0 16px;">'.$title.'</h2><div class="groups-inner">'.$cards.'</div></div>';
     }
 
     private function buildAgeGroupsHtml(string $locale): string
     {
         $isAr = $locale === 'ar';
+        $title = $isAr ? 'تسوق من خلال الأعمار' : 'Shop by Age';
+
         $ages = [
-            ['id' => 10, 'label_en' => '0-2 Years', 'label_ar' => '0-2 سنة'],
-            ['id' => 11, 'label_en' => '3-5 Years', 'label_ar' => '3-5 سنوات'],
-            ['id' => 12, 'label_en' => '6-8 Years', 'label_ar' => '6-8 سنوات'],
-            ['id' => 13, 'label_en' => '9-12 Years', 'label_ar' => '9-12 سنة'],
+            ['id' => 10, 'label_en' => '0-2 Years', 'label_ar' => '0-2 سنة', 'file' => 'age_0_2.png'],
+            ['id' => 11, 'label_en' => '3-4 Years', 'label_ar' => '3-4 سنوات', 'file' => 'age_3_5.png'],
+            ['id' => 12, 'label_en' => '5-7 Years', 'label_ar' => '5-7 سنوات', 'file' => 'age_6_8.png'],
+            ['id' => 13, 'label_en' => '8-10 Years', 'label_ar' => '8-10 سنوات', 'file' => 'age_9_12.png'],
+            ['id' => 17, 'label_en' => '11+ Years', 'label_ar' => '11+ سنة', 'file' => 'age_11_plus.png'],
         ];
 
         $cards = '';
         foreach ($ages as $age) {
             $label = $isAr ? $age['label_ar'] : $age['label_en'];
+            $img   = $this->storeGroupImage('theme/14/groups', $age['file']) ?? '';
             $href  = '/products?age_group='.$age['id'];
 
             $cards .= '<div class="group-card">'
                 .'<a href="'.$href.'">'
-                .'<div class="g-img" style="background:#f5f5f5; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#333; font-weight:bold; font-size:18px;">'
-                .htmlspecialchars($label)
+                .'<div class="g-img">'
+                .'<img src="'.$img.'" width="104" height="104" alt="'.htmlspecialchars($label).'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">'
                 .'</div>'
-                .'<span></span>'
+                .'<span dir="auto"><bdi>'.htmlspecialchars($label).'</bdi></span>'
                 .'</a>'
                 .'</div>';
         }
-        return '<div class="groups-wrap"><div class="groups-inner">'.$cards.'</div></div>';
+        return '<div class="groups-wrap"><h2 style="font-size: 24px; font-weight: bold; margin-bottom: 20px; margin-top: 20px; text-align: '.($isAr ? 'right' : 'left').'; padding: 0 16px;">'.$title.'</h2><div class="groups-inner">'.$cards.'</div></div>';
     }
 
     private function buildSuitableForHtml(string $locale): string
     {
         $isAr = $locale === 'ar';
+        $title = $isAr ? 'لمن تتسوق؟' : 'Who are you shopping for?';
+
         $audiences = [
-            ['id' => 14, 'label_en' => 'Boys', 'label_ar' => 'أولاد'],
-            ['id' => 15, 'label_en' => 'Girls', 'label_ar' => 'بنات'],
-            ['id' => 16, 'label_en' => 'Unisex', 'label_ar' => 'محايد'],
+            ['id' => 14, 'label_en' => 'Boys', 'label_ar' => 'أولاد', 'file' => 'boys.png'],
+            ['id' => 15, 'label_en' => 'Girls', 'label_ar' => 'بنات', 'file' => 'girls.png'],
+            ['id' => 16, 'label_en' => 'Unisex', 'label_ar' => 'محايد', 'file' => 'unisex.png'],
         ];
 
         $cards = '';
         foreach ($audiences as $aud) {
             $label = $isAr ? $aud['label_ar'] : $aud['label_en'];
+            $img   = $this->storeGroupImage('theme/15/groups', $aud['file']) ?? '';
             $href  = '/products?suitable_for='.$aud['id'];
 
             $cards .= '<div class="group-card">'
                 .'<a href="'.$href.'">'
-                .'<div class="g-img" style="background:#eef5ff; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#0056b3; font-weight:bold; font-size:20px;">'
-                .htmlspecialchars($label)
+                .'<div class="g-img">'
+                .'<img src="'.$img.'" width="104" height="104" alt="'.htmlspecialchars($label).'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">'
                 .'</div>'
-                .'<span></span>'
+                .'<span dir="auto"><bdi>'.htmlspecialchars($label).'</bdi></span>'
                 .'</a>'
                 .'</div>';
         }
-        return '<div class="groups-wrap"><div class="groups-inner">'.$cards.'</div></div>';
+        return '<div class="groups-wrap"><h2 style="font-size: 24px; font-weight: bold; margin-bottom: 20px; margin-top: 20px; text-align: '.($isAr ? 'right' : 'left').'; padding: 0 16px;">'.$title.'</h2><div class="groups-inner">'.$cards.'</div></div>';
     }
 }
