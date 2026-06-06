@@ -110,16 +110,20 @@ class CategoryController extends APIController
             $categories = $query->paginate();
 
             $options = $categories->getCollection()->map(function ($category) {
-                $option = new \Webkul\Attribute\Models\AttributeOption([
-                    'admin_name' => $category->name,
-                    'sort_order' => $category->position,
-                ]);
-                $option->id = $category->id;
-                return $option;
+                return [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                ];
             });
-            $categories->setCollection($options);
 
-            return AttributeOptionResource::collection($categories);
+            return new \Illuminate\Http\JsonResponse([
+                'data' => $options,
+                'meta' => [
+                    'current_page' => $categories->currentPage(),
+                    'last_page' => $categories->lastPage(),
+                    'total' => $categories->total(),
+                ]
+            ]);
         }
 
         $attribute = $this->attributeRepository->findOrFail($attributeId);
