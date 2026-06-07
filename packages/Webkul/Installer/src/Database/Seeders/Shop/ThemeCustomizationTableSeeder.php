@@ -545,43 +545,47 @@ class ThemeCustomizationTableSeeder extends Seeder
         ];
 
         $rectGroups = [
-            ['ar' => 'اقل من 1 دينار', 'en' => 'Under 1 Dinar',    'slug' => 'under-1-dinar',    'bg' => '#ffeb3b', 'color' => '#000', 'file' => 'under-1-dinar.png'],
-            ['ar' => 'عروض',           'en' => 'Offers',           'slug' => 'offers',           'bg' => '#9c27b0', 'color' => '#fff', 'file' => 'offers.png'],
+            ['ar' => 'اقل من 1 دينار', 'en' => 'Under 1 Dinar',    'slug' => 'under-1-dinar',    'file' => 'under-1-dinar.png'],
+            ['ar' => 'عروض',           'en' => 'Offers',           'slug' => 'offers',           'file' => 'offers.png'],
         ];
 
-        $cardsHtml = '<div class="groups-circles" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; margin-bottom: 20px;">';
+        $cardsHtml = '<div class="groups-circles" style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; margin-bottom: 30px; width: 100%;">';
         foreach ($circleGroups as $group) {
             $label = $isAr ? $group['ar'] : $group['en'];
             $img   = $this->storeGroupImage('theme/2/groups', $group['file']) ?? '';
             $href  = '/' . $group['slug'];
 
-            $cardsHtml .= '<div class="group-card" style="width: 22%; min-width: 80px; max-width: 120px;">'
-                .'<a href="'.$href.'" style="display:flex; flex-direction:column; align-items:center; gap:10px; text-decoration:none; color:inherit;">'
+            $cardsHtml .= '<div class="group-card" style="width: 23%; max-width: 250px;">'
+                .'<a href="'.$href.'" style="display:flex; flex-direction:column; align-items:center; gap:15px; text-decoration:none; color:inherit;">'
                 .'<div class="g-img" style="width:100%; aspect-ratio:1; transition:transform .25s ease;">'
-                .'<img src="'.$img.'" width="104" height="104" alt="'.htmlspecialchars($label).'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">'
+                .'<img src="'.$img.'" alt="'.htmlspecialchars($label).'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">'
                 .'</div>'
-                .'<span style="font-size:14px;font-weight:700;color:#222;">'.htmlspecialchars($label).'</span>'
+                .'<span style="font-size:20px;font-weight:700;color:#222; text-align:center;">'.htmlspecialchars($label).'</span>'
                 .'</a>'
                 .'</div>';
         }
         $cardsHtml .= '</div>';
 
-        $cardsHtml .= '<div class="groups-rects" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">';
+        $cardsHtml .= '<div class="groups-rects" style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 20px; width: 100%;">';
         foreach ($rectGroups as $group) {
             $label = $isAr ? $group['ar'] : $group['en'];
+            $img   = $this->storeGroupImage('theme/2/groups', $group['file']) ?? '';
             $href  = '/' . $group['slug'];
-            $bg = $group['bg'];
-            $color = $group['color'];
 
-            $cardsHtml .= '<div class="group-card-rect" style="width: 45%; max-width: 300px;">'
-                .'<a href="'.$href.'" style="display:flex; align-items:center; justify-content:center; padding: 16px; background-color:'.$bg.'; color:'.$color.'; text-decoration:none; border-radius:12px; font-weight:bold; font-size:18px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition:transform .25s ease;">'
-                .'<span dir="auto"><bdi>'.htmlspecialchars($label).'</bdi></span>'
+            $cardsHtml .= '<div class="group-card-rect" style="width: 48%; min-width: 280px; max-width: 600px;">'
+                .'<a href="'.$href.'" style="display:block; text-decoration:none; color:inherit;">'
+                .'<div class="g-img-rect" style="width:100%; height:160px; transition:transform .25s ease; border-radius:16px; overflow:hidden; position:relative; background-color:#f8f9fa; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">'
+                .'<img src="'.$img.'" alt="'.htmlspecialchars($label).'" style="width:100%;height:100%;object-fit:cover;">'
+                .'<div style="position:absolute; top:0; left:0; right:0; bottom:0; background:linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.5)); display:flex; align-items:center; justify-content:center;">'
+                .'<span style="font-size:32px;font-weight:800;color:#fff; text-shadow: 2px 2px 5px rgba(0,0,0,0.7);">'.htmlspecialchars($label).'</span>'
+                .'</div>'
+                .'</div>'
                 .'</a>'
                 .'</div>';
         }
         $cardsHtml .= '</div>';
 
-        return '<div class="groups-wrap" style="padding: 28px 16px; text-align:center; width: 100%;"><h2 style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">'.$title.'</h2>'.$cardsHtml.'</div>';
+        return '<div class="groups-wrap" style="padding: 28px 16px; text-align:center; width: 100%; max-width: 1200px; margin: 0 auto;"><h2 style="font-size: 28px; font-weight: bold; margin-bottom: 30px;">'.$title.'</h2>'.$cardsHtml.'</div>';
     }
 
     private function buildAgeGroupsHtml(string $locale): string
@@ -603,12 +607,12 @@ class ThemeCustomizationTableSeeder extends Seeder
             $href  = '/products?age_group='.$age['id'];
 
             $cards .= '<div class="age-pill">'
-                .'<a href="'.$href.'" style="display:block; padding: 12px 30px; background-color: #0b51b7; color: #fff; text-decoration: none; border-radius: 30px; font-weight: bold; font-size: 18px; transition: opacity 0.2s; box-shadow: 0 4px 6px rgba(11, 81, 183, 0.2);">'
+                .'<a href="'.$href.'" style="display:block; padding: 18px 40px; background-color: #0b51b7; color: #fff; text-decoration: none; border-radius: 40px; font-weight: bold; font-size: 24px; transition: opacity 0.2s; box-shadow: 0 4px 8px rgba(11, 81, 183, 0.3);">'
                 .'<span dir="auto"><bdi>'.htmlspecialchars($label).'</bdi></span>'
                 .'</a>'
                 .'</div>';
         }
-        return '<div class="groups-wrap" style="padding: 28px 16px; text-align: center;"><h2 style="font-size: 24px; font-weight: bold; margin-bottom: 24px;">'.$title.'</h2><div class="groups-inner" style="display:flex; flex-wrap:wrap; justify-content:center; gap: 16px;">'.$cards.'</div></div>';
+        return '<div class="groups-wrap" style="padding: 32px 16px; text-align: center; width: 100%; max-width: 1200px; margin: 0 auto;"><h2 style="font-size: 28px; font-weight: bold; margin-bottom: 30px;">'.$title.'</h2><div class="groups-inner" style="display:flex; flex-wrap:wrap; justify-content:center; gap: 20px;">'.$cards.'</div></div>';
     }
 
     private function buildSuitableForHtml(string $locale): string
@@ -627,17 +631,17 @@ class ThemeCustomizationTableSeeder extends Seeder
             $img   = $this->storeGroupImage('theme/15/groups', $aud['file']) ?? '';
             $href  = '/products?suitable_for='.$aud['id'];
 
-            $cards .= '<div class="group-card-banner" style="width: 48%; min-width: 280px; max-width: 500px;">'
+            $cards .= '<div class="group-card-banner" style="width: 48%; min-width: 280px; max-width: 600px;">'
                 .'<a href="'.$href.'" style="display:block; text-decoration:none; color:inherit;">'
-                .'<div class="g-img-banner" style="width:100%; height:160px; transition:transform .25s ease; border-radius:16px; overflow:hidden; position:relative; background-color:#f8f9fa; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">'
+                .'<div class="g-img-banner" style="width:100%; height:200px; transition:transform .25s ease; border-radius:16px; overflow:hidden; position:relative; background-color:#f8f9fa; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">'
                 .'<img src="'.$img.'" alt="'.htmlspecialchars($label).'" style="width:100%;height:100%;object-fit:cover;">'
                 .'<div style="position:absolute; top:0; left:0; right:0; bottom:0; background:linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.5)); display:flex; align-items:center; justify-content:center;">'
-                .'<span style="font-size:32px;font-weight:800;color:#fff; text-shadow: 2px 2px 5px rgba(0,0,0,0.7);">'.htmlspecialchars($label).'</span>'
+                .'<span style="font-size:36px;font-weight:800;color:#fff; text-shadow: 2px 2px 5px rgba(0,0,0,0.7);">'.htmlspecialchars($label).'</span>'
                 .'</div>'
                 .'</div>'
                 .'</a>'
                 .'</div>';
         }
-        return '<div class="groups-wrap" style="padding: 32px 16px; text-align: center;"><h2 style="font-size: 24px; font-weight: bold; margin-bottom: 24px;">'.$title.'</h2><div class="groups-inner" style="display:flex; flex-wrap:wrap; justify-content:center; gap: 24px;">'.$cards.'</div></div>';
+        return '<div class="groups-wrap" style="padding: 32px 16px; text-align: center; width: 100%; max-width: 1200px; margin: 0 auto;"><h2 style="font-size: 28px; font-weight: bold; margin-bottom: 30px;">'.$title.'</h2><div class="groups-inner" style="display:flex; flex-wrap:wrap; justify-content:space-between; gap: 20px;">'.$cards.'</div></div>';
     }
 }

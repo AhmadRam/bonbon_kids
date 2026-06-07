@@ -37,7 +37,7 @@
                     <ul class="grid grid-cols-1 gap-3">
                         @php
                             $rootCategory = app('Webkul\Category\Repositories\CategoryRepository')->findOneByField('parent_id', null);
-                            $groups = $rootCategory ? app('Webkul\Category\Repositories\CategoryRepository')->findByField('parent_id', $rootCategory->id) : collect([]);
+                            $groups = $rootCategory ? app('Webkul\Category\Repositories\CategoryRepository')->findWhere(['parent_id' => $rootCategory->id, 'status' => 1]) : collect([]);
 
                             $desiredOrder = [
                                 'toddlers-toys', 'boys-toys', 'girls-toys', 'educational-toys', 'smart-toys', 'outdoor-toys', 'under-1-dinar', 'offers'
