@@ -585,7 +585,15 @@ class ThemeCustomizationTableSeeder extends Seeder
         }
         $cardsHtml .= '</div>';
 
-        return '<div class="groups-wrap" style="padding: 28px 16px; text-align:center; width: 100%; max-width: 1200px; margin: 0 auto;"><h2 style="font-size: 28px; font-weight: bold; margin-bottom: 30px;">'.$title.'</h2>'.$cardsHtml.'</div>';
+        $titleHtml = '<div style="display:flex; align-items:center; justify-content:center; gap: 15px; margin-bottom: 40px;">'
+            .'<div style="flex-grow:1; max-width: 250px; border-bottom: 3px dotted #ffb3d9; opacity: 0.7;"></div>'
+            .'<span style="color:#ffb3d9; font-size:26px;">★</span>'
+            .'<h2 style="font-size: 32px; font-weight: 900; color: #17385c; margin: 0;">'.$title.'</h2>'
+            .'<span style="color:#ffb3d9; font-size:26px;">★</span>'
+            .'<div style="flex-grow:1; max-width: 250px; border-bottom: 3px dotted #ffb3d9; opacity: 0.7;"></div>'
+            .'</div>';
+
+        return '<div class="groups-wrap" style="padding: 28px 16px; text-align:center; width: 100%; max-width: 1200px; margin: 0 auto;">'.$titleHtml.$cardsHtml.'</div>';
     }
 
     private function buildAgeGroupsHtml(string $locale): string
@@ -607,12 +615,21 @@ class ThemeCustomizationTableSeeder extends Seeder
             $href  = '/products?age_group='.$age['id'];
 
             $cards .= '<div class="age-pill">'
-                .'<a href="'.$href.'" style="display:block; padding: 18px 40px; background-color: #0b51b7; color: #fff; text-decoration: none; border-radius: 40px; font-weight: bold; font-size: 24px; transition: opacity 0.2s; box-shadow: 0 4px 8px rgba(11, 81, 183, 0.3);">'
+                .'<a href="'.$href.'" style="display:block; padding: 18px 60px; background-color: #0b51b7; color: #fff; text-decoration: none; border-radius: 40px; font-weight: bold; font-size: 24px; transition: opacity 0.2s; box-shadow: 0 4px 8px rgba(11, 81, 183, 0.3);">'
                 .'<span dir="auto"><bdi>'.htmlspecialchars($label).'</bdi></span>'
                 .'</a>'
                 .'</div>';
         }
-        return '<div class="groups-wrap" style="padding: 32px 16px; text-align: center; width: 100%; max-width: 1200px; margin: 0 auto;"><h2 style="font-size: 28px; font-weight: bold; margin-bottom: 30px;">'.$title.'</h2><div class="groups-inner" style="display:flex; flex-wrap:wrap; justify-content:center; gap: 20px;">'.$cards.'</div></div>';
+
+        $titleHtml = '<div style="display:flex; align-items:center; justify-content:center; gap: 15px; margin-bottom: 40px;">'
+            .'<div style="flex-grow:1; max-width: 250px; border-bottom: 3px dotted #8cbcfc; opacity: 0.7;"></div>'
+            .'<span style="color:#8cbcfc; font-size:26px;">★</span>'
+            .'<h2 style="font-size: 32px; font-weight: 900; color: #17385c; margin: 0;">'.$title.'</h2>'
+            .'<span style="color:#8cbcfc; font-size:26px;">★</span>'
+            .'<div style="flex-grow:1; max-width: 250px; border-bottom: 3px dotted #8cbcfc; opacity: 0.7;"></div>'
+            .'</div>';
+
+        return '<div class="groups-wrap" style="padding: 32px 16px; text-align: center; width: 100%; max-width: 1200px; margin: 0 auto; background-color: #f7fbff; border-radius: 20px; margin-top: 20px; margin-bottom: 20px;">'.$titleHtml.'<div class="groups-inner" style="display:flex; flex-wrap:wrap; justify-content:center; gap: 40px;">'.$cards.'</div></div>';
     }
 
     private function buildSuitableForHtml(string $locale): string
@@ -642,6 +659,15 @@ class ThemeCustomizationTableSeeder extends Seeder
                 .'</a>'
                 .'</div>';
         }
-        return '<div class="groups-wrap" style="padding: 32px 16px; text-align: center; width: 100%; max-width: 1200px; margin: 0 auto;"><h2 style="font-size: 28px; font-weight: bold; margin-bottom: 30px;">'.$title.'</h2><div class="groups-inner" style="display:flex; flex-wrap:wrap; justify-content:space-between; gap: 20px;">'.$cards.'</div></div>';
+
+        $titleHtml = '<div style="display:flex; align-items:center; justify-content:center; gap: 15px; margin-bottom: 40px;">'
+            .'<div style="flex-grow:1; max-width: 250px; border-bottom: 3px dotted #ffb3d9; opacity: 0.7;"></div>'
+            .'<span style="color:#ffb3d9; font-size:26px;">★</span>'
+            .'<h2 style="font-size: 32px; font-weight: 900; color: #17385c; margin: 0;">'.$title.'</h2>'
+            .'<span style="color:#ffb3d9; font-size:26px;">★</span>'
+            .'<div style="flex-grow:1; max-width: 250px; border-bottom: 3px dotted #ffb3d9; opacity: 0.7;"></div>'
+            .'</div>';
+
+        return '<div class="groups-wrap" style="padding: 32px 16px; text-align: center; width: 100%; max-width: 1200px; margin: 0 auto; background-color: #fff5f9; border-radius: 20px; margin-bottom: 30px;">'.$titleHtml.'<div class="groups-inner" style="display:flex; flex-wrap:wrap; justify-content:space-between; gap: 20px;">'.$cards.'</div></div>';
     }
 }
