@@ -47,21 +47,21 @@ class ProductCategoriesTableSeeder extends Seeder
         }
 
         $categoriesData = [
-            ['ar' => 'ألعاب أولاد', 'en' => 'Boys Toys', 'file' => 'boys.png'],
-            ['ar' => 'ألعاب ذكية', 'en' => 'Smart Toys', 'file' => 'smart.png'],
-            ['ar' => 'ألعاب تعليمية', 'en' => 'Educational Toys', 'file' => 'educational.png'],
-            ['ar' => 'ألعاب مواليد', 'en' => 'Toddlers Toys', 'file' => 'toddlers.png'],
-            ['ar' => 'اقل من 1 دينار', 'en' => 'Under 1 Dinar', 'file' => 'under-1-dinar.png'],
-            ['ar' => 'ألعاب بنات', 'en' => 'Girls Toys', 'file' => 'girls.png'],
-            ['ar' => 'ألعاب خارجية', 'en' => 'Outdoor Toys', 'file' => 'outdoor.png'],
-            ['ar' => 'عروض', 'en' => 'Offers', 'file' => 'offers.png'],
+            ['ar' => 'ألعاب أولاد', 'en' => 'Boys Toys', 'file' => 'boys.png', 'status' => 1],
+            ['ar' => 'ألعاب ذكية', 'en' => 'Smart Toys', 'file' => 'smart.png', 'status' => 0],
+            ['ar' => 'ألعاب تعليمية', 'en' => 'Educational Toys', 'file' => 'educational.png', 'status' => 1],
+            ['ar' => 'ألعاب مواليد', 'en' => 'Toddlers Toys', 'file' => 'toddlers.png', 'status' => 1],
+            ['ar' => 'اقل من 1 دينار', 'en' => 'Under 1 Dinar', 'file' => 'under-1-dinar.png', 'status' => 1],
+            ['ar' => 'ألعاب بنات', 'en' => 'Girls Toys', 'file' => 'girls.png', 'status' => 1],
+            ['ar' => 'ألعاب خارجية', 'en' => 'Outdoor Toys', 'file' => 'outdoor.png', 'status' => 0],
+            ['ar' => 'عروض', 'en' => 'Offers', 'file' => 'offers.png', 'status' => 1],
         ];
 
         foreach ($categoriesData as $index => $data) {
             $slug = Str::slug($data['en']);
             
             $category = $this->categoryRepository->create([
-                'status'       => 1,
+                'status'       => $data['status'],
                 'position'     => $index + 1,
                 'display_mode' => 'products_and_description',
                 'parent_id'    => $root->id,

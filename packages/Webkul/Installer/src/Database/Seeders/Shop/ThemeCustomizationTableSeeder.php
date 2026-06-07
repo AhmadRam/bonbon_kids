@@ -135,27 +135,27 @@ class ThemeCustomizationTableSeeder extends Seeder
                             'images' => [
                                 [
                                     'title' => '',
-                                    'link' => '',
+                                    'link' => '/products',
                                     'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/1.png', 'sliders/en/1.png'),
                                 ], [
                                     'title' => '',
-                                    'link' => '',
+                                    'link' => '/boys-toys',
                                     'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/2.png', 'sliders/en/2.png'),
                                 ], [
                                     'title' => '',
-                                    'link' => '',
+                                    'link' => '/girls-toys',
                                     'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/3.png', 'sliders/en/3.png'),
                                 ], [
                                     'title' => '',
-                                    'link' => '',
+                                    'link' => '/educational-toys',
                                     'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/4.png', 'sliders/en/4.png'),
                                 ], [
                                     'title' => '',
-                                    'link' => '',
+                                    'link' => '/under-1-dinar',
                                     'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/5.png', 'sliders/en/5.png'),
                                 ], [
                                     'title' => '',
-                                    'link' => '',
+                                    'link' => '/offers',
                                     'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/6.png', 'sliders/en/6.png'),
                                 ],
                             ],
@@ -167,7 +167,7 @@ class ThemeCustomizationTableSeeder extends Seeder
 
                         'options' => json_encode([
                             'html' => $this->buildGroupsHtml($locale),
-                            'css'  => '.groups-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;text-align:center;padding:28px 16px;}.groups-inner{display:inline-flex;flex-direction:row;gap:28px;}.group-card a{display:flex;flex-direction:column;align-items:center;gap:10px;text-decoration:none;color:inherit;}.group-card .g-img{width:104px;height:104px;transition:transform .25s ease;}.group-card:hover .g-img{transform:scale(1.07);}.group-card span{font-size:14px;font-weight:700;color:#222;}.groups-wrap::-webkit-scrollbar{height:4px;}.groups-wrap::-webkit-scrollbar-track{background:#f1f1f1;}.groups-wrap::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px;}',
+                            'css'  => '',
                         ]),
                     ], [
                         'theme_customization_id' => 14,
@@ -176,7 +176,7 @@ class ThemeCustomizationTableSeeder extends Seeder
 
                         'options' => json_encode([
                             'html' => $this->buildAgeGroupsHtml($locale),
-                            'css'  => '.groups-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;text-align:center;padding:28px 16px;}.groups-inner{display:inline-flex;flex-direction:row;gap:28px;}.group-card a{display:flex;flex-direction:column;align-items:center;gap:10px;text-decoration:none;color:inherit;}.group-card .g-img{width:104px;height:104px;transition:transform .25s ease;}.group-card:hover .g-img{transform:scale(1.07);}.group-card span{font-size:14px;font-weight:700;color:#222;}.groups-wrap::-webkit-scrollbar{height:4px;}.groups-wrap::-webkit-scrollbar-track{background:#f1f1f1;}.groups-wrap::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px;}',
+                            'css'  => '',
                         ]),
                     ], [
                         'theme_customization_id' => 15,
@@ -185,7 +185,7 @@ class ThemeCustomizationTableSeeder extends Seeder
 
                         'options' => json_encode([
                             'html' => $this->buildSuitableForHtml($locale),
-                            'css'  => '.groups-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;text-align:center;padding:28px 16px;}.groups-inner{display:inline-flex;flex-direction:row;gap:28px;}.group-card a{display:flex;flex-direction:column;align-items:center;gap:10px;text-decoration:none;color:inherit;}.group-card .g-img{width:104px;height:104px;transition:transform .25s ease;}.group-card:hover .g-img{transform:scale(1.07);}.group-card span{font-size:14px;font-weight:700;color:#222;}.groups-wrap::-webkit-scrollbar{height:4px;}.groups-wrap::-webkit-scrollbar-track{background:#f1f1f1;}.groups-wrap::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px;}',
+                            'css'  => '',
                         ]),
                     ], [
                         'theme_customization_id' => 3,
@@ -537,34 +537,51 @@ class ThemeCustomizationTableSeeder extends Seeder
         $isAr = $locale === 'ar';
         $title = $isAr ? 'تسوق من خلال الفئات' : 'Shop by Categories';
 
-        $groups = [
+        $circleGroups = [
             ['ar' => 'ألعاب مواليد',   'en' => 'Toddlers Toys',    'slug' => 'toddlers-toys',    'file' => 'toddlers.png'],
             ['ar' => 'ألعاب أولاد',    'en' => 'Boys Toys',        'slug' => 'boys-toys',        'file' => 'boys.png'],
             ['ar' => 'ألعاب بنات',    'en' => 'Girls Toys',       'slug' => 'girls-toys',       'file' => 'girls.png'],
             ['ar' => 'ألعاب تعليمية', 'en' => 'Educational Toys', 'slug' => 'educational-toys', 'file' => 'educational.png'],
-            ['ar' => 'ألعاب ذكية',    'en' => 'Smart Toys',       'slug' => 'smart-toys',       'file' => 'smart.png'],
-            ['ar' => 'ألعاب خارجية',  'en' => 'Outdoor Toys',     'slug' => 'outdoor-toys',     'file' => 'outdoor.png'],
-            ['ar' => 'اقل من 1 دينار', 'en' => 'Under 1 Dinar',    'slug' => 'under-1-dinar',    'file' => 'under-1-dinar.png'],
-            ['ar' => 'عروض',           'en' => 'Offers',           'slug' => 'offers',           'file' => 'offers.png'],
         ];
 
-        $cards = '';
-        foreach ($groups as $group) {
+        $rectGroups = [
+            ['ar' => 'اقل من 1 دينار', 'en' => 'Under 1 Dinar',    'slug' => 'under-1-dinar',    'bg' => '#ffeb3b', 'color' => '#000', 'file' => 'under-1-dinar.png'],
+            ['ar' => 'عروض',           'en' => 'Offers',           'slug' => 'offers',           'bg' => '#9c27b0', 'color' => '#fff', 'file' => 'offers.png'],
+        ];
+
+        $cardsHtml = '<div class="groups-circles" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; margin-bottom: 20px;">';
+        foreach ($circleGroups as $group) {
             $label = $isAr ? $group['ar'] : $group['en'];
             $img   = $this->storeGroupImage('theme/2/groups', $group['file']) ?? '';
             $href  = '/' . $group['slug'];
 
-            $cards .= '<div class="group-card">'
-                .'<a href="'.$href.'">'
-                .'<div class="g-img">'
-                .'<img src="'.$img.'" width="104" height="104" alt="'.htmlspecialchars($label).'" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">'
+            $cardsHtml .= '<div class="group-card" style="width: 22%; min-width: 80px; max-width: 120px;">'
+                .'<a href="'.$href.'" style="display:flex; flex-direction:column; align-items:center; gap:10px; text-decoration:none; color:inherit;">'
+                .'<div class="g-img" style="width:100%; aspect-ratio:1; transition:transform .25s ease;">'
+                .'<img src="'.$img.'" width="104" height="104" alt="'.htmlspecialchars($label).'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">'
                 .'</div>'
-                .'<span>'.htmlspecialchars($label).'</span>'
+                .'<span style="font-size:14px;font-weight:700;color:#222;">'.htmlspecialchars($label).'</span>'
                 .'</a>'
                 .'</div>';
         }
+        $cardsHtml .= '</div>';
 
-        return '<div class="groups-wrap"><h2 style="font-size: 24px; font-weight: bold; margin-bottom: 20px; text-align: center; padding: 0 16px;">'.$title.'</h2><div class="groups-inner">'.$cards.'</div></div>';
+        $cardsHtml .= '<div class="groups-rects" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">';
+        foreach ($rectGroups as $group) {
+            $label = $isAr ? $group['ar'] : $group['en'];
+            $href  = '/' . $group['slug'];
+            $bg = $group['bg'];
+            $color = $group['color'];
+
+            $cardsHtml .= '<div class="group-card-rect" style="width: 45%; max-width: 300px;">'
+                .'<a href="'.$href.'" style="display:flex; align-items:center; justify-content:center; padding: 16px; background-color:'.$bg.'; color:'.$color.'; text-decoration:none; border-radius:12px; font-weight:bold; font-size:18px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition:transform .25s ease;">'
+                .'<span dir="auto"><bdi>'.htmlspecialchars($label).'</bdi></span>'
+                .'</a>'
+                .'</div>';
+        }
+        $cardsHtml .= '</div>';
+
+        return '<div class="groups-wrap" style="padding: 28px 16px; text-align:center; width: 100%;"><h2 style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">'.$title.'</h2>'.$cardsHtml.'</div>';
     }
 
     private function buildAgeGroupsHtml(string $locale): string
@@ -573,29 +590,25 @@ class ThemeCustomizationTableSeeder extends Seeder
         $title = $isAr ? 'تسوق من خلال الأعمار' : 'Shop by Age';
 
         $ages = [
-            ['id' => 10, 'label_en' => '0-2 Years', 'label_ar' => "2-0 سنة", 'file' => 'age_0_2.png'],
-            ['id' => 11, 'label_en' => '3-4 Years', 'label_ar' => "4-3 سنوات", 'file' => 'age_3_5.png'],
-            ['id' => 12, 'label_en' => '5-7 Years', 'label_ar' => "7-5 سنوات", 'file' => 'age_6_8.png'],
-            ['id' => 13, 'label_en' => '8-10 Years', 'label_ar' => "10-8 سنوات", 'file' => 'age_9_12.png'],
-            ['id' => 17, 'label_en' => '11+ Years', 'label_ar' => "11+ سنة", 'file' => 'age_11_plus.png'],
+            ['id' => 10, 'label_en' => '0-2', 'label_ar' => "2-0"],
+            ['id' => 11, 'label_en' => '3-4', 'label_ar' => "4-3"],
+            ['id' => 12, 'label_en' => '5-7', 'label_ar' => "7-5"],
+            ['id' => 13, 'label_en' => '8-10', 'label_ar' => "10-8"],
+            ['id' => 17, 'label_en' => '11+', 'label_ar' => "11+"],
         ];
 
         $cards = '';
         foreach ($ages as $age) {
             $label = $isAr ? $age['label_ar'] : $age['label_en'];
-            $img   = $this->storeGroupImage('theme/14/groups', $age['file']) ?? '';
             $href  = '/products?age_group='.$age['id'];
 
-            $cards .= '<div class="group-card">'
-                .'<a href="'.$href.'">'
-                .'<div class="g-img">'
-                .'<img src="'.$img.'" width="104" height="104" alt="'.htmlspecialchars($label).'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">'
-                .'</div>'
+            $cards .= '<div class="age-pill">'
+                .'<a href="'.$href.'" style="display:block; padding: 12px 30px; background-color: #0b51b7; color: #fff; text-decoration: none; border-radius: 30px; font-weight: bold; font-size: 18px; transition: opacity 0.2s; box-shadow: 0 4px 6px rgba(11, 81, 183, 0.2);">'
                 .'<span dir="auto"><bdi>'.htmlspecialchars($label).'</bdi></span>'
                 .'</a>'
                 .'</div>';
         }
-        return '<div class="groups-wrap"><h2 style="font-size: 24px; font-weight: bold; margin-bottom: 20px; margin-top: 20px; text-align: center; padding: 0 16px;">'.$title.'</h2><div class="groups-inner">'.$cards.'</div></div>';
+        return '<div class="groups-wrap" style="padding: 28px 16px; text-align: center;"><h2 style="font-size: 24px; font-weight: bold; margin-bottom: 24px;">'.$title.'</h2><div class="groups-inner" style="display:flex; flex-wrap:wrap; justify-content:center; gap: 16px;">'.$cards.'</div></div>';
     }
 
     private function buildSuitableForHtml(string $locale): string
@@ -604,8 +617,8 @@ class ThemeCustomizationTableSeeder extends Seeder
         $title = $isAr ? 'لمن تتسوق؟' : 'Who are you shopping for?';
 
         $audiences = [
-            ['id' => 14, 'label_en' => 'Boys', 'label_ar' => 'أولاد', 'file' => 'boys.png'],
             ['id' => 15, 'label_en' => 'Girls', 'label_ar' => 'بنات', 'file' => 'girls.png'],
+            ['id' => 14, 'label_en' => 'Boys', 'label_ar' => 'أولاد', 'file' => 'boys.png'],
         ];
 
         $cards = '';
@@ -614,15 +627,17 @@ class ThemeCustomizationTableSeeder extends Seeder
             $img   = $this->storeGroupImage('theme/15/groups', $aud['file']) ?? '';
             $href  = '/products?suitable_for='.$aud['id'];
 
-            $cards .= '<div class="group-card">'
-                .'<a href="'.$href.'">'
-                .'<div class="g-img">'
-                .'<img src="'.$img.'" width="104" height="104" alt="'.htmlspecialchars($label).'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">'
+            $cards .= '<div class="group-card-banner" style="width: 48%; min-width: 280px; max-width: 500px;">'
+                .'<a href="'.$href.'" style="display:block; text-decoration:none; color:inherit;">'
+                .'<div class="g-img-banner" style="width:100%; height:160px; transition:transform .25s ease; border-radius:16px; overflow:hidden; position:relative; background-color:#f8f9fa; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">'
+                .'<img src="'.$img.'" alt="'.htmlspecialchars($label).'" style="width:100%;height:100%;object-fit:cover;">'
+                .'<div style="position:absolute; top:0; left:0; right:0; bottom:0; background:linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.5)); display:flex; align-items:center; justify-content:center;">'
+                .'<span style="font-size:32px;font-weight:800;color:#fff; text-shadow: 2px 2px 5px rgba(0,0,0,0.7);">'.htmlspecialchars($label).'</span>'
                 .'</div>'
-                .'<span dir="auto"><bdi>'.htmlspecialchars($label).'</bdi></span>'
+                .'</div>'
                 .'</a>'
                 .'</div>';
         }
-        return '<div class="groups-wrap"><h2 style="font-size: 24px; font-weight: bold; margin-bottom: 20px; margin-top: 20px; text-align: center; padding: 0 16px;">'.$title.'</h2><div class="groups-inner">'.$cards.'</div></div>';
+        return '<div class="groups-wrap" style="padding: 32px 16px; text-align: center;"><h2 style="font-size: 24px; font-weight: bold; margin-bottom: 24px;">'.$title.'</h2><div class="groups-inner" style="display:flex; flex-wrap:wrap; justify-content:center; gap: 24px;">'.$cards.'</div></div>';
     }
 }
