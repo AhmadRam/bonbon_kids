@@ -650,10 +650,10 @@ class ThemeCustomizationTableSeeder extends Seeder
 
             $cards .= '<div class="group-card-banner" style="width: 48%; min-width: 280px; max-width: 600px;">'
                 .'<a href="'.$href.'" style="display:block; text-decoration:none; color:inherit;">'
-                .'<div class="g-img-banner" style="width:100%; height:200px; transition:transform .25s ease; border-radius:16px; overflow:hidden; position:relative; background-color:#f8f9fa; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">'
+                .'<div class="g-img-banner" style="width:100%; height:350px; transition:transform .25s ease; border-radius:24px; overflow:hidden; position:relative; background-color:#f8f9fa; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">'
                 .'<img src="'.$img.'" alt="'.htmlspecialchars($label).'" style="width:100%;height:100%;object-fit:cover;">'
                 .'<div style="position:absolute; top:0; left:0; right:0; bottom:0; background:linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.5)); display:flex; align-items:center; justify-content:center;">'
-                .'<span style="font-size:36px;font-weight:800;color:#fff; text-shadow: 2px 2px 5px rgba(0,0,0,0.7);">'.htmlspecialchars($label).'</span>'
+                .'<span style="font-size:42px;font-weight:900;color:#fff; text-shadow: 2px 2px 5px rgba(0,0,0,0.7);">'.htmlspecialchars($label).'</span>'
                 .'</div>'
                 .'</div>'
                 .'</a>'
