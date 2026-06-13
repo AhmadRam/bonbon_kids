@@ -138,7 +138,7 @@ services:
                 soft: 65536
                 hard: 65536
         volumes:
-            - 'elasticsearch:/var/lib/elasticsearch/data'
+            - 'elasticsearch:/usr/share/elasticsearch/data'
         networks:
             - bonbon_network
     kibana:

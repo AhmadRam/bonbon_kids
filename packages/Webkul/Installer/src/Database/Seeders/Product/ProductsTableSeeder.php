@@ -87,8 +87,8 @@ class ProductsTableSeeder extends Seeder
         $categoriesMap = [];
         $categories = \Illuminate\Support\Facades\DB::table('category_translations')->whereIn('locale', ['en', 'ar'])->get();
         foreach ($categories as $cat) {
-            $categoriesMap[$cat->name] = $cat->category_id;
-            $categoriesMap[$cat->slug] = $cat->category_id;
+            $categoriesMap[mb_strtolower(trim($cat->name))] = $cat->category_id;
+            $categoriesMap[mb_strtolower(trim($cat->slug))] = $cat->category_id;
         }
 
         // 3. Build Age Groups Map Dynamically from DB
@@ -105,9 +105,10 @@ class ProductsTableSeeder extends Seeder
                 if (!isset($ageGroupsMap[$opt->id])) {
                     $ageGroupsMap[$opt->id] = [];
                 }
-                $ageGroupsMap[$opt->id][] = trim($opt->label);
-                $ageGroupsMap[$opt->id][] = trim(str_replace('Years', '', $opt->label));
-                $ageGroupsMap[$opt->id][] = trim(str_replace(['سنة', 'سنوات'], '', $opt->label));
+                $label = trim($opt->label);
+                $ageGroupsMap[$opt->id][] = mb_strtolower($label);
+                $ageGroupsMap[$opt->id][] = mb_strtolower(trim(str_replace('Years', '', $label)));
+                $ageGroupsMap[$opt->id][] = mb_strtolower(trim(str_replace(['سنة', 'سنوات'], '', $label)));
             }
         }
         
@@ -124,7 +125,7 @@ class ProductsTableSeeder extends Seeder
                 if (!isset($suitableForMap[$opt->id])) {
                     $suitableForMap[$opt->id] = [];
                 }
-                $suitableForMap[$opt->id][] = trim($opt->label);
+                $suitableForMap[$opt->id][] = mb_strtolower(trim($opt->label));
             }
         }
 
@@ -161,27 +162,38 @@ class ProductsTableSeeder extends Seeder
             $price = (float)($row['price'] ?? 0);
             $qty = (int)($row['inventories'] ?? 0);
 
-            // The old group column was the Group. We'll map it to the Categories.
-            $groupName = $row['group'] ?? ($row['brand'] ?? '');
+            // The category column is mapped to the Categories.
+            $categoryName = trim((string)($row['category'] ?? ''));
             $categoryId = null;
-            if (!empty($groupName)) {
-                $categoryId = $categoriesMap[$groupName] ?? null;
+            if ($categoryName !== '') {
+                $categoryId = $categoriesMap[mb_strtolower($categoryName)] ?? null;
             }
 
-            // The old category slug was the Age. We'll map it to the Age Group Attribute.
-            $ageGroupRaw = $row['categories_slug'] ?? '';
+            // The age_group column is mapped to the Age Group Attribute.
+            $ageGroupRaw = trim((string)($row['age_group'] ?? ''));
             $ageGroupId = null;
-            if (!empty($ageGroupRaw)) {
+            if ($ageGroupRaw !== '') {
+                $ageGroupLower = mb_strtolower($ageGroupRaw);
                 foreach ($ageGroupsMap as $gId => $labels) {
-                    if (in_array(trim($ageGroupRaw), $labels) || in_array(trim($ageGroupRaw) . ' Years', $labels)) {
+                    if (in_array($ageGroupLower, $labels) || in_array($ageGroupLower . ' years', $labels)) {
                         $ageGroupId = $gId;
                         break;
                     }
                 }
             }
             
-            // Map gender/suitable_for if provided, or leave null for now
+            // The suitable_for column is mapped to the Suitable For Attribute.
+            $suitableForRaw = trim((string)($row['suitable_for'] ?? ''));
             $suitableForId = null;
+            if ($suitableForRaw !== '') {
+                $suitableForLower = mb_strtolower($suitableForRaw);
+                foreach ($suitableForMap as $sId => $labels) {
+                    if (in_array($suitableForLower, $labels)) {
+                        $suitableForId = $sId;
+                        break;
+                    }
+                }
+            }
 
             // Create or Find Product
             $product = $this->productRepository->findOneByField('sku', $sku);
@@ -218,7 +230,7 @@ class ProductsTableSeeder extends Seeder
                 'cost' => (float)($row['cost'] ?? 0),
                 'guest_checkout' => 1,
                 'weight' => (float)($row['weight'] ?? 0),
-                'status' => 1,
+                'status' => isset($row['status']) ? (int) $row['status'] : 1,
                 'new' => 1,
                 'featured' => 1,
                 'visible_individually' => 1,
