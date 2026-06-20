@@ -160,6 +160,11 @@ class ThemeCustomizationTableSeeder extends Seeder
                                 ],
                             ],
                         ]),
+                    ], [
+                        'theme_customization_id' => 2,
+
+                        'locale' => $locale,
+
                         'options' => json_encode([
                             'html' => $this->buildGroupsHtml($locale),
                             'css'  => '@media (max-width: 768px) { .groups-wrap > div:first-child { margin-bottom: 24px !important; gap: 8px !important; } .groups-wrap > div:first-child > div[style*="border-bottom"] { max-width: 40px !important; border-bottom-width: 2px !important; } .groups-wrap > div:first-child > span { font-size: 18px !important; } .groups-wrap > div:first-child > h2 { font-size: 20px !important; text-align: center !important; } .groups-circles { justify-content: center !important; gap: 12px !important; margin-bottom: 20px !important; } .groups-circles .group-card { width: 22% !important; max-width: 80px !important; } .groups-circles .group-card a { gap: 6px !important; } .groups-circles .group-card span { font-size: 11px !important; line-height: 1.2 !important; } .groups-rects { display: flex !important; flex-wrap: wrap !important; justify-content: space-between !important; gap: 12px !important; } .groups-rects .group-card-rect { width: 48% !important; min-width: 0 !important; max-width: 100% !important; } .groups-rects .g-img-rect { height: 120px !important; } }',
