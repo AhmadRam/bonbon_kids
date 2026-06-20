@@ -185,7 +185,7 @@ class ThemeCustomizationTableSeeder extends Seeder
 
                         'options' => json_encode([
                             'html' => $this->buildSuitableForHtml($locale),
-                            'css'  => '@media (max-width: 768px) { .groups-wrap > div:first-child { margin-bottom: 24px !important; gap: 8px !important; } .groups-wrap > div:first-child > div[style*="border-bottom"] { max-width: 40px !important; border-bottom-width: 2px !important; } .groups-wrap > div:first-child > span { font-size: 18px !important; } .groups-wrap > div:first-child > h2 { font-size: 20px !important; text-align: center !important; } .groups-wrap .groups-inner { display: flex !important; flex-wrap: wrap !important; justify-content: space-between !important; gap: 12px !important; } .group-card-banner { width: 48% !important; min-width: 0 !important; max-width: 100% !important; } .group-card-banner .g-img-banner { height: 150px !important; border-radius: 16px !important; } .group-card-banner .g-img-banner span { font-size: 22px !important; } }',
+                            'css'  => '@media (max-width: 768px) { .groups-wrap > div:first-child { margin-bottom: 24px !important; gap: 8px !important; } .groups-wrap > div:first-child > div[style*="border-bottom"] { max-width: 40px !important; border-bottom-width: 2px !important; } .groups-wrap > div:first-child > span { font-size: 18px !important; } .groups-wrap > div:first-child > h2 { font-size: 20px !important; text-align: center !important; } .groups-wrap .groups-inner { display: flex !important; flex-wrap: wrap !important; justify-content: space-between !important; gap: 12px !important; } .group-card-banner { width: 48% !important; min-width: 0 !important; max-width: 100% !important; } .group-card-banner .g-img-banner { height: auto !important; aspect-ratio: 3/4 !important; border-radius: 16px !important; } .group-card-banner .g-img-banner span { font-size: 22px !important; } }',
                         ]),
                     ], [
                         'theme_customization_id' => 3,
@@ -520,10 +520,10 @@ class ThemeCustomizationTableSeeder extends Seeder
      * @param  string  $filename    Image filename (e.g. 'toys.png')
      * @return string|null
      */
-    public function storeGroupImage(string $targetPath, string $filename): ?string
+    public function storeGroupImage(string $targetPath, string $filename, string $sourceDir = 'category-images'): ?string
     {
-        $categoryImagesDir = 'packages/Webkul/Installer/src/Database/Seeders/Product/Data/category-images/';
-        $fullPath = base_path($categoryImagesDir.$filename);
+        $imagesDir = 'packages/Webkul/Installer/src/Database/Seeders/Product/Data/' . $sourceDir . '/';
+        $fullPath = base_path($imagesDir.$filename);
 
         if (file_exists($fullPath)) {
             return 'storage/'.Storage::putFile($targetPath, new File($fullPath));
@@ -645,12 +645,12 @@ class ThemeCustomizationTableSeeder extends Seeder
         $cards = '';
         foreach ($audiences as $aud) {
             $label = $isAr ? $aud['label_ar'] : $aud['label_en'];
-            $img   = $this->storeGroupImage('theme/15/groups', $aud['file']) ?? '';
+            $img   = $this->storeGroupImage('theme/15/groups', $aud['file'], 'suitable-images') ?? '';
             $href  = '/products?suitable_for='.$aud['id'];
 
             $cards .= '<div class="group-card-banner" style="width: 48%; min-width: 280px; max-width: 600px;">'
                 .'<a href="'.$href.'" style="display:block; text-decoration:none; color:inherit;">'
-                .'<div class="g-img-banner" style="width:100%; height:350px; transition:transform .25s ease; border-radius:24px; overflow:hidden; position:relative; background-color:#f8f9fa; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">'
+                .'<div class="g-img-banner" style="width:100%; aspect-ratio: 3/4; transition:transform .25s ease; border-radius:24px; overflow:hidden; position:relative; background-color:#f8f9fa; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">'
                 .'<img src="'.$img.'" alt="'.htmlspecialchars($label).'" style="width:100%;height:100%;object-fit:cover;">'
                 .'<div style="position:absolute; top:0; left:0; right:0; bottom:0; background:linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.5)); display:flex; align-items:center; justify-content:center;">'
                 .'<span style="font-size:42px;font-weight:900;color:#fff; text-shadow: 2px 2px 5px rgba(0,0,0,0.7);">'.htmlspecialchars($label).'</span>'
