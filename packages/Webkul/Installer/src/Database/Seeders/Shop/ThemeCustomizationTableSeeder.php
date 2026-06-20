@@ -160,14 +160,9 @@ class ThemeCustomizationTableSeeder extends Seeder
                                 ],
                             ],
                         ]),
-                    ], [
-                        'theme_customization_id' => 2,
-
-                        'locale' => $locale,
-
                         'options' => json_encode([
                             'html' => $this->buildGroupsHtml($locale),
-                            'css'  => '@media (max-width: 768px) { .groups-wrap > div:first-child { margin-bottom: 24px !important; gap: 8px !important; } .groups-wrap > div:first-child > div[style*="border-bottom"] { max-width: 40px !important; border-bottom-width: 2px !important; } .groups-wrap > div:first-child > span { font-size: 18px !important; } .groups-wrap > div:first-child > h2 { font-size: 20px !important; text-align: center !important; } .groups-circles { justify-content: center !important; gap: 12px !important; margin-bottom: 20px !important; } .groups-circles .group-card { width: 22% !important; max-width: 80px !important; } .groups-circles .group-card a { gap: 6px !important; } .groups-circles .group-card span { font-size: 11px !important; line-height: 1.2 !important; } .groups-rects { flex-direction: column !important; align-items: center !important; gap: 15px !important; } .groups-rects .group-card-rect { width: 100% !important; min-width: 0 !important; max-width: 100% !important; } .groups-rects .g-img-rect { height: 120px !important; } .groups-rects .g-img-rect span { font-size: 20px !important; } }',
+                            'css'  => '@media (max-width: 768px) { .groups-wrap > div:first-child { margin-bottom: 24px !important; gap: 8px !important; } .groups-wrap > div:first-child > div[style*="border-bottom"] { max-width: 40px !important; border-bottom-width: 2px !important; } .groups-wrap > div:first-child > span { font-size: 18px !important; } .groups-wrap > div:first-child > h2 { font-size: 20px !important; text-align: center !important; } .groups-circles { justify-content: center !important; gap: 12px !important; margin-bottom: 20px !important; } .groups-circles .group-card { width: 22% !important; max-width: 80px !important; } .groups-circles .group-card a { gap: 6px !important; } .groups-circles .group-card span { font-size: 11px !important; line-height: 1.2 !important; } .groups-rects { display: flex !important; flex-wrap: wrap !important; justify-content: space-between !important; gap: 12px !important; } .groups-rects .group-card-rect { width: 48% !important; min-width: 0 !important; max-width: 100% !important; } .groups-rects .g-img-rect { height: 120px !important; } }',
                         ]),
                     ], [
                         'theme_customization_id' => 14,
@@ -576,9 +571,6 @@ class ThemeCustomizationTableSeeder extends Seeder
                 .'<a href="'.$href.'" style="display:block; text-decoration:none; color:inherit;">'
                 .'<div class="g-img-rect" style="width:100%; height:160px; transition:transform .25s ease; border-radius:16px; overflow:hidden; position:relative; background-color:#f8f9fa; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">'
                 .'<img src="'.$img.'" alt="'.htmlspecialchars($label).'" style="width:100%;height:100%;object-fit:cover;">'
-                .'<div style="position:absolute; top:0; left:0; right:0; bottom:0; background:linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.5)); display:flex; align-items:center; justify-content:center;">'
-                .'<span style="font-size:32px;font-weight:800;color:#fff; text-shadow: 2px 2px 5px rgba(0,0,0,0.7);">'.htmlspecialchars($label).'</span>'
-                .'</div>'
                 .'</div>'
                 .'</a>'
                 .'</div>';
@@ -652,9 +644,6 @@ class ThemeCustomizationTableSeeder extends Seeder
                 .'<a href="'.$href.'" style="display:block; text-decoration:none; color:inherit;">'
                 .'<div class="g-img-banner" style="width:100%; aspect-ratio: 3/4; transition:transform .25s ease; border-radius:24px; overflow:hidden; position:relative; background-color:#f8f9fa; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">'
                 .'<img src="'.$img.'" alt="'.htmlspecialchars($label).'" style="width:100%;height:100%;object-fit:cover;">'
-                .'<div style="position:absolute; top:0; left:0; right:0; bottom:0; background:linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.5)); display:flex; align-items:center; justify-content:center;">'
-                .'<span style="font-size:42px;font-weight:900;color:#fff; text-shadow: 2px 2px 5px rgba(0,0,0,0.7);">'.htmlspecialchars($label).'</span>'
-                .'</div>'
                 .'</div>'
                 .'</a>'
                 .'</div>';
