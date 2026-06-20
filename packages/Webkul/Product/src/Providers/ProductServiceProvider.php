@@ -35,6 +35,7 @@ class ProductServiceProvider extends ServiceProvider
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
             $schedule->command('indexer:index --type=price')->dailyAt('00:01');
+            $schedule->command('indexer:index --mode=full')->dailyAt('00:00');
         });
 
         $this->app->register(EventServiceProvider::class);
