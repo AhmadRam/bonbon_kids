@@ -31,30 +31,24 @@ class ProductCategoriesTableSeeder extends Seeder
         }
 
         // Delete existing sample categories if any exist to start fresh
-        $slugsToDelete = ['boys-toys', 'smart-toys', 'educational-toys', 'toddlers-toys', 'under-1-dinar', 'girls-toys', 'outdoor-toys', 'offers', '0-2', '3-4', '5-7', '8-10', '11-12', '13+', '11+'];
-        foreach ($slugsToDelete as $slugToDelete) {
-            $translation = DB::table('category_translations')
-                ->where('slug', $slugToDelete)
-                ->first();
-
-            if ($translation) {
-                try {
-                    $this->categoryRepository->delete($translation->category_id);
-                } catch (\Exception $e) {
-                    // Ignore exceptions during cascade deletion
-                }
+        $children = $this->categoryRepository->findWhere(['parent_id' => $root->id]);
+        foreach ($children as $child) {
+            try {
+                $this->categoryRepository->delete($child->id);
+            } catch (\Exception $e) {
+                // Ignore exceptions during cascade deletion
             }
         }
 
         $categoriesData = [
-            ['ar' => 'ألعاب أولاد', 'en' => 'Boys Toys', 'file' => 'boys.png', 'status' => 1],
-            ['ar' => 'ألعاب ذكية', 'en' => 'Smart Toys', 'file' => 'smart.png', 'status' => 0],
             ['ar' => 'ألعاب تعليمية', 'en' => 'Educational Toys', 'file' => 'educational.png', 'status' => 1],
-            ['ar' => 'ألعاب مواليد', 'en' => 'Toddlers Toys', 'file' => 'toddlers.png', 'status' => 1],
-            ['ar' => 'اقل من 1 دينار', 'en' => 'Under 1 Dinar', 'file' => 'under-1-dinar.png', 'status' => 1],
-            ['ar' => 'ألعاب بنات', 'en' => 'Girls Toys', 'file' => 'girls.png', 'status' => 1],
-            ['ar' => 'ألعاب خارجية', 'en' => 'Outdoor Toys', 'file' => 'outdoor.png', 'status' => 0],
-            ['ar' => 'عروض', 'en' => 'Offers', 'file' => 'offers.png', 'status' => 1],
+            ['ar' => 'ألعاب خارجية', 'en' => 'Outdoor Toys', 'file' => 'outdoor.png', 'status' => 1],
+            ['ar' => 'ألعاب ذكية', 'en' => 'Smart Toys', 'file' => 'smart.png', 'status' => 1],
+            ['ar' => 'ألعاب منزلية', 'en' => 'Indoor Toys', 'file' => 'indoor.png', 'status' => 1],
+            ['ar' => 'ألعاب العرائس', 'en' => 'Dolls Toys', 'file' => 'dolls.png', 'status' => 0],
+            ['ar' => 'ألعاب سيارات', 'en' => 'Cars Toys', 'file' => 'cars.png', 'status' => 0],
+            ['ar' => 'ألعاب أقل من دينار', 'en' => 'Under 1 Dinar', 'file' => 'under-1-dinar.png', 'status' => 1],
+            ['ar' => 'عروض وخصومات', 'en' => 'Offers & Discounts', 'file' => 'offers.png', 'status' => 1],
         ];
 
         foreach ($categoriesData as $index => $data) {
@@ -67,12 +61,8 @@ class ProductCategoriesTableSeeder extends Seeder
                 'parent_id'    => $root->id,
             ]);
 
-            // Try to copy category image from previous group-images directory if exists
-            $imagePath = __DIR__ . '/Data/group-images/' . $data['file'];
-            if (!file_exists($imagePath)) {
-                // fallback to category-images if they moved it
-                $imagePath = __DIR__ . '/Data/category-images/' . $data['file'];
-            }
+            // Try to copy category image from category-images directory if exists
+            $imagePath = __DIR__ . '/Data/category-images/' . $data['file'];
             if (file_exists($imagePath)) {
                 $storedPath = Storage::putFile('category/' . $category->id, new File($imagePath));
                 $category->logo_path = $storedPath;

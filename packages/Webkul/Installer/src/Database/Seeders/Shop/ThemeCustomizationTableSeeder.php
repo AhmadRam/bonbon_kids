@@ -139,11 +139,11 @@ class ThemeCustomizationTableSeeder extends Seeder
                                     'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/1.png', 'sliders/en/1.png'),
                                 ], [
                                     'title' => '',
-                                    'link' => '/boys-toys',
+                                    'link' => '/smart-toys',
                                     'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/2.png', 'sliders/en/2.png'),
                                 ], [
                                     'title' => '',
-                                    'link' => '/girls-toys',
+                                    'link' => '/indoor-toys',
                                     'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/3.png', 'sliders/en/3.png'),
                                 ], [
                                     'title' => '',
@@ -155,7 +155,7 @@ class ThemeCustomizationTableSeeder extends Seeder
                                     'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/5.png', 'sliders/en/5.png'),
                                 ], [
                                     'title' => '',
-                                    'link' => '/offers',
+                                    'link' => '/offers-discounts',
                                     'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/6.png', 'sliders/en/6.png'),
                                 ],
                             ],
@@ -522,8 +522,8 @@ class ThemeCustomizationTableSeeder extends Seeder
      */
     public function storeGroupImage(string $targetPath, string $filename): ?string
     {
-        $groupImagesDir = 'packages/Webkul/Installer/src/Database/Seeders/Product/Data/group-images/';
-        $fullPath = base_path($groupImagesDir.$filename);
+        $categoryImagesDir = 'packages/Webkul/Installer/src/Database/Seeders/Product/Data/category-images/';
+        $fullPath = base_path($categoryImagesDir.$filename);
 
         if (file_exists($fullPath)) {
             return 'storage/'.Storage::putFile($targetPath, new File($fullPath));
@@ -538,15 +538,15 @@ class ThemeCustomizationTableSeeder extends Seeder
         $title = $isAr ? 'تسوق من خلال الفئات' : 'Shop by Categories';
 
         $circleGroups = [
-            ['ar' => 'ألعاب مواليد',   'en' => 'Toddlers Toys',    'slug' => 'toddlers-toys',    'file' => 'toddlers.png'],
-            ['ar' => 'ألعاب أولاد',    'en' => 'Boys Toys',        'slug' => 'boys-toys',        'file' => 'boys.png'],
-            ['ar' => 'ألعاب بنات',    'en' => 'Girls Toys',       'slug' => 'girls-toys',       'file' => 'girls.png'],
             ['ar' => 'ألعاب تعليمية', 'en' => 'Educational Toys', 'slug' => 'educational-toys', 'file' => 'educational.png'],
+            ['ar' => 'ألعاب خارجية', 'en' => 'Outdoor Toys',     'slug' => 'outdoor-toys',     'file' => 'outdoor.png'],
+            ['ar' => 'ألعاب ذكية',    'en' => 'Smart Toys',       'slug' => 'smart-toys',       'file' => 'smart.png'],
+            ['ar' => 'ألعاب منزلية',  'en' => 'Indoor Toys',      'slug' => 'indoor-toys',      'file' => 'indoor.png'],
         ];
 
         $rectGroups = [
-            ['ar' => 'اقل من 1 دينار', 'en' => 'Under 1 Dinar',    'slug' => 'under-1-dinar',    'file' => 'under-1-dinar.png'],
-            ['ar' => 'عروض',           'en' => 'Offers',           'slug' => 'offers',           'file' => 'offers.png'],
+            ['ar' => 'ألعاب أقل من دينار', 'en' => 'Under 1 Dinar',    'slug' => 'under-1-dinar',    'file' => 'under-1-dinar.png'],
+            ['ar' => 'عروض وخصومات',       'en' => 'Offers & Discounts', 'slug' => 'offers-discounts', 'file' => 'offers.png'],
         ];
 
         $cardsHtml = '<div class="groups-circles" style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; margin-bottom: 30px; width: 100%;">';
