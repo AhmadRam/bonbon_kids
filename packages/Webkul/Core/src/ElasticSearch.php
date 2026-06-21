@@ -101,6 +101,105 @@ class ElasticSearch
      */
     public function __call(string $method, array $parameters)
     {
-        return call_user_func_array([$this->makeConnection(), $method], $parameters);
+        try {
+            return call_user_func_array([$this->makeConnection(), $method], $parameters);
+        } catch (\Elastic\Elasticsearch\Exception\ClientResponseException $e) {
+            $statusCode = null;
+            if (method_exists($e, 'getResponse') && $e->getResponse()) {
+                $statusCode = $e->getResponse()->getStatusCode();
+            } else {
+                $statusCode = $e->getCode();
+            }
+
+            if ($statusCode === 404) {
+                if ($method === 'search') {
+                    $index = $parameters[0]['index'] ?? null;
+                    if ($index) {
+                        $this->handleMissingIndex($index);
+
+                        // Retry the search query after index creation
+                        try {
+                            return call_user_func_array([$this->makeConnection(), $method], $parameters);
+                        } catch (\Elastic\Elasticsearch\Exception\ClientResponseException $retryException) {
+                            $retryStatusCode = null;
+                            if (method_exists($retryException, 'getResponse') && $retryException->getResponse()) {
+                                $retryStatusCode = $retryException->getResponse()->getStatusCode();
+                            } else {
+                                $retryStatusCode = $retryException->getCode();
+                            }
+
+                            if ($retryStatusCode === 404) {
+                                return [
+                                    'hits' => [
+                                        'total' => [
+                                            'value' => 0,
+                                            'relation' => 'eq',
+                                        ],
+                                        'hits' => [],
+                                    ],
+                                    'suggest' => [
+                                        'name_suggest' => [
+                                            [
+                                                'options' => [],
+                                            ],
+                                        ],
+                                    ],
+                                    'aggregations' => [
+                                        'max_price' => ['value' => 0],
+                                        'min_price' => ['value' => 0],
+                                    ],
+                                ];
+                            }
+                            throw $retryException;
+                        }
+                    }
+                }
+            }
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Handle missing index by creating it and triggering a background reindexing.
+     *
+     * @param  string|array  $index
+     * @return void
+     */
+    protected function handleMissingIndex($index): void
+    {
+        $indices = is_array($index) ? $index : [$index];
+        $client = $this->makeConnection();
+
+        foreach ($indices as $indexName) {
+            try {
+                $existsResponse = $client->indices()->exists(['index' => $indexName]);
+                $exists = false;
+                if (method_exists($existsResponse, 'asBool')) {
+                    $exists = $existsResponse->asBool();
+                } elseif (method_exists($existsResponse, 'getStatusCode')) {
+                    $exists = $existsResponse->getStatusCode() === 200;
+                } else {
+                    $exists = (bool) $existsResponse;
+                }
+
+                if (! $exists) {
+                    $client->indices()->create(['index' => $indexName]);
+
+                    // Trigger background reindex
+                    $lockKey = 'elasticsearch_reindexing_' . $indexName;
+                    if (! \Illuminate\Support\Facades\Cache::has($lockKey)) {
+                        \Illuminate\Support\Facades\Cache::put($lockKey, true, now()->addMinutes(15));
+
+                        if (class_exists(\Webkul\Product\Jobs\ElasticSearch\ReindexFull::class)) {
+                            \Webkul\Product\Jobs\ElasticSearch\ReindexFull::dispatch();
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('ElasticSearch Auto-Indexing Error: ' . $e->getMessage());
+            }
+        }
     }
 }
+
