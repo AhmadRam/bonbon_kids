@@ -381,10 +381,16 @@ class ProductController extends Controller
      */
     public function download($productId, $attributeId)
     {
-        $productAttribute = $this->productAttributeValueRepository->findOneWhere([
+        $params = [
             'product_id' => $productId,
             'attribute_id' => $attributeId,
-        ]);
+        ];
+
+        if ($locale = request()->get('locale')) {
+            $params['locale'] = $locale;
+        }
+
+        $productAttribute = $this->productAttributeValueRepository->findOneWhere($params);
 
         return Storage::download($productAttribute['text_value']);
     }

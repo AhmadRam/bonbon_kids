@@ -159,7 +159,7 @@ class ProductForm extends FormRequest
                             $this->id,
                             $attribute->id,
                             $attribute->column_name,
-                            request($attribute->code)
+                            $value
                         )
                     ) {
                         $fail(trans('admin::app.catalog.products.index.already-taken', ['name' => ':attribute']));
@@ -169,6 +169,23 @@ class ProductForm extends FormRequest
 
             $this->rules[$attribute->code] = $validations;
         }
+
+        $locales = core()->getRequestedChannel()->locales->pluck('code')->toArray();
+        $processedRules = [];
+
+        foreach ($this->rules as $field => $rules) {
+            $attribute = $this->productEditableAttributes->where('code', $field)->first();
+
+            if ($attribute && $attribute->value_per_locale) {
+                foreach ($locales as $localeCode) {
+                    $processedRules[$field . '.' . $localeCode] = $rules;
+                }
+            } else {
+                $processedRules[$field] = $rules;
+            }
+        }
+
+        $this->rules = $processedRules;
 
         return $this->rules;
     }
@@ -231,9 +248,19 @@ class ProductForm extends FormRequest
 
         foreach ($tinyMCEFields as $field) {
             if ($this->has($field)) {
-                $this->merge([
-                    $field => clean_content($this->get($field)),
-                ]);
+                $value = $this->get($field);
+
+                if (is_array($value)) {
+                    $cleaned = [];
+                    foreach ($value as $key => $val) {
+                        $cleaned[$key] = is_string($val) ? clean_content($val) : $val;
+                    }
+                    $this->merge([$field => $cleaned]);
+                } elseif (is_string($value)) {
+                    $this->merge([
+                        $field => clean_content($value),
+                    ]);
+                }
             }
         }
     }

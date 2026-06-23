@@ -27,110 +27,213 @@ class ProductAttributeValueRepository extends Repository
     public function saveValues($data, $product, $attributes)
     {
         $attributeValuesToInsert = [];
+        $locales = core()->getAllLocales()->pluck('code')->toArray();
 
         foreach ($attributes as $attribute) {
-            if ($attribute->type === 'boolean') {
-                $data[$attribute->code] = ! empty($data[$attribute->code]);
+            $isLocalizedArray = false;
+            if ($attribute->value_per_locale && is_array($data[$attribute->code] ?? null)) {
+                $isLocalizedArray = ! empty(array_intersect(array_keys($data[$attribute->code]), $locales));
             }
 
-            if (in_array($attribute->type, ['multiselect', 'checkbox'])) {
-                $data[$attribute->code] = implode(',', $data[$attribute->code] ?? []);
-            }
+            if ($isLocalizedArray) {
+                foreach ($data[$attribute->code] as $localeCode => $value) {
+                    if (! in_array($localeCode, $locales)) {
+                        continue;
+                    }
 
-            if (! isset($data[$attribute->code])) {
-                continue;
-            }
+                    if ($attribute->type === 'boolean') {
+                        $value = ! empty($value);
+                    }
 
-            if (
-                $attribute->type === 'price'
-                && empty($data[$attribute->code])
-            ) {
-                $data[$attribute->code] = null;
-            }
+                    if (in_array($attribute->type, ['multiselect', 'checkbox'])) {
+                        $value = implode(',', $value ?? []);
+                    }
 
-            if (
-                $attribute->type === 'date'
-                && empty($data[$attribute->code])
-            ) {
-                $data[$attribute->code] = null;
-            }
+                    if (
+                        $attribute->type === 'price'
+                        && empty($value)
+                    ) {
+                        $value = null;
+                    }
 
-            if (in_array($attribute->type, ['image', 'file'])) {
-                $data[$attribute->code] = gettype($data[$attribute->code]) === 'object'
-                    ? request()->file($attribute->code)->store('product/'.$product->id)
-                    : $data[$attribute->code];
-            }
+                    if (
+                        $attribute->type === 'date'
+                        && empty($value)
+                    ) {
+                        $value = null;
+                    }
 
-            $attributeValues = $product->attribute_values
-                ->where('attribute_id', $attribute->id);
+                    if (in_array($attribute->type, ['image', 'file'])) {
+                        $file = null;
+                        if (gettype($value) === 'object') {
+                            $file = $value;
+                        } elseif (request()->hasFile($attribute->code . '.' . $localeCode)) {
+                            $file = request()->file($attribute->code . '.' . $localeCode);
+                        }
 
-            $channel = $attribute->value_per_channel ? ($data['channel'] ?? core()->getDefaultChannelCode()) : null;
+                        $value = $file ? $file->store('product/'.$product->id) : $value;
+                    }
 
-            $locale = $attribute->value_per_locale ? ($data['locale'] ?? core()->getDefaultLocaleCodeFromDefaultChannel()) : null;
+                    $attributeValues = $product->attribute_values
+                        ->where('attribute_id', $attribute->id);
 
-            if ($attribute->value_per_channel) {
-                if ($attribute->value_per_locale) {
-                    $filteredAttributeValues = $attributeValues
-                        ->where('channel', $channel)
-                        ->where('locale', $locale);
-                } else {
-                    $filteredAttributeValues = $attributeValues
-                        ->where('channel', $channel);
+                    $channel = $attribute->value_per_channel ? ($data['channel'] ?? core()->getDefaultChannelCode()) : null;
+
+                    $locale = $localeCode;
+
+                    if ($attribute->value_per_channel) {
+                        $filteredAttributeValues = $attributeValues
+                            ->where('channel', $channel)
+                            ->where('locale', $locale);
+                    } else {
+                        $filteredAttributeValues = $attributeValues
+                            ->where('locale', $locale);
+                    }
+
+                    $attributeValue = $filteredAttributeValues->first();
+
+                    $uniqueId = implode('|', array_filter([
+                        $channel,
+                        $locale,
+                        $product->id,
+                        $attribute->id,
+                    ]));
+
+                    if (! $attributeValue) {
+                        $attributeValuesToInsert[] = array_merge($this->getAttributeTypeColumnValues($attribute, $value), [
+                            'product_id' => $product->id,
+                            'attribute_id' => $attribute->id,
+                            'channel' => $channel,
+                            'locale' => $locale,
+                            'unique_id' => $uniqueId,
+                        ]);
+                    } else {
+                        $previousTextValue = $attributeValue->text_value;
+
+                        if (in_array($attribute->type, ['image', 'file'])) {
+                            if (! empty($value['delete'])) {
+                                Storage::delete($previousTextValue);
+
+                                $value = null;
+                            }
+                            elseif (
+                                ! empty($previousTextValue)
+                                && $value != $previousTextValue
+                            ) {
+                                Storage::delete($previousTextValue);
+                            }
+                        }
+
+                        $attributeValue = $this->update([
+                            $attribute->column_name => $value,
+                            'unique_id' => $uniqueId,
+                        ], $attributeValue->id);
+                    }
                 }
             } else {
-                if ($attribute->value_per_locale) {
-                    $filteredAttributeValues = $attributeValues
-                        ->where('locale', $locale);
-                } else {
-                    $filteredAttributeValues = $attributeValues;
+                if ($attribute->type === 'boolean') {
+                    $data[$attribute->code] = ! empty($data[$attribute->code]);
                 }
-            }
 
-            $attributeValue = $filteredAttributeValues->first();
+                if (in_array($attribute->type, ['multiselect', 'checkbox'])) {
+                    $data[$attribute->code] = implode(',', $data[$attribute->code] ?? []);
+                }
 
-            $uniqueId = implode('|', array_filter([
-                $channel,
-                $locale,
-                $product->id,
-                $attribute->id,
-            ]));
+                if (! isset($data[$attribute->code])) {
+                    continue;
+                }
 
-            if (! $attributeValue) {
-                $attributeValuesToInsert[] = array_merge($this->getAttributeTypeColumnValues($attribute, $data[$attribute->code]), [
-                    'product_id' => $product->id,
-                    'attribute_id' => $attribute->id,
-                    'channel' => $channel,
-                    'locale' => $locale,
-                    'unique_id' => $uniqueId,
-                ]);
-            } else {
-                $previousTextValue = $attributeValue->text_value;
+                if (
+                    $attribute->type === 'price'
+                    && empty($data[$attribute->code])
+                ) {
+                    $data[$attribute->code] = null;
+                }
+
+                if (
+                    $attribute->type === 'date'
+                    && empty($data[$attribute->code])
+                ) {
+                    $data[$attribute->code] = null;
+                }
 
                 if (in_array($attribute->type, ['image', 'file'])) {
-                    /**
-                     * If $data[$attribute->code]['delete'] is not empty, that means someone selected the "delete" option.
-                     */
-                    if (! empty($data[$attribute->code]['delete'])) {
-                        Storage::delete($previousTextValue);
+                    $data[$attribute->code] = gettype($data[$attribute->code]) === 'object'
+                        ? request()->file($attribute->code)->store('product/'.$product->id)
+                        : $data[$attribute->code];
+                }
 
-                        $data[$attribute->code] = null;
+                $attributeValues = $product->attribute_values
+                    ->where('attribute_id', $attribute->id);
+
+                $channel = $attribute->value_per_channel ? ($data['channel'] ?? core()->getDefaultChannelCode()) : null;
+
+                $locale = $attribute->value_per_locale ? ($data['locale'] ?? core()->getDefaultLocaleCodeFromDefaultChannel()) : null;
+
+                if ($attribute->value_per_channel) {
+                    if ($attribute->value_per_locale) {
+                        $filteredAttributeValues = $attributeValues
+                            ->where('channel', $channel)
+                            ->where('locale', $locale);
+                    } else {
+                        $filteredAttributeValues = $attributeValues
+                            ->where('channel', $channel);
                     }
-                    /**
-                     * If $data[$attribute->code] is not equal to the previous one, that means someone has
-                     * updated the file or image. In that case, we will remove the previous file.
-                     */
-                    elseif (
-                        ! empty($previousTextValue)
-                        && $data[$attribute->code] != $previousTextValue
-                    ) {
-                        Storage::delete($previousTextValue);
+                } else {
+                    if ($attribute->value_per_locale) {
+                        $filteredAttributeValues = $attributeValues
+                            ->where('locale', $locale);
+                    } else {
+                        $filteredAttributeValues = $attributeValues;
                     }
                 }
 
-                $attributeValue = $this->update([
-                    $attribute->column_name => $data[$attribute->code],
-                    'unique_id' => $uniqueId,
-                ], $attributeValue->id);
+                $attributeValue = $filteredAttributeValues->first();
+
+                $uniqueId = implode('|', array_filter([
+                    $channel,
+                    $locale,
+                    $product->id,
+                    $attribute->id,
+                ]));
+
+                if (! $attributeValue) {
+                    $attributeValuesToInsert[] = array_merge($this->getAttributeTypeColumnValues($attribute, $data[$attribute->code]), [
+                        'product_id' => $product->id,
+                        'attribute_id' => $attribute->id,
+                        'channel' => $channel,
+                        'locale' => $locale,
+                        'unique_id' => $uniqueId,
+                    ]);
+                } else {
+                    $previousTextValue = $attributeValue->text_value;
+
+                    if (in_array($attribute->type, ['image', 'file'])) {
+                        /**
+                         * If $data[$attribute->code]['delete'] is not empty, that means someone selected the "delete" option.
+                         */
+                        if (! empty($data[$attribute->code]['delete'])) {
+                            Storage::delete($previousTextValue);
+
+                            $data[$attribute->code] = null;
+                        }
+                        /**
+                         * If $data[$attribute->code] is not equal to the previous one, that means someone has
+                         * updated the file or image. In that case, we will remove the previous file.
+                         */
+                        elseif (
+                            ! empty($previousTextValue)
+                            && $data[$attribute->code] != $previousTextValue
+                        ) {
+                            Storage::delete($previousTextValue);
+                        }
+                    }
+
+                    $attributeValue = $this->update([
+                        $attribute->column_name => $data[$attribute->code],
+                        'unique_id' => $uniqueId,
+                    ], $attributeValue->id);
+                }
             }
         }
 

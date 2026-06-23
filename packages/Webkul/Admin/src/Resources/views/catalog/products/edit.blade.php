@@ -99,41 +99,12 @@
                     </x-slot>
                 </x-admin::dropdown>
 
-                <!-- Locale Switcher -->
-                <x-admin::dropdown :class="$currentChannel->locales->count() <= 1 ? 'hidden' : ''">
-                    <!-- Dropdown Toggler -->
-                    <x-slot:toggle>
-                        <button
-                            type="button"
-                            class="transparent-button px-1 py-1.5 hover:bg-gray-200 focus:bg-gray-200 dark:text-white dark:hover:bg-gray-800 dark:focus:bg-gray-800"
-                        >
-                            <span class="icon-language text-2xl"></span>
-
-                            <span v-pre>{{ $currentLocale->name }}</span>
-                            
-                            <input
-                                type="hidden"
-                                name="locale"
-                                value="{{ $currentLocale->code }}"
-                            />
-
-                            <span class="icon-sort-down text-2xl"></span>
-                        </button>
-                    </x-slot>
-
-                    <!-- Dropdown Content -->
-                    <x-slot:content class="!p-0">
-                        @foreach ($currentChannel->locales->sortBy('name') as $locale)
-                            <a
-                                href="?{{ Arr::query(['channel' => $currentChannel->code, 'locale' => $locale->code]) }}"
-                                class="flex gap-2.5 px-5 py-2 text-base cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-950 dark:text-white {{ $locale->code == $currentLocale->code ? 'bg-gray-100 dark:bg-gray-950' : ''}}"
-                                v-pre
-                            >
-                                {{ $locale->name }}
-                            </a>
-                        @endforeach
-                    </x-slot>
-                </x-admin::dropdown>
+                <!-- Locale Switcher (Hidden) -->
+                <input
+                    type="hidden"
+                    name="locale"
+                    value="{{ $currentLocale->code }}"
+                />
             </div>
         </div>
 
@@ -190,45 +161,84 @@
                                 </p>
 
                                 @if ($group->code == 'meta_description')
-                                    <x-admin::seo />
+                                    @foreach ($currentChannel->locales->sortBy('name') as $locale)
+                                        <div class="mb-6 last:mb-0 border-b pb-6 last:border-b-0 dark:border-gray-800">
+                                            <p class="mb-2 text-xs font-semibold text-gray-800 dark:text-white">
+                                                {{ trans('admin::app.catalog.products.edit.preview') }} ({{ $locale->name }})
+                                            </p>
+                                            <x-admin::seo
+                                                :meta-title-field="'meta_title[' . $locale->code . ']'"
+                                                :url-key-field="'url_key[' . $locale->code . ']'"
+                                                :meta-description-field="'meta_description[' . $locale->code . ']'"
+                                            />
+                                        </div>
+                                    @endforeach
                                 @endif
 
                                 @foreach ($customAttributes as $attribute)
                                     {!! view_render_event("bagisto.admin.catalog.product.edit.form.{$group->code}.controls.before", ['product' => $product]) !!}
 
-                                    <x-admin::form.control-group class="last:!mb-0">
-                                        <x-admin::form.control-group.label>
-                                            {!! $attribute->admin_name . ($attribute->is_required ? '<span class="required"></span>' : '') !!}
+                                    @if ($attribute->value_per_locale)
+                                        @foreach ($currentChannel->locales->sortBy('name') as $locale)
+                                            <x-admin::form.control-group class="last:!mb-0">
+                                                <x-admin::form.control-group.label>
+                                                    {!! $attribute->admin_name . ($attribute->is_required ? '<span class="required"></span>' : '') !!}
 
-                                            @if (
-                                                $attribute->value_per_channel
-                                                && $channels->count() > 1
-                                            )
-                                                <span 
-                                                    class="rounded border border-gray-200 bg-gray-100 px-1 py-0.5 text-[10px] font-semibold leading-normal text-gray-600"
-                                                    v-pre
-                                                >
-                                                    {{ $currentChannel->name }}
-                                                </span>
-                                            @endif
+                                                    @if (
+                                                        $attribute->value_per_channel
+                                                        && $channels->count() > 1
+                                                    )
+                                                        <span 
+                                                            class="rounded border border-gray-200 bg-gray-100 px-1 py-0.5 text-[10px] font-semibold leading-normal text-gray-600"
+                                                            v-pre
+                                                        >
+                                                            {{ $currentChannel->name }}
+                                                        </span>
+                                                    @endif
 
-                                            @if ($attribute->value_per_locale)
-                                                <span
-                                                    class="rounded border border-gray-200 bg-gray-100 px-1 py-0.5 text-[10px] font-semibold leading-normal text-gray-600"
-                                                    v-pre
-                                                >
-                                                    {{ $currentLocale->name }}
-                                                </span>
-                                            @endif
-                                        </x-admin::form.control-group.label>
+                                                    <span
+                                                        class="rounded border border-gray-200 bg-gray-100 px-1 py-0.5 text-[10px] font-semibold leading-normal text-gray-600"
+                                                        v-pre
+                                                    >
+                                                        {{ $locale->name }}
+                                                    </span>
+                                                </x-admin::form.control-group.label>
 
-                                        @include ('admin::catalog.products.edit.controls', [
-                                            'attribute' => $attribute,
-                                            'product'   => $product,
-                                        ])
+                                                @include ('admin::catalog.products.edit.controls', [
+                                                    'attribute' => $attribute,
+                                                    'product'   => $product,
+                                                    'localeCode' => $locale->code,
+                                                ])
 
-                                        <x-admin::form.control-group.error :control-name="$attribute->code . (in_array($attribute->type, ['multiselect', 'checkbox']) ? '[]' : '')" />
-                                    </x-admin::form.control-group>
+                                                <x-admin::form.control-group.error :control-name="$attribute->code . '[' . $locale->code . ']' . (in_array($attribute->type, ['multiselect', 'checkbox']) ? '[]' : '')" />
+                                            </x-admin::form.control-group>
+                                        @endforeach
+                                    @else
+                                        <x-admin::form.control-group class="last:!mb-0">
+                                            <x-admin::form.control-group.label>
+                                                {!! $attribute->admin_name . ($attribute->is_required ? '<span class="required"></span>' : '') !!}
+
+                                                @if (
+                                                    $attribute->value_per_channel
+                                                    && $channels->count() > 1
+                                                )
+                                                    <span 
+                                                        class="rounded border border-gray-200 bg-gray-100 px-1 py-0.5 text-[10px] font-semibold leading-normal text-gray-600"
+                                                        v-pre
+                                                    >
+                                                        {{ $currentChannel->name }}
+                                                    </span>
+                                                @endif
+                                            </x-admin::form.control-group.label>
+
+                                            @include ('admin::catalog.products.edit.controls', [
+                                                'attribute' => $attribute,
+                                                'product'   => $product,
+                                            ])
+
+                                            <x-admin::form.control-group.error :control-name="$attribute->code . (in_array($attribute->type, ['multiselect', 'checkbox']) ? '[]' : '')" />
+                                        </x-admin::form.control-group>
+                                    @endif
 
                                     {!! view_render_event("bagisto.admin.catalog.product.edit.form.{$group->code}.controls.after", ['product' => $product]) !!}
                                 @endforeach

@@ -1,22 +1,42 @@
+@php
+    $inputName = $attribute->code;
+
+    if ($attribute->value_per_locale && isset($localeCode)) {
+        $inputName = $attribute->code . '[' . $localeCode . ']';
+
+        $channel = $attribute->value_per_channel ? core()->getRequestedChannelCode() : null;
+
+        $attrValModel = $product->attribute_values
+            ->where('attribute_id', $attribute->id)
+            ->where('channel', $channel)
+            ->where('locale', $localeCode)
+            ->first();
+
+        $attributeValue = $attrValModel ? $attrValModel[$attribute->column_name] : $attribute->default_value;
+    } else {
+        $attributeValue = $product[$attribute->code];
+    }
+@endphp
+
 @switch($attribute->type)
     @case('text')
         <v-field
             type="text"
-            name="{{ $attribute->code }}"
+            name="{{ $inputName }}"
             :rules="{{ $attribute->validations }}"
-            value="{{ old($attribute->code) ?: $product[$attribute->code] }}"
+            value="{{ old($inputName) ?: $attributeValue }}"
             v-slot="{ field }"
             label="{{ $attribute->admin_name }}"
         >
             <input
                 type="text"
-                id="{{ $attribute->code }}"
-                :class="[errors['{{ $attribute->code }}'] ? 'border border-red-600 hover:border-red-600' : '']"
+                id="{{ $inputName }}"
+                :class="[errors['{{ $inputName }}'] ? 'border border-red-600 hover:border-red-600' : '']"
                 class="w-full rounded-md border px-3 py-2.5 text-sm text-gray-600 transition-all hover:border-gray-400 focus:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-400 dark:focus:border-gray-400"
-                name="{{ $attribute->code }}"
+                name="{{ $inputName }}"
                 v-bind="field"
                 @if ($attribute->code == 'url_key') v-slugify @endif
-                @if ($attribute->code == 'name') v-slugify-target:url_key="setValues" @endif
+                @if ($attribute->code == 'name') v-slugify-target:{{ isset($localeCode) ? 'url_key[' . $localeCode . ']' : 'url_key' }}="setValues" @endif
             >
         </v-field>
 
@@ -24,11 +44,11 @@
     @case('price')
         <x-admin::form.control-group.control
             type="price"
-            :id="$attribute->code"
+            :id="$inputName"
             :class="($attribute->code == 'price' ? 'py-2.5 bg-gray-50 text-xl font-bold' : '')"
-            :name="$attribute->code"
+            :name="$inputName"
             ::rules="{{ $attribute->validations }}"
-            value="{{ old($attribute->code) ?: $product[$attribute->code] }}"
+            value="{{ old($inputName) ?: $attributeValue }}"
             :label="$attribute->admin_name"
         >
             <x-slot:currency :class="'dark:text-gray-300 ' . ($attribute->code == 'price' ? 'bg-gray-50 dark:bg-gray-900 text-xl' : '')">
@@ -40,10 +60,10 @@
     @case('textarea')
         <x-admin::form.control-group.control
             type="textarea"
-            :id="$attribute->code"
-            :name="$attribute->code"
+            :id="$inputName"
+            :name="$inputName"
             ::rules="{{ $attribute->validations }}"
-            value="{{ old($attribute->code) ?: $product[$attribute->code] }}"
+            value="{{ old($inputName) ?: $attributeValue }}"
             :label="$attribute->admin_name"
             :tinymce="(bool) $attribute->enable_wysiwyg"
         />
@@ -52,10 +72,10 @@
     @case('date')
         <x-admin::form.control-group.control
             type="date"
-            :id="$attribute->code"
-            :name="$attribute->code"
+            :id="$inputName"
+            :name="$inputName"
             ::rules="{{ $attribute->validations }}"
-            value="{{ old($attribute->code) ?: $product[$attribute->code] }}"
+            value="{{ old($inputName) ?: $attributeValue }}"
             :label="$attribute->admin_name"
         />
 
@@ -63,9 +83,9 @@
     @case('datetime')
         <x-admin::form.control-group.control
             type="datetime"
-            :name="$attribute->code"
+            :name="$inputName"
             ::rules="{{ $attribute->validations }}"
-            value="{{ old($attribute->code) ?: $product[$attribute->code] }}"
+            value="{{ old($inputName) ?: $attributeValue }}"
             :label="$attribute->admin_name"
         />
 
@@ -73,14 +93,14 @@
     @case('select')
         <x-admin::form.control-group.control
             type="select"
-            :id="$attribute->code"
-            :name="$attribute->code"
+            :id="$inputName"
+            :name="$inputName"
             ::rules="{{ $attribute->validations }}"
-            :value="old($attribute->code) ?: $product[$attribute->code]"
+            :value="old($inputName) ?: $attributeValue"
             :label="$attribute->admin_name"
         >
             @php
-                $selectedOption = old($attribute->code) ?: $product[$attribute->code];
+                $selectedOption = old($inputName) ?: $attributeValue;
 
                 if ($attribute->code === 'tax_category_id') {
                     $options = app('Webkul\Tax\Repositories\TaxCategoryRepository')->all();
@@ -127,13 +147,13 @@
         @break
     @case('multiselect')
         @php
-            $selectedOption = old($attribute->code) ?: explode(',', $product[$attribute->code]);
+            $selectedOption = old($inputName) ?: (is_string($attributeValue) ? explode(',', $attributeValue) : []);
         @endphp
 
         <x-admin::form.control-group.control
             type="multiselect"
-            :id="$attribute->code . '[]'"
-            :name="$attribute->code . '[]'"
+            :id="$inputName . '[]'"
+            :name="$inputName . '[]'"
             ::rules="{{ $attribute->validations }}"
             :label="$attribute->admin_name"
         >
@@ -151,25 +171,25 @@
         @break
     @case('checkbox')
         @php
-            $selectedOption = old($attribute->code) ?: explode(',', $product[$attribute->code]);
+            $selectedOption = old($inputName) ?: (is_string($attributeValue) ? explode(',', $attributeValue) : []);
         @endphp
 
         @foreach ($attribute->options as $option)
             <div class="mb-2 flex items-center gap-2.5 last:!mb-0">
                 <x-admin::form.control-group.control
                     type="checkbox"
-                    :id="$attribute->code . '_' . $option->id"
-                    :name="$attribute->code . '[]'"
+                    :id="$inputName . '_' . $option->id"
+                    :name="$inputName . '[]'"
                     ::rules="{{ $attribute->validations }}"
                     :value="$option->id"
-                    :for="$attribute->code . '_' . $option->id"
+                    :for="$inputName . '_' . $option->id"
                     :label="$attribute->admin_name"
                     :checked="in_array($option->id, $selectedOption)"
                 />
 
                 <label
                     class="cursor-pointer select-none text-xs font-medium text-gray-600 dark:text-gray-300"
-                    for="{{ $attribute->code . '_' . $option->id }}"
+                    for="{{ $inputName . '_' . $option->id }}"
                     v-pre
                 >
                     {{ $option->admin_name }}
@@ -179,12 +199,12 @@
 
         @break
     @case('boolean')
-        @php $selectedValue = old($attribute->code) ?: $product[$attribute->code] @endphp
+        @php $selectedValue = old($inputName) ?: $attributeValue @endphp
 
         <x-admin::form.control-group.control
             type="switch"
-            :id="$attribute->code"
-            :name="$attribute->code"
+            :id="$inputName"
+            :name="$inputName"
             :value="1"
             :label="$attribute->admin_name"
             :checked="(boolean) $selectedValue"
@@ -194,15 +214,15 @@
     @case('image')
     @case('file')
         <div class="flex gap-2.5">
-            @if ($product[$attribute->code])
+            @if ($attributeValue)
                 <a
-                    href="{{ route('admin.catalog.products.file.download', [$product->id, $attribute->id] )}}"
+                    href="{{ route('admin.catalog.products.file.download', [$product->id, $attribute->id, 'locale' => $localeCode ?? null] )}}"
                     class="flex"
                 >
                     @if ($attribute->type == 'image')
-                        @if (Storage::exists($product[$attribute->code]))
+                        @if (Storage::exists($attributeValue))
                             <img
-                                src="{{ Storage::url($product[$attribute->code]) }}"
+                                src="{{ Storage::url($attributeValue) }}"
                                 class="h-[45px] w-[45px] overflow-hidden rounded border hover:border-gray-400 dark:border-gray-800"
                             />
                         @endif
@@ -215,43 +235,43 @@
 
                 <input
                     type="hidden"
-                    name="{{ $attribute->code }}"
-                    value="{{ $product[$attribute->code] }}"
+                    name="{{ $inputName }}"
+                    value="{{ $attributeValue }}"
                 />
             @endif
 
             <v-field
                 type="file"
                 class="w-full"
-                name="{{ $attribute->code }}"
+                name="{{ $inputName }}"
                 :rules="{{ $attribute->validations }}"
                 v-slot="{ handleChange, handleBlur }"
                 label="{{ $attribute->admin_name }}"
             >
                 <input
                     type="file"
-                    id="{{ $attribute->code }}"
-                    :class="[errors['{{ $attribute->code }}'] ? 'border border-red-600 hover:border-red-600' : '']"
+                    id="{{ $inputName }}"
+                    :class="[errors['{{ $inputName }}'] ? 'border border-red-600 hover:border-red-600' : '']"
                     class="w-full rounded-md border px-3 py-2.5 text-sm text-gray-600 transition-all hover:border-gray-400 focus:border-gray-400 dark:border-gray-800 dark:text-gray-300 dark:file:bg-gray-800 dark:file:dark:text-white dark:hover:border-gray-400 dark:focus:border-gray-400"
-                    name="{{ $attribute->code }}"
+                    name="{{ $inputName }}"
                     @change="handleChange"
                     @blur="handleBlur"
                 >
             </v-field>
         </div>
 
-        @if ($product[$attribute->code])
+        @if ($attributeValue)
             <div class="mt-2.5 flex items-center gap-2.5">
                 <x-admin::form.control-group.control
                     type="checkbox"
-                    :id="$attribute->code . '_delete'"
-                    :name="$attribute->code . '[delete]'"
+                    :id="$inputName . '_delete'"
+                    :name="$inputName . '[delete]'"
                     value="1"
-                    :for="$attribute->code . '_delete'"
+                    :for="$inputName . '_delete'"
                 />
 
                 <label
-                    for="{{ $attribute->code . '_delete' }}"
+                    for="{{ $inputName . '_delete' }}"
                     class="cursor-pointer select-none text-sm text-gray-600 dark:text-gray-300"
                 >
                     @lang('admin::app.catalog.products.edit.remove')
