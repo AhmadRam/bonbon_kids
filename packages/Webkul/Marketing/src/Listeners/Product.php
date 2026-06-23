@@ -41,18 +41,74 @@ class Product
 
         $product = $this->productRepository->find($id);
 
-        if ($currentURLKey === $product->url_key) {
-            return;
+        if (is_array($currentURLKey)) {
+            foreach ($currentURLKey as $localeCode => $newURLKey) {
+                if (! $newURLKey) {
+                    continue;
+                }
+
+                $oldURLKey = $this->getOldURLKey($product, $localeCode);
+
+                if ($newURLKey === $oldURLKey) {
+                    continue;
+                }
+
+                $this->handleURLRewrite($product, $oldURLKey, $newURLKey, $localeCode);
+            }
+        } else {
+            if ($currentURLKey === $product->url_key) {
+                return;
+            }
+
+            $this->handleURLRewrite($product, $product->url_key, $currentURLKey, core()->getRequestedLocaleCode());
+        }
+    }
+
+    /**
+     * Retrieve the old URL Key for a specific locale
+     *
+     * @param  mixed  $product
+     * @param  string  $localeCode
+     * @return string|null
+     */
+    protected function getOldURLKey($product, $localeCode)
+    {
+        $attribute = app(\Webkul\Attribute\Repositories\AttributeRepository::class)->findOneByField('code', 'url_key');
+        
+        if (! $attribute) {
+            return null;
         }
 
-        if (empty($product->url_key)) {
+        $channel = $attribute->value_per_channel ? core()->getRequestedChannelCode() : null;
+
+        $attrValModel = $product->attribute_values
+            ->where('attribute_id', $attribute->id)
+            ->where('channel', $channel)
+            ->where('locale', $localeCode)
+            ->first();
+
+        return $attrValModel ? $attrValModel[$attribute->column_name] : null;
+    }
+
+    /**
+     * Handle URL Rewrite creation/deletion logic
+     *
+     * @param  mixed  $product
+     * @param  string|null  $oldURLKey
+     * @param  string  $newURLKey
+     * @param  string  $localeCode
+     * @return void
+     */
+    protected function handleURLRewrite($product, $oldURLKey, $newURLKey, $localeCode)
+    {
+        if (empty($oldURLKey)) {
             /**
              * Delete category and product url rewrites
              * if already exists for the request path
              */
             $urlRewrites = $this->urlRewriteRepository->findWhere([
                 ['entity_type', 'IN', ['category', 'product']],
-                'request_path' => $currentURLKey,
+                'request_path' => $newURLKey,
             ]);
 
             foreach ($urlRewrites as $urlRewrite) {
@@ -72,7 +128,7 @@ class Product
          */
         $urlRewrites = $this->urlRewriteRepository->findWhere([
             ['entity_type', 'IN', ['category', 'product']],
-            'target_path' => $product->url_key,
+            'target_path' => $oldURLKey,
         ]);
 
         foreach ($urlRewrites as $urlRewrite) {
@@ -87,9 +143,9 @@ class Product
 
         $urlRewrite = $this->urlRewriteRepository->create([
             'entity_type' => 'product',
-            'request_path' => $product->url_key,
-            'target_path' => $currentURLKey ?? '',
-            'locale' => core()->getRequestedLocaleCode(),
+            'request_path' => $oldURLKey,
+            'target_path' => $newURLKey ?? '',
+            'locale' => $localeCode,
             'redirect_type' => self::PERMANENT_REDIRECT_CODE,
         ]);
 
