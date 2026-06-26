@@ -150,7 +150,10 @@
         type="text/x-template"
         id="v-filter-item-template"
     >
-        <x-shop::accordion class="last:border-b-0">
+        <!-- 
+            Price filter commented out as requested.
+        -->
+        <x-shop::accordion class="last:border-b-0" v-if="filter.type !== 'price'">
             <!-- Filter Item Header -->
             <x-slot:header class="px-0 py-2.5 max-sm:!pb-1.5">
                 <div class="flex items-center justify-between">

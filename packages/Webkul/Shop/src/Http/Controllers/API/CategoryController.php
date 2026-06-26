@@ -82,8 +82,8 @@ class CategoryController extends APIController
         
         $filterableAttributes->push($categoryAttribute);
 
-        // Sort attributes based on user request: Price, Category, Age Group, Suitable For
-        $order = ['price' => 1, 'category_id' => 2, 'age_group' => 3, 'suitable_for' => 4];
+        // Sort attributes based on user request: Suitable For, Price, Category, Age Group
+        $order = ['suitable_for' => 1, 'price' => 2, 'category_id' => 3, 'age_group' => 4];
         $filterableAttributes = $filterableAttributes->sortBy(function ($attribute) use ($order) {
             return $order[$attribute->code] ?? 99;
         })->values();
