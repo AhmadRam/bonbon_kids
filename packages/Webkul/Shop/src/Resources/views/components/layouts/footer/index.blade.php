@@ -96,7 +96,7 @@
                     alt="{{ config('app.name') }}"
                     class="max-w-[200px]"
                     width="200"
-                    height="131"
+                    height="70"
                 >
             </a>
 
