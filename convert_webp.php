@@ -16,22 +16,23 @@ function processOptions($options, &$updated) {
             $options[$key] = processOptions($value, $updated);
         } elseif (is_string($value) && preg_match('/\.(png|jpg|jpeg)$/i', $value)) {
             echo "Checking string: $value\n";
-            if (Storage::disk('public')->exists($value)) {
-                echo "Found image: $value\n";
-                $path = Storage::disk('public')->path($value);
+            $relativePath = preg_replace('/^storage\//i', '', $value);
+            if (Storage::disk('public')->exists($relativePath)) {
+                echo "Found image: $relativePath\n";
+                $path = Storage::disk('public')->path($relativePath);
                 try {
                     $image = image_manager()->read($path)->encodeByExtension('webp');
-                    $newPath = preg_replace('/\.(png|jpg|jpeg)$/i', '.webp', $value);
-                    Storage::disk('public')->put($newPath, (string) $image);
-                    $options[$key] = $newPath;
+                    $newRelativePath = preg_replace('/\.(png|jpg|jpeg)$/i', '.webp', $relativePath);
+                    Storage::disk('public')->put($newRelativePath, (string) $image);
+                    $options[$key] = preg_replace('/\.(png|jpg|jpeg)$/i', '.webp', $value);
                     $updated = true;
-                    echo "Converted to: $newPath\n";
+                    echo "Converted to: " . $options[$key] . "\n";
                     $convertedCount++;
                 } catch (\Exception $e) {
                     echo "Failed to convert $value: " . $e->getMessage() . "\n";
                 }
             } else {
-                echo "File not found in storage: $value\n";
+                echo "File not found in storage: $relativePath\n";
             }
         }
     }
