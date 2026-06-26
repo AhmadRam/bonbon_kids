@@ -40,11 +40,12 @@ class ConvertThemeImagesToWebp extends Command
         foreach ($options as $key => $value) {
             if (is_array($value)) {
                 $options[$key] = $this->processOptions($value, $updated);
-            } elseif (is_string($value) && preg_match('/\.(png|jpg|jpeg)$/i', $value)) {
-                // It's likely an image path. Let's check if it exists in storage
-                if (Storage::disk('public')->exists($value)) {
-                    $this->info("Found image: " . $value);
-                    $path = Storage::disk('public')->path($value);
+            } elseif (is_string($value)) {
+                if (preg_match('/\.(png|jpg|jpeg)$/i', $value)) {
+                    $this->info("Checking string: " . $value);
+                    if (Storage::disk('public')->exists($value)) {
+                        $this->info("Found image: " . $value);
+                        $path = Storage::disk('public')->path($value);
                     
                     try {
                         // Use Bagisto's ImageManager (Intervention) to encode
