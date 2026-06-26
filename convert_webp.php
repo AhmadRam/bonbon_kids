@@ -40,6 +40,11 @@ function processOptions($options, &$updated) {
 }
 
 foreach ($customizations as $customization) {
+    if (in_array($customization->id, [2, 15])) {
+        echo "Dumping ID {$customization->id} options:\n";
+        print_r($customization->options);
+    }
+    
     $options = $customization->options;
     $updated = false;
     if (is_array($options)) {
