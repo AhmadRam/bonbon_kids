@@ -136,27 +136,27 @@ class ThemeCustomizationTableSeeder extends Seeder
                                 [
                                     'title' => '',
                                     'link' => '/products',
-                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/1.png', 'sliders/en/1.png'),
+                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/1.webp', 'sliders/en/1.webp'),
                                 ], [
                                     'title' => '',
                                     'link' => '/smart-toys',
-                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/2.png', 'sliders/en/2.png'),
+                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/2.webp', 'sliders/en/2.webp'),
                                 ], [
                                     'title' => '',
                                     'link' => '/indoor-toys',
-                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/3.png', 'sliders/en/3.png'),
+                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/3.webp', 'sliders/en/3.webp'),
                                 ], [
                                     'title' => '',
                                     'link' => '/educational-toys',
-                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/4.png', 'sliders/en/4.png'),
+                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/4.webp', 'sliders/en/4.webp'),
                                 ], [
                                     'title' => '',
                                     'link' => '/under-1-dinar',
-                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/5.png', 'sliders/en/5.png'),
+                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/5.webp', 'sliders/en/5.webp'),
                                 ], [
                                     'title' => '',
                                     'link' => '/offers-discounts',
-                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/6.png', 'sliders/en/6.png'),
+                                    'image' => $this->storeFileIfExists('theme/1', 'sliders/'.$locale.'/6.webp', 'sliders/en/6.webp'),
                                 ],
                             ],
                         ]),
@@ -517,7 +517,7 @@ class ThemeCustomizationTableSeeder extends Seeder
      * Store a group swatch image from the ProductGroupsTableSeeder data directory.
      *
      * @param  string  $targetPath  Storage sub-path (e.g. 'theme/2/groups')
-     * @param  string  $filename    Image filename (e.g. 'toys.png')
+     * @param  string  $filename    Image filename (e.g. 'toys.webp')
      * @return string|null
      */
     public function storeGroupImage(string $targetPath, string $filename, string $sourceDir = 'category-images'): ?string
@@ -538,15 +538,15 @@ class ThemeCustomizationTableSeeder extends Seeder
         $title = $isAr ? 'تسوق من خلال الفئات' : 'Shop by Categories';
 
         $circleGroups = [
-            ['ar' => 'ألعاب تعليمية', 'en' => 'Educational Toys', 'slug' => 'educational-toys', 'file' => 'educational.png'],
-            ['ar' => 'ألعاب خارجية', 'en' => 'Outdoor Toys',     'slug' => 'outdoor-toys',     'file' => 'outdoor.png'],
-            ['ar' => 'ألعاب ذكية',    'en' => 'Smart Toys',       'slug' => 'smart-toys',       'file' => 'smart.png'],
-            ['ar' => 'ألعاب منزلية',  'en' => 'Indoor Toys',      'slug' => 'indoor-toys',      'file' => 'indoor.png'],
+            ['ar' => 'ألعاب تعليمية', 'en' => 'Educational Toys', 'slug' => 'educational-toys', 'file' => 'educational.webp'],
+            ['ar' => 'ألعاب خارجية', 'en' => 'Outdoor Toys',     'slug' => 'outdoor-toys',     'file' => 'outdoor.webp'],
+            ['ar' => 'ألعاب ذكية',    'en' => 'Smart Toys',       'slug' => 'smart-toys',       'file' => 'smart.webp'],
+            ['ar' => 'ألعاب منزلية',  'en' => 'Indoor Toys',      'slug' => 'indoor-toys',      'file' => 'indoor.webp'],
         ];
 
         $rectGroups = [
-            ['ar' => 'ألعاب أقل من دينار', 'en' => 'Under 1 Dinar',    'slug' => 'under-1-dinar',    'file' => 'under-1-dinar.png'],
-            ['ar' => 'عروض وخصومات',       'en' => 'Offers & Discounts', 'slug' => 'offers-discounts', 'file' => 'offers.png'],
+            ['ar' => 'ألعاب أقل من دينار', 'en' => 'Under 1 Dinar',    'slug' => 'under-1-dinar',    'file' => 'under-1-dinar.webp'],
+            ['ar' => 'عروض وخصومات',       'en' => 'Offers & Discounts', 'slug' => 'offers-discounts', 'file' => 'offers.webp'],
         ];
 
         $cardsHtml = '<div class="groups-circles" style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; margin-bottom: 30px; width: 100%;">';
@@ -635,8 +635,8 @@ class ThemeCustomizationTableSeeder extends Seeder
         $title = $isAr ? 'لمن تتسوق؟' : 'Who are you shopping for?';
 
         $audiences = [
-            ['id' => 15, 'label_en' => 'Girls', 'label_ar' => 'بنات', 'file' => 'girls.png'],
-            ['id' => 14, 'label_en' => 'Boys', 'label_ar' => 'أولاد', 'file' => 'boys.png'],
+            ['id' => 15, 'label_en' => 'Girls', 'label_ar' => 'بنات', 'file' => 'girls.webp'],
+            ['id' => 14, 'label_en' => 'Boys', 'label_ar' => 'أولاد', 'file' => 'boys.webp'],
         ];
 
         $cards = '';
