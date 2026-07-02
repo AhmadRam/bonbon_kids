@@ -122,7 +122,7 @@
 
                 {!! view_render_event('bagisto.shop.components.products.card.name.before') !!}
 
-                <p class="break-words text-base font-medium max-md:mb-1.5 max-md:max-w-56 max-md:leading-6 max-sm:max-w-[192px] max-sm:text-sm max-sm:leading-5">
+                <p class="w-full break-words text-base font-medium text-black max-md:mb-1.5 max-md:leading-6 max-sm:text-sm max-sm:leading-5 whitespace-normal line-clamp-2">
                     @{{ product.name }}
                 </p>
 
