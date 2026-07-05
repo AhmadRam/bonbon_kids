@@ -89,6 +89,13 @@
         {!! view_render_event('bagisto.shop.checkout.cart.cross_sell_carousel.after') !!}
     @endif
 
+    <!-- Cart Category Products (You might also like) -->
+    <x-shop::products.carousel
+        title="منتجات قد ترغب بها ايضا"
+        :src="route('shop.api.products.cart-category.index')"
+    >
+    </x-shop::products.carousel>
+
     @pushOnce('scripts')
         <script
             type="text/x-template"

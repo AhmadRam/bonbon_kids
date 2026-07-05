@@ -86,7 +86,7 @@
                                         </p>
                                     </div>
 
-                                    <p class="mt-6 text-sm text-zinc-500 max-md:mt-2 max-sm:mt-0">
+                                    <p class="hidden mt-6 text-sm text-zinc-500 max-md:mt-2 max-sm:mt-0">
                                         <template v-if="address.address">
                                             @{{ address.address.join(', ') }},
                                         </template>
@@ -206,7 +206,7 @@
                                                 </p>
                                             </div>
 
-                                            <p class="mt-6 text-sm text-zinc-500 max-md:mt-2 max-sm:mt-0">
+                                            <p class="hidden mt-6 text-sm text-zinc-500 max-md:mt-2 max-sm:mt-0">
                                                 <template v-if="address.address">
                                                     @{{ address.address.join(', ') }},
                                                 </template>

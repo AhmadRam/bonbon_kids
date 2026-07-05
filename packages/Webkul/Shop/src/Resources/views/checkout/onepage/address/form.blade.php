@@ -178,8 +178,8 @@
                 </x-shop::form.control-group.control>
             </x-shop::form.control-group>
 
-            <!-- State, City, Street -->
-            <div class="grid grid-cols-3 gap-x-5 max-md:grid-cols-1">
+            <!-- State, City, Block (Hidden) -->
+            <div class="hidden grid-cols-3 gap-x-5 max-md:grid-cols-1">
                 <!-- State -->
                 <x-shop::form.control-group>
                     <x-shop::form.control-group.label class="required !mt-0">
@@ -290,8 +290,8 @@
                 </x-shop::form.control-group>
             </div>
 
-            <!-- Custom Address Inputs Row 2 (Street, Avenue) -->
-            <div class="grid grid-cols-2 gap-x-5 max-md:grid-cols-1 mt-2">
+            <!-- Custom Address Inputs Row 2 (Street, Avenue) (Hidden) -->
+            <div class="hidden grid-cols-2 gap-x-5 max-md:grid-cols-1 mt-2">
                 <!-- Street -->
                 <x-shop::form.control-group>
                     <x-shop::form.control-group.label class="required !mt-0">
@@ -335,8 +335,8 @@
                 </x-shop::form.control-group>
             </div>
 
-            <!-- Custom Address Inputs Row 3 (House, Floor, Apartment) -->
-            <div class="grid grid-cols-3 gap-x-5 max-md:grid-cols-1 mt-2">
+            <!-- Custom Address Inputs Row 3 (House, Floor, Apartment) (Hidden) -->
+            <div class="hidden grid-cols-3 gap-x-5 max-md:grid-cols-1 mt-2">
                 <!-- House -->
                 <x-shop::form.control-group>
                     <x-shop::form.control-group.label class="required !mt-0">
@@ -401,8 +401,8 @@
                 </x-shop::form.control-group>
             </div>
 
-            <!-- Notes -->
-            <x-shop::form.control-group class="mt-2">
+            <!-- Notes (Hidden) -->
+            <x-shop::form.control-group class="mt-2 hidden">
                 <x-shop::form.control-group.label class="!mt-0">
                     @lang('shop::app.checkout.onepage.address.notes')
                 </x-shop::form.control-group.label>
@@ -467,7 +467,7 @@
                         first_name: '',
                         last_name: '',
                         email: '',
-                        address: [],
+                        address: ['0', 'NA', '', 'NA', 'NA', 'NA'],
                         country: '',
                         state: '',
                         city: '',

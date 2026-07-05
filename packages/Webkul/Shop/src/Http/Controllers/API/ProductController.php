@@ -158,4 +158,76 @@ class ProductController extends APIController
 
         return ProductResource::collection($upSellProducts);
     }
+
+    /**
+     * Same category product listings.
+     *
+     * @param  int  $id
+     */
+    public function sameCategoryProducts($id): JsonResource
+    {
+        $product = $this->productRepository->findOrFail($id);
+
+        $categoryIds = $product->categories->pluck('id')->implode(',');
+
+        if (empty($categoryIds)) {
+            return ProductResource::collection(collect());
+        }
+
+        $params = [
+            'category_id' => $categoryIds,
+            'limit'       => core()->getConfigData('catalog.products.product_view_page.no_of_related_products') ?: 10,
+            'sort'        => 'rand',
+            'order'       => 'rand',
+        ];
+
+        $sameCategoryProducts = $this->productRepository->getAll($params)
+            ->filter(function ($item) use ($product) {
+                return $item->id != $product->id;
+            });
+
+        return ProductResource::collection($sameCategoryProducts);
+    }
+
+    /**
+     * Cart category product listings.
+     */
+    public function cartCategoryProducts(): JsonResource
+    {
+        $cart = \Webkul\Checkout\Facades\Cart::getCart();
+
+        if (! $cart || ! $cart->items->count()) {
+            return ProductResource::collection(collect());
+        }
+
+        $categoryIds = [];
+        foreach ($cart->items as $item) {
+            $product = $item->product;
+            if ($product) {
+                $categoryIds = array_merge($categoryIds, $product->categories->pluck('id')->toArray());
+            }
+        }
+
+        $categoryIds = array_unique($categoryIds);
+
+        if (empty($categoryIds)) {
+            return ProductResource::collection(collect());
+        }
+
+        $cartProductIds = $cart->items->pluck('product_id')->toArray();
+
+        $params = [
+            'category_id' => implode(',', $categoryIds),
+            'limit'       => 10,
+            'sort'        => 'rand',
+            'order'       => 'rand',
+        ];
+
+        $cartCategoryProducts = $this->productRepository->getAll($params)
+            ->filter(function ($item) use ($cartProductIds) {
+                return ! in_array($item->id, $cartProductIds);
+            });
+
+        return ProductResource::collection($cartCategoryProducts);
+    }
 }
