@@ -385,22 +385,25 @@ class ProductDataGridExport implements FromCollection, ShouldAutoSize, WithHeadi
             return $value;
         }
 
+        // Replace newlines and tabs with spaces to prevent CSV/Excel row breakage
+        $value = str_replace(["\r\n", "\n", "\r", "\t"], ' ', $value);
+
         $trimmed = ltrim($value);
 
         if ($trimmed === '') {
             return $value;
         }
 
-        $dangerousChars = ['=', '+', '-', '@', "\t", "\r", "\n", '|', '%'];
+        $dangerousChars = ['=', '+', '-', '@', '|', '%'];
 
         $firstChar = mb_substr($trimmed, 0, 1);
 
         if (in_array($firstChar, $dangerousChars, true)) {
-            return "'".$value;
+            return "'" . $value;
         }
 
         if (preg_match('/^[\s]*[@=+\-|%]/u', $value)) {
-            return "'".$value;
+            return "'" . $value;
         }
 
         return $value;
