@@ -128,7 +128,7 @@ class ProductDataGridExport implements FromCollection, ShouldAutoSize, WithHeadi
                     return null;
                 }
 
-                return $this->resolveAttributeValue($record->product_id, $attribute);
+                return $this->resolveAttributeValue($record, $attribute);
             })
             ->values()
             ->toArray();
@@ -340,22 +340,24 @@ class ProductDataGridExport implements FromCollection, ShouldAutoSize, WithHeadi
      *
      * Returns null when no value exists.
      */
-    protected function resolveAttributeValue(int $productId, object $attribute): mixed
+    protected function resolveAttributeValue(object $record, object $attribute): mixed
     {
-        $productValues = $this->attributeValuesByProduct->get($productId, []);
+        $productValues = $this->attributeValuesByProduct->get($record->product_id, []);
 
         $row = $productValues[$attribute->id] ?? null;
+        $value = null;
 
-        if ($row === null) {
-            return null;
+        if ($row !== null) {
+            $column = ProductAttributeValue::$attributeTypeFields[$attribute->type] ?? 'text_value';
+            $value = $row->{$column};
         }
 
-        $column = ProductAttributeValue::$attributeTypeFields[$attribute->type] ?? 'text_value';
-
-        $value = $row->{$column};
-
         if ($value === null || $value === '') {
-            return null;
+            if (isset($record->{$attribute->code}) && $record->{$attribute->code} !== '') {
+                $value = $record->{$attribute->code};
+            } else {
+                return null;
+            }
         }
 
         return match ($attribute->type) {
