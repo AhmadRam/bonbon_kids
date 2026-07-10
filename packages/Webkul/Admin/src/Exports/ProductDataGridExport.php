@@ -125,10 +125,10 @@ class ProductDataGridExport implements FromCollection, ShouldAutoSize, WithHeadi
             ->map(function ($attribute) use ($record, $familyAttrIds) {
                 // Only export value when this attribute belongs to the product's family.
                 if (! in_array($attribute->id, $familyAttrIds)) {
-                    return null;
+                    return '';
                 }
 
-                return $this->resolveAttributeValue($record, $attribute);
+                return $this->sanitize($this->resolveAttributeValue($record, $attribute));
             })
             ->values()
             ->toArray();
