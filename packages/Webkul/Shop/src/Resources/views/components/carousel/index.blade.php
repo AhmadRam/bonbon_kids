@@ -2,7 +2,7 @@
 
 <v-carousel :images="{{ json_encode($options['images'] ?? []) }}">
     <div class="overflow-hidden">
-        <div class="shimmer aspect-[2.743/1] max-h-screen w-screen"></div>
+        <div class="shimmer aspect-[2.743/1] max-md:aspect-[1.8/1] max-sm:aspect-[1.6/1] max-h-screen w-screen"></div>
     </div>
 </v-carousel>
 
@@ -25,7 +25,7 @@
                     ref="slide"
                 >
                     <x-shop::media.images.lazy
-                        class="aspect-[2.743/1] max-h-full w-full max-w-full select-none transition-transform duration-300 ease-in-out will-change-transform"
+                        class="aspect-[2.743/1] max-md:aspect-[1.8/1] max-sm:aspect-[1.6/1] object-cover max-h-full w-full max-w-full select-none transition-transform duration-300 ease-in-out will-change-transform"
                         width="1920"
                         height="700"
                         ::lazy="index === 0 ? false : true"
