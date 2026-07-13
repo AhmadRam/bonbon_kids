@@ -69,10 +69,14 @@ abstract class UPayments extends Payment
     }
 
     /**
-     * Override isAvailable to also check credentials.
+     * Override isAvailable to also check credentials and limit to KNET only.
      */
     public function isAvailable(): bool
     {
+        if ($this->code !== 'upayments_knet') {
+            return false;
+        }
+
         return parent::isAvailable() && $this->hasValidCredentials();
     }
 
