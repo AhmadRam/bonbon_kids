@@ -1123,7 +1123,7 @@ return [
                 'floor'          => 'Floor',
                 'apartment'      => 'Apartment',
                 'notes'          => 'Notes (Special Mark)',
-                'title'          => 'Address',
+                'title'          => 'Customer Details',
                 'vat-id'         => 'Vat ID',
             ],
 

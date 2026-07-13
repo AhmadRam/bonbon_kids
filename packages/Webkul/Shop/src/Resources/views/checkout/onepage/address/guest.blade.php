@@ -27,11 +27,11 @@
                     {!! view_render_event('bagisto.shop.checkout.onepage.address.guest.billing.before') !!}
 
                     <!-- Billing Address Header -->
-                    <div class="flex items-center justify-between">
+                    {{-- <div class="flex items-center justify-between">
                         <h2 class="text-xl font-medium max-md:text-lg max-sm:text-base">
                             @lang('shop::app.checkout.onepage.address.billing-address')
                         </h2>
-                    </div>
+                    </div> --}}
                 
                     <!-- Billing Address Form -->
                     <v-checkout-address-form

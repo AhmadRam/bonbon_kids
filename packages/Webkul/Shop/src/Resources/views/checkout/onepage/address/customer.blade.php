@@ -31,11 +31,11 @@
                 >
                     <form @submit="handleSubmit($event, addAddressToCart)">
                         <!-- Billing Address Header -->
-                        <div class="mb-4 flex items-center justify-between max-md:mb-2">
+                        {{-- <div class="mb-4 flex items-center justify-between max-md:mb-2">
                             <h2 class="text-xl font-medium max-sm:text-base max-sm:font-normal">
                                 @lang('shop::app.checkout.onepage.address.billing-address')
                             </h2>
-                        </div>
+                        </div> --}}
 
                         <!-- Saved Customer Addresses Cards -->
                         <div class="mb-2 grid grid-cols-2 gap-5 max-1060:grid-cols-[1fr] max-lg:grid-cols-2 max-md:mt-2 max-md:grid-cols-1">
@@ -54,7 +54,7 @@
                                             ::value="address.id"
                                             v-model="selectedAddresses.billing_address_id"
                                             rules="required"
-                                            label="{{ trans('shop::app.checkout.onepage.address.billing-address') }}"
+                                            label="{{ trans('shop::app.checkout.onepage.address.title') }}"
                                         />
                                     </x-shop::form.control-group>
 
@@ -267,7 +267,7 @@
                         <div class="mb-4 flex items-center justify-between">
                             <h2 class="text-xl font-medium max-md:text-base max-sm:font-normal">
                                 <template v-if="activeAddressForm == 'billing'">
-                                    @lang('shop::app.checkout.onepage.address.billing-address')
+                                    @lang('shop::app.checkout.onepage.address.title')
                                 </template>
 
                                 <template v-else>
