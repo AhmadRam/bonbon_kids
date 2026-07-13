@@ -59,10 +59,6 @@
                         placeholder="@lang('shop::app.components.layouts.header.mobile.search-text')"
                         required
                     >
-
-                    @if (core()->getConfigData('catalog.products.settings.image_search'))
-                        @include('shop::search.images.index')
-                    @endif
                 </div>
             </form>
 

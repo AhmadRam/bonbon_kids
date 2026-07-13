@@ -144,10 +144,10 @@
                     @if (core()->getConfigData('sales.checkout.shopping_cart.cart_page'))
                         {!! view_render_event('bagisto.shop.components.products.card.add_to_cart.before') !!}
 
-                        <div class="flex items-center gap-2 w-full">
+                        <div class="flex flex-row md:flex-col items-center gap-2 w-full">
                             <!-- Add to Cart Button -->
                             <button
-                                class="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-toyBlue text-white py-2 px-3 text-sm font-semibold transition-all hover:bg-opacity-90 disabled:opacity-50 max-sm:text-xs max-sm:py-1.5 max-sm:px-2 max-sm:rounded-lg"
+                                class="flex flex-1 md:flex-none md:w-full items-center justify-center gap-1.5 rounded-xl bg-toyBlue text-white py-2 px-3 text-sm font-semibold transition-all hover:bg-opacity-90 disabled:opacity-50 max-sm:text-xs max-sm:py-1.5 max-sm:px-2 max-sm:rounded-lg"
                                 :disabled="! product.is_saleable || isAddingToCart"
                                 @click="addToCart()"
                                 aria-label="@lang('shop::app.components.products.card.add-to-cart')"
@@ -160,7 +160,7 @@
                             <a
                                 :href="'https://wa.me/96592214430?text=' + encodeURIComponent('مرحباً، أود شراء هذا المنتج:\n' + '{{ route('shop.product_or_category.index', ':slug') }}'.replace(':slug', product.url_key))"
                                 target="_blank"
-                                class="flex flex-1 items-center justify-center gap-1.5 rounded-xl text-white py-2 px-3 text-sm font-semibold transition-all hover:opacity-90 max-sm:text-xs max-sm:py-1.5 max-sm:px-2 max-sm:rounded-lg"
+                                class="flex flex-1 md:flex-none md:w-full items-center justify-center gap-1.5 rounded-xl text-white py-2 px-3 text-sm font-semibold transition-all hover:opacity-90 max-sm:text-xs max-sm:py-1.5 max-sm:px-2 max-sm:rounded-lg"
                                 style="background-color: #25D366;"
                                 aria-label="WhatsApp"
                             >
