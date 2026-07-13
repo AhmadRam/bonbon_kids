@@ -5121,6 +5121,7 @@ return [
                 'my-account' => 'My Account',
                 'notifications' => 'Notifications',
                 'visit-shop' => 'Visit Shop',
+                'switch-language' => 'Switch Language',
 
                 'mega-search' => [
                     'categories' => 'Categories',

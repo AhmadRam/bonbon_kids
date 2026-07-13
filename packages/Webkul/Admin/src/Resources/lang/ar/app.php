@@ -5121,6 +5121,7 @@ return [
                 'my-account' => 'حسابي',
                 'notifications' => 'الإشعارات',
                 'visit-shop' => 'زيارة المتجر',
+                'switch-language' => 'تغيير اللغة',
 
                 'mega-search' => [
                     'categories' => 'الفئات',

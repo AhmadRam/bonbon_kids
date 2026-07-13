@@ -66,6 +66,35 @@
             </span>
         </a>
 
+        <!-- Language Switcher -->
+        @php $currentAdminLocale = app()->getLocale(); @endphp
+        <x-admin::dropdown position="bottom-{{ core()->getCurrentLocale()->direction === 'ltr' ? 'right' : 'left' }}">
+            <x-slot:toggle>
+                <button
+                    type="button"
+                    class="flex items-center gap-1 cursor-pointer rounded-md px-2 py-1.5 text-sm font-semibold text-gray-600 transition-all hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-950"
+                    title="{{ __('admin::app.components.layouts.header.switch-language') }}"
+                >
+                    <span class="icon-globe text-xl sm:text-2xl"></span>
+                    <span class="hidden uppercase sm:block">{{ strtoupper($currentAdminLocale) }}</span>
+                </button>
+            </x-slot:toggle>
+
+            <x-slot:content class="!p-1 min-w-[120px]">
+                @foreach (core()->getAllLocales() as $locale)
+                    <a
+                        href="{{ route('admin.locale.switch', ['code' => $locale->code]) }}"
+                        class="flex items-center gap-2 rounded px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-950 {{ $currentAdminLocale === $locale->code ? 'text-blue-600 font-semibold dark:text-blue-400' : 'text-gray-700 dark:text-gray-300' }}"
+                    >
+                        {{ $locale->name }}
+                        @if ($currentAdminLocale === $locale->code)
+                            <span class="icon-tick ms-auto text-blue-600 dark:text-blue-400"></span>
+                        @endif
+                    </a>
+                @endforeach
+            </x-slot:content>
+        </x-admin::dropdown>
+
        <!-- Notification Component -->
         <v-notifications {{ $attributes }}>
             <span class="relative flex">
