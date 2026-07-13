@@ -4,6 +4,7 @@ namespace Webkul\Inventory\Providers;
 
 use Webkul\Core\Providers\CoreModuleServiceProvider;
 use Webkul\Inventory\Models\InventorySource;
+use Webkul\Inventory\Models\InventoryTransfer;
 
 class ModuleServiceProvider extends CoreModuleServiceProvider
 {
@@ -14,5 +15,6 @@ class ModuleServiceProvider extends CoreModuleServiceProvider
      */
     protected $models = [
         InventorySource::class,
+        InventoryTransfer::class,
     ];
 }

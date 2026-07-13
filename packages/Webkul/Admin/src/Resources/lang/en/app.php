@@ -3409,6 +3409,19 @@ return [
             'delete-success' => 'Inventory Sources Deleted Successfully',
             'last-delete-error' => 'Last Inventory Sources Can Not Deleted',
             'update-success' => 'Inventory Sources Updated Successfully',
+
+            'transfer' => [
+                'transfer-title' => 'Transfer',
+                'general' => 'General',
+                'back-btn' => 'Back',
+                'select-from' => 'Select Inventory',
+                'from' => 'From Inventory',
+                'select-to' => 'Select Inventory',
+                'to' => 'To Inventory',
+                'qty' => 'Qty',
+                'save-btn' => 'Transfer',
+                'title' => 'Inventory Sources',
+            ],
         ],
 
         'taxes' => [

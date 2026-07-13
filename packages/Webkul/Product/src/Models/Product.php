@@ -18,6 +18,7 @@ use Webkul\CatalogRule\Models\CatalogRuleProductPriceProxy;
 use Webkul\Category\Models\CategoryProxy;
 use Webkul\Core\Models\ChannelProxy;
 use Webkul\Inventory\Models\InventorySourceProxy;
+use Webkul\Inventory\Models\InventoryTransferProxy;
 use Webkul\Product\Contracts\Product as ProductContract;
 use Webkul\Product\Database\Factories\ProductFactory;
 use Webkul\Product\Type\AbstractType;
@@ -519,5 +520,13 @@ class Product extends Model implements ProductContract
     protected static function newFactory(): Factory
     {
         return ProductFactory::new();
+    }
+
+    /**
+     * Get the Inventory Transfers entries that are associated with product.
+     */
+    public function InventoryTransfers(): HasMany
+    {
+        return $this->hasMany(InventoryTransferProxy::modelClass(), 'product_id');
     }
 }

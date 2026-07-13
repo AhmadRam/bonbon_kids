@@ -98,6 +98,18 @@ Route::prefix('settings')->group(function () {
         Route::put('edit/{id}', 'update')->name('admin.settings.inventory_sources.update');
 
         Route::delete('edit/{id}', 'destroy')->name('admin.settings.inventory_sources.delete');
+
+        Route::get('index_transfer', 'indexTransfer')->name('admin.settings.inventory_sources.index_transfer');
+
+        Route::get('transfer', 'transfer')->name('admin.settings.inventory_sources.transfer');
+
+        Route::post('transfer', 'storeTransfer')->name('admin.settings.inventory_sources.store-transfer');
+
+        Route::get('print-transfer/{id}', 'printTransfer')->name('admin.settings.inventory_sources.print_transfer');
+
+        Route::get('mass-print-transfer', 'massPrintTransfer')->name('admin.settings.inventory_sources.mass_print_transfer');
+
+        Route::post('mass-print-transfer', 'massPrintTransfer')->name('admin.settings.inventory_sources.mass_print_transfer_post');
     });
 
     Route::prefix('taxes')->group(function () {
