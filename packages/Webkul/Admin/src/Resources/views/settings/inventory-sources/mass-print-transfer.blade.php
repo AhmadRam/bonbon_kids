@@ -183,7 +183,7 @@
                             {{ $isRTL ? 'سند تحويل بضاعة' : 'MASS INVENTORY TRANSFER REPORT' }}
                         </span><br><br>
                         <span style="color: #000;font-size:18px">
-                            {{ 'شركة عمر خالد الشراح' }}
+                            {{ $isRTL ? 'شركة عمر خالد الشراح' : 'Omar Khalid Al-Sharrah Company' }}
                         </span>
                     </div>
 
