@@ -168,10 +168,10 @@
                 <!-- Transfer Text in the Middle -->
                 <div class="transfer-text" style="text-align: center;">
                     <span>{{ $isRTL
-                        ? strtoupper(trans('admin::app.settings.inventory-sources.transfer.transfer-title'))
+                        ? 'سند تحويل بضاعة'
                         : 'INVENTORY TRANSFER' }}</span><br><br>
                     <span style="color: #000;font-size:18px">
-                        {{ core()->getConfigData('sales.shipping.origin.store_name') ?? 'Dar Al-Wafaa Trading Company' }}
+                        {{ 'شركة عمر خالد الشراح' }}
                     </span>
                 </div>
 
@@ -199,10 +199,7 @@
                                 class="value">{{ \Carbon\Carbon::parse($transfer->created_at)->format('d-m-Y') }}</span>
                         </div>
 
-                        <div style="padding-top: 20px">
-                            <span
-                                class="merchant-details-title">{{ core()->getConfigData('sales.shipping.origin.store_name') ? core()->getConfigData('sales.shipping.origin.store_name') : 'الشركة' }}</span>
-                        </div>
+                        <!-- Removed store_name / الشركة -->
 
                         <div>{{ core()->getConfigData('sales.shipping.origin.address1') ?? '' }}</div>
 
@@ -243,10 +240,10 @@
                 <thead>
                     <tr>
                         <th style="text-align: {{ $isRTL ? 'right' : 'left' }};">
-                            {{ $isRTL ? 'الصنف' : 'Product' }}
+                            {{ $isRTL ? 'الرمز' : 'SKU' }}
                         </th>
                         <th style="text-align: {{ $isRTL ? 'right' : 'left' }};">
-                            {{ $isRTL ? 'الرمز' : 'SKU' }}
+                            {{ $isRTL ? 'الصنف' : 'Product' }}
                         </th>
                         <th style="text-align: {{ $isRTL ? 'right' : 'left' }};">
                             {{ $isRTL ? 'سيريال نمبر' : 'Serial Number' }}
@@ -265,19 +262,19 @@
                 <tbody>
                     <tr>
                         <td style="text-align: {{ $isRTL ? 'right' : 'left' }}; padding: 15px 10px;">
-                            {{ $transfer->product_name }}
+                            {{ $transfer->product_sku }}
                         </td>
                         <td style="text-align: {{ $isRTL ? 'right' : 'left' }}; padding: 15px 10px;">
-                            {{ $transfer->product_sku }}
+                            {{ $transfer->product_name }}
                         </td>
                         <td style="text-align: {{ $isRTL ? 'right' : 'left' }}; padding: 15px 10px;">
                             {{ $transfer->product_number ?? '-' }}
                         </td>
                         <td style="text-align: {{ $isRTL ? 'right' : 'left' }}; padding: 15px 10px;">
-                            {{ $transfer->from_name === 'Default' ? 'Hawalli' : $transfer->from_name }}
+                            {{ $transfer->from_name === 'Default' || $transfer->from_name === 'Hawalli' ? ($isRTL ? 'المخزن الرئيسي' : 'Main Warehouse') : $transfer->from_name }}
                         </td>
                         <td style="text-align: {{ $isRTL ? 'right' : 'left' }}; padding: 15px 10px;">
-                            {{ $transfer->to_name === 'Default' ? 'Hawalli' : $transfer->to_name }}
+                            {{ $transfer->to_name === 'Default' || $transfer->to_name === 'Hawalli' ? ($isRTL ? 'المخزن الرئيسي' : 'Main Warehouse') : $transfer->to_name }}
                         </td>
                         <td style="text-align: {{ $isRTL ? 'right' : 'left' }}; padding: 15px 10px;">
                             {{ $transfer->quantity }}
@@ -289,29 +286,45 @@
 
         <!-- Signature Section -->
         <div class="signature-section">
-            <div class="row" style="text-align: {{ $isRTL ? 'right' : 'left' }};">
-                <div style="width: 100%; margin: 0 auto;">
+            <div class="row" style="text-align: {{ $isRTL ? 'right' : 'left' }}; display: flex; justify-content: space-between;">
+                <!-- Sending Section -->
+                <div style="width: 48%;">
                     <div class="merchant-details-title" style="margin-bottom: 20px; font-size: 14px;">
-                        {{ $isRTL ? 'الاسم والتوقيع:' : 'Name and Signature:' }}
+                        {{ $isRTL ? 'قسم الإرسال:' : 'Sending Section:' }}
                     </div>
-                    <div class="signature-box"
-                        style="height: 120px; display: flex; flex-direction: column; justify-content: space-between;">
-                        <!-- Name Line -->
-                        <div style="margin-bottom: 40px;">
-                            <span
-                                style="margin-{{ $isRTL ? 'left' : 'right' }}: 20px;">{{ $isRTL ? 'الاسم:' : 'Name:' }}</span>
-                            <div
-                                style="border-bottom: solid 1px #000; width: 300px; display: inline-block; margin-{{ $isRTL ? 'right' : 'left' }}: 10px;">
-                            </div>
+                    <div class="signature-box" style="height: auto; padding: 15px;">
+                        <div style="margin-bottom: 20px;">
+                            <span style="display: inline-block; width: 60px;">{{ $isRTL ? 'الاسم:' : 'Name:' }}</span>
+                            <div style="border-bottom: solid 1px #000; width: calc(100% - 70px); display: inline-block;"></div>
                         </div>
-
-                        <!-- Signature Line -->
+                        <div style="margin-bottom: 20px;">
+                            <span style="display: inline-block; width: 60px;">{{ $isRTL ? 'التوقيع:' : 'Signature:' }}</span>
+                            <div style="border-bottom: solid 1px #000; width: calc(100% - 70px); display: inline-block;"></div>
+                        </div>
                         <div>
-                            <span
-                                style="margin-{{ $isRTL ? 'left' : 'right' }}: 20px;">{{ $isRTL ? 'التوقيع:' : 'Signature:' }}</span>
-                            <div
-                                style="border-bottom: solid 1px #000; width: 300px; display: inline-block; margin-{{ $isRTL ? 'right' : 'left' }}: 10px;">
-                            </div>
+                            <span style="display: inline-block; width: 60px;">{{ $isRTL ? 'التاريخ:' : 'Date:' }}</span>
+                            <div style="border-bottom: solid 1px #000; width: calc(100% - 70px); display: inline-block;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Receiving Section -->
+                <div style="width: 48%;">
+                    <div class="merchant-details-title" style="margin-bottom: 20px; font-size: 14px;">
+                        {{ $isRTL ? 'قسم الاستلام:' : 'Receiving Section:' }}
+                    </div>
+                    <div class="signature-box" style="height: auto; padding: 15px;">
+                        <div style="margin-bottom: 20px;">
+                            <span style="display: inline-block; width: 60px;">{{ $isRTL ? 'الاسم:' : 'Name:' }}</span>
+                            <div style="border-bottom: solid 1px #000; width: calc(100% - 70px); display: inline-block;"></div>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <span style="display: inline-block; width: 60px;">{{ $isRTL ? 'التوقيع:' : 'Signature:' }}</span>
+                            <div style="border-bottom: solid 1px #000; width: calc(100% - 70px); display: inline-block;"></div>
+                        </div>
+                        <div>
+                            <span style="display: inline-block; width: 60px;">{{ $isRTL ? 'التاريخ:' : 'Date:' }}</span>
+                            <div style="border-bottom: solid 1px #000; width: calc(100% - 70px); display: inline-block;"></div>
                         </div>
                     </div>
                 </div>
