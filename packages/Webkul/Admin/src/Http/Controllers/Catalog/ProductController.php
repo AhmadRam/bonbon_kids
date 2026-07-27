@@ -351,6 +351,7 @@ class ProductController extends Controller
 
         $params = [
             'index' => $indexNames ?? null,
+            'query' => request('query'),
             'name' => request('query'),
             'sort' => 'created_at',
             'order' => 'desc',
