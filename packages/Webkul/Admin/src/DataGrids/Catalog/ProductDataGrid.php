@@ -68,6 +68,7 @@ class ProductDataGrid extends DataGrid
             )
             ->addSelect(DB::raw('SUM(DISTINCT '.$tablePrefix.'product_inventories.qty) as quantity'))
             ->addSelect(DB::raw('COUNT(DISTINCT '.$tablePrefix.'product_images.id) as images_count'))
+            ->addSelect(DB::raw('IF(COUNT(DISTINCT '.$tablePrefix.'product_images.id) > 0, "Yes", "No") as has_images'))
             ->where('product_flat.locale', app()->getLocale())
             ->groupBy('product_flat.product_id');
 
@@ -146,6 +147,14 @@ class ProductDataGrid extends DataGrid
 
                 return Storage::url($row->base_image);
             },
+        ]);
+
+        $this->addColumn([
+            'index' => 'has_images',
+            'label' => 'يوجد صور',
+            'type' => 'string',
+            'exportable' => true,
+            'sortable' => true,
         ]);
 
         $this->addColumn([
