@@ -119,7 +119,7 @@ class SyncDaftraQuantities extends Command
                         
                         // Update Price
                         $price = $daftraProduct['price1'] ?? $daftraProduct['price'] ?? null;
-                        if ($price !== null) {
+                        if ($price !== null && (float)$price > 0) {
                             // Update the product's price attribute
                             // We need to update it through the repository
                             $this->productRepository->update([
