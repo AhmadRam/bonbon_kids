@@ -65,6 +65,17 @@ class ProductController extends Controller
     }
 
     /**
+     * Report Export.
+     */
+    public function reportExport()
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \Webkul\Admin\Exports\ProductReportExport,
+            'products-report.xlsx'
+        );
+    }
+
+    /**
      * Show the form for creating a new resource.
      *
      * @return View

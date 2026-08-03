@@ -173,11 +173,13 @@ return [
     'sales' => [
         'orders' => [
             'index' => [
+                'report-export' => 'Report Export',
                 'create-btn' => 'Create Order',
                 'title' => 'Orders',
 
                 'search-customer' => [
-                    'create-btn' => 'Create Customer',
+                    'report-export' => 'Report Export',
+                'create-btn' => 'Create Customer',
                     'empty-info' => 'No customers available for search term.',
                     'empty-title' => 'No customers found',
                     'search-by' => 'Search by email or name',
@@ -489,6 +491,7 @@ return [
                 'amount-per-unit' => ':amount Per Unit x :qty Quantity',
                 'cancel-error' => 'Order not be canceled',
                 'carrier-name' => 'Carrier Name',
+                'report-export' => 'Report Export',
                 'create-btn' => 'Create Shipment',
                 'creation-error' => 'Error on Shipment creation',
                 'item-canceled' => 'Canceled (:qty_canceled)',
@@ -706,6 +709,7 @@ return [
 
         'transactions' => [
             'index' => [
+                'report-export' => 'Report Export',
                 'create-btn' => 'Create Transactions',
                 'title' => 'Transactions',
 
@@ -862,7 +866,8 @@ return [
 
             'rma-status' => [
                 'index' => [
-                    'create-btn' => 'Create RMA Status',
+                    'report-export' => 'Report Export',
+                'create-btn' => 'Create RMA Status',
                     'title' => 'RMA Status',
 
                     'datagrid' => [
@@ -903,7 +908,8 @@ return [
 
             'reasons' => [
                 'index' => [
-                    'create-btn' => 'Create RMA Reason',
+                    'report-export' => 'Report Export',
+                'create-btn' => 'Create RMA Reason',
                     'title' => 'Reasons',
 
                     'datagrid' => [
@@ -942,7 +948,8 @@ return [
 
             'custom-field' => [
                 'index' => [
-                    'create-btn' => 'Add New Field',
+                    'report-export' => 'Report Export',
+                'create-btn' => 'Add New Field',
                     'title' => 'RMA Custom Fields',
 
                     'datagrid' => [
@@ -984,7 +991,8 @@ return [
 
             'rules' => [
                 'index' => [
-                    'create-btn' => 'Create RMA Rules',
+                    'report-export' => 'Report Export',
+                'create-btn' => 'Create RMA Rules',
                     'title' => 'RMA Rules',
 
                     'datagrid' => [
@@ -1066,13 +1074,15 @@ return [
         'products' => [
             'index' => [
                 'already-taken' => 'The :name has already been taken.',
+                'report-export' => 'Report Export',
                 'create-btn' => 'Create Product',
                 'title' => 'Products',
 
                 'create' => [
                     'back-btn' => 'Back',
                     'configurable-attributes' => 'Configurable Attributes',
-                    'create-btn' => 'Create Product',
+                    'report-export' => 'Report Export',
+                'create-btn' => 'Create Product',
                     'family' => 'Family',
                     'save-btn' => 'Save Product',
                     'sku' => 'SKU',
@@ -1123,7 +1133,8 @@ return [
                     'group' => [
                         'add-group-price' => 'Add Group Price',
                         'all-groups' => 'All Groups',
-                        'create-btn' => 'Add New',
+                        'report-export' => 'Report Export',
+                'create-btn' => 'Add New',
                         'discount-group-price-info' => 'For :qty Qty at discount of :price',
                         'edit-btn' => 'Edit',
                         'empty-info' => 'Special pricing for customers belonging to a specific group.',
@@ -1654,6 +1665,7 @@ return [
 
         'attributes' => [
             'index' => [
+                'report-export' => 'Report Export',
                 'create-btn' => 'Create Attributes',
                 'title' => 'Attributes',
 
@@ -2037,7 +2049,8 @@ return [
                 'create' => [
                     'channel' => 'Channel',
                     'contact-number' => 'Contact Number',
-                    'create-btn' => 'Create Customer',
+                    'report-export' => 'Report Export',
+                'create-btn' => 'Create Customer',
                     'create-success' => 'Customer created successfully',
                     'customer-group' => 'Customer Group',
                     'date-of-birth' => 'Date of Birth',
@@ -2088,7 +2101,8 @@ return [
                         'company-name' => 'Company Name',
                         'country' => 'Country',
                         'create-address-btn' => 'Add New Address',
-                        'create-btn' => 'Create',
+                        'report-export' => 'Report Export',
+                'create-btn' => 'Create',
                         'default-address' => 'Default Address',
                         'email' => 'Email',
                         'first-name' => 'First Name',
@@ -2250,7 +2264,8 @@ return [
 
                 'create' => [
                     'code' => 'Code',
-                    'create-btn' => 'Create Group',
+                    'report-export' => 'Report Export',
+                'create-btn' => 'Create Group',
                     'name' => 'Name',
                     'save-btn' => 'Save Group',
                     'success' => 'Group created successfully',
@@ -2373,7 +2388,8 @@ return [
         'communications' => [
             'templates' => [
                 'index' => [
-                    'create-btn' => 'Create Template',
+                    'report-export' => 'Report Export',
+                'create-btn' => 'Create Template',
                     'title' => 'Email Templates',
 
                     'datagrid' => [
@@ -2422,7 +2438,8 @@ return [
 
             'campaigns' => [
                 'index' => [
-                    'create-btn' => 'Create Campaign',
+                    'report-export' => 'Report Export',
+                'create-btn' => 'Create Campaign',
                     'title' => 'Campaigns',
 
                     'datagrid' => [
@@ -2488,7 +2505,8 @@ return [
 
             'events' => [
                 'index' => [
-                    'create-btn' => 'Create Event',
+                    'report-export' => 'Report Export',
+                'create-btn' => 'Create Event',
                     'event' => 'Event',
                     'title' => 'Events',
 
@@ -2565,7 +2583,8 @@ return [
 
             'cart-rules' => [
                 'index' => [
-                    'create-btn' => 'Create Cart Rule',
+                    'report-export' => 'Report Export',
+                'create-btn' => 'Create Cart Rule',
                     'title' => 'Cart Rules',
 
                     'datagrid' => [
@@ -2752,7 +2771,8 @@ return [
 
             'catalog-rules' => [
                 'index' => [
-                    'create-btn' => 'Create Catalog Rule',
+                    'report-export' => 'Report Export',
+                'create-btn' => 'Create Catalog Rule',
                     'title' => 'Catalog Rules',
 
                     'datagrid' => [
@@ -2879,7 +2899,8 @@ return [
         'search-seo' => [
             'search-terms' => [
                 'index' => [
-                    'create-btn' => 'Create Search Term',
+                    'report-export' => 'Report Export',
+                'create-btn' => 'Create Search Term',
                     'title' => 'Search Terms',
 
                     'datagrid' => [
@@ -2919,7 +2940,8 @@ return [
 
             'search-synonyms' => [
                 'index' => [
-                    'create-btn' => 'Create Search Synonym',
+                    'report-export' => 'Report Export',
+                'create-btn' => 'Create Search Synonym',
                     'title' => 'Search Synonyms',
 
                     'datagrid' => [
@@ -2952,7 +2974,8 @@ return [
 
             'sitemaps' => [
                 'index' => [
-                    'create-btn' => 'Create Sitemap',
+                    'report-export' => 'Report Export',
+                'create-btn' => 'Create Sitemap',
                     'sitemap' => 'Sitemap',
                     'title' => 'Sitemaps',
 
@@ -2989,7 +3012,8 @@ return [
 
             'url-rewrites' => [
                 'index' => [
-                    'create-btn' => 'Create URL Rewrite',
+                    'report-export' => 'Report Export',
+                'create-btn' => 'Create URL Rewrite',
                     'title' => 'URL Rewrites',
 
                     'datagrid' => [
@@ -3040,7 +3064,8 @@ return [
         'index' => [
             'already-taken' => 'The :name has already been taken.',
             'channel' => 'Channel',
-            'create-btn' => 'Create Page',
+            'report-export' => 'Report Export',
+                'create-btn' => 'Create Page',
             'language' => 'Language',
             'title' => 'Pages',
 
@@ -3097,6 +3122,7 @@ return [
     'settings' => [
         'locales' => [
             'index' => [
+                'report-export' => 'Report Export',
                 'create-btn' => 'Create Locale',
                 'locale' => 'Locale',
                 'logo-size' => 'Image resolution should be like 24px X 16px',
@@ -3139,6 +3165,7 @@ return [
 
         'currencies' => [
             'index' => [
+                'report-export' => 'Report Export',
                 'create-btn' => 'Create Currency',
                 'currency' => 'Currency',
                 'title' => 'Currencies',
@@ -3158,7 +3185,8 @@ return [
 
                 'create' => [
                     'code' => 'Code',
-                    'create-btn' => 'Create Currency',
+                    'report-export' => 'Report Export',
+                'create-btn' => 'Create Currency',
                     'currency-position' => 'Currency Position',
                     'decimal' => 'Decimal',
                     'decimal-separator' => 'Decimal Separator',
@@ -3294,6 +3322,7 @@ return [
 
         'exchange-rates' => [
             'index' => [
+                'report-export' => 'Report Export',
                 'create-btn' => 'Create Exchange Rate',
                 'exchange-rate' => 'Exchange Rate',
                 'title' => 'Exchange Rates',
@@ -3331,6 +3360,7 @@ return [
 
         'inventory-sources' => [
             'index' => [
+                'report-export' => 'Report Export',
                 'create-btn' => 'Create Inventory Source',
                 'title' => 'Inventory Sources',
 
@@ -3527,6 +3557,7 @@ return [
 
         'channels' => [
             'index' => [
+                'report-export' => 'Report Export',
                 'create-btn' => 'Create Channel',
                 'delete-failed' => 'Channel Delete Failed',
                 'delete-success' => 'Channel deleted successfully.',
@@ -3682,6 +3713,7 @@ return [
 
         'roles' => [
             'index' => [
+                'report-export' => 'Report Export',
                 'create-btn' => 'Create Role',
                 'title' => 'Roles',
 
@@ -3732,6 +3764,7 @@ return [
 
         'themes' => [
             'index' => [
+                'report-export' => 'Report Export',
                 'create-btn' => 'Create Theme',
                 'title' => 'Themes',
 

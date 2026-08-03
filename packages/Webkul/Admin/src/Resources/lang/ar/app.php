@@ -173,11 +173,13 @@ return [
     'sales' => [
         'orders' => [
             'index' => [
+                'report-export' => 'تصدير التقرير',
                 'create-btn' => 'إنشاء طلب',
                 'title' => 'الطلبات',
 
                 'search-customer' => [
-                    'create-btn' => 'إنشاء عميل',
+                    'report-export' => 'تصدير التقرير',
+                'create-btn' => 'إنشاء عميل',
                     'empty-info' => 'لا توجد عملاء متاحين لمصطلح البحث.',
                     'empty-title' => 'لم يتم العثور على عملاء',
                     'search-by' => 'البحث بواسطة البريد الإلكتروني أو الاسم',
@@ -489,6 +491,7 @@ return [
                 'amount-per-unit' => ':amount لكل وحدة x :qty الكمية',
                 'cancel-error' => 'لا يمكن إلغاء الطلب',
                 'carrier-name' => 'اسم الناقل',
+                'report-export' => 'تصدير التقرير',
                 'create-btn' => 'إنشاء الشحنة',
                 'creation-error' => 'خطأ في إنشاء الشحنة',
                 'item-canceled' => 'تم الإلغاء (:qty_canceled)',
@@ -706,6 +709,7 @@ return [
 
         'transactions' => [
             'index' => [
+                'report-export' => 'تصدير التقرير',
                 'create-btn' => 'إنشاء عمليات',
                 'title' => 'العمليات',
 
@@ -862,7 +866,8 @@ return [
 
             'rma-status' => [
                 'index' => [
-                    'create-btn' => 'إنشاء حالة RMA',
+                    'report-export' => 'تصدير التقرير',
+                'create-btn' => 'إنشاء حالة RMA',
                     'title' => 'حالة RMA',
 
                     'datagrid' => [
@@ -903,7 +908,8 @@ return [
 
             'reasons' => [
                 'index' => [
-                    'create-btn' => 'إنشاء سبب RMA',
+                    'report-export' => 'تصدير التقرير',
+                'create-btn' => 'إنشاء سبب RMA',
                     'title' => 'الأسباب',
 
                     'datagrid' => [
@@ -942,7 +948,8 @@ return [
 
             'custom-field' => [
                 'index' => [
-                    'create-btn' => 'إضافة حقل جديد',
+                    'report-export' => 'تصدير التقرير',
+                'create-btn' => 'إضافة حقل جديد',
                     'title' => 'حقول مخصصة لـ RMA',
 
                     'datagrid' => [
@@ -984,7 +991,8 @@ return [
 
             'rules' => [
                 'index' => [
-                    'create-btn' => 'إنشاء قواعد RMA',
+                    'report-export' => 'تصدير التقرير',
+                'create-btn' => 'إنشاء قواعد RMA',
                     'title' => 'قواعد RMA',
 
                     'datagrid' => [
@@ -1066,13 +1074,15 @@ return [
         'products' => [
             'index' => [
                 'already-taken' => 'تم أخذ :name بالفعل.',
+                'report-export' => 'تصدير التقرير',
                 'create-btn' => 'إنشاء منتج',
                 'title' => 'المنتجات',
 
                 'create' => [
                     'back-btn' => 'عودة',
                     'configurable-attributes' => 'خصائص قابلة للتكوين',
-                    'create-btn' => 'إنشاء منتج',
+                    'report-export' => 'تصدير التقرير',
+                'create-btn' => 'إنشاء منتج',
                     'family' => 'عائلة',
                     'save-btn' => 'حفظ المنتج',
                     'sku' => 'SKU',
@@ -1123,7 +1133,8 @@ return [
                     'group' => [
                         'add-group-price' => 'إضافة سعر المجموعة',
                         'all-groups' => 'جميع المجموعات',
-                        'create-btn' => 'إضافة جديدة',
+                        'report-export' => 'تصدير التقرير',
+                'create-btn' => 'إضافة جديدة',
                         'discount-group-price-info' => 'لـ :qty كمية بخصم قدره :price',
                         'edit-btn' => 'تعديل',
                         'empty-info' => 'تسعير خاص للعملاء الذين ينتمون إلى مجموعة معينة.',
@@ -1654,6 +1665,7 @@ return [
 
         'attributes' => [
             'index' => [
+                'report-export' => 'تصدير التقرير',
                 'create-btn' => 'إنشاء السمات',
                 'title' => 'السمات',
 
@@ -2037,7 +2049,8 @@ return [
                 'create' => [
                     'channel' => 'القناة',
                     'contact-number' => 'رقم الاتصال',
-                    'create-btn' => 'إنشاء عميل',
+                    'report-export' => 'تصدير التقرير',
+                'create-btn' => 'إنشاء عميل',
                     'create-success' => 'تم إنشاء العميل بنجاح',
                     'customer-group' => 'مجموعة العملاء',
                     'date-of-birth' => 'تاريخ الميلاد',
@@ -2088,7 +2101,8 @@ return [
                         'company-name' => 'اسم الشركة',
                         'country' => 'البلد',
                         'create-address-btn' => 'إضافة عنوان جديد',
-                        'create-btn' => 'إنشاء',
+                        'report-export' => 'تصدير التقرير',
+                'create-btn' => 'إنشاء',
                         'default-address' => 'العنوان الافتراضي',
                         'email' => 'البريد الإلكتروني',
                         'first-name' => 'الاسم الأول',
@@ -2250,7 +2264,8 @@ return [
 
                 'create' => [
                     'code' => 'الكود',
-                    'create-btn' => 'إنشاء مجموعة',
+                    'report-export' => 'تصدير التقرير',
+                'create-btn' => 'إنشاء مجموعة',
                     'name' => 'الاسم',
                     'save-btn' => 'حفظ المجموعة',
                     'success' => 'تم إنشاء المجموعة بنجاح',
@@ -2373,7 +2388,8 @@ return [
         'communications' => [
             'templates' => [
                 'index' => [
-                    'create-btn' => 'إنشاء قالب',
+                    'report-export' => 'تصدير التقرير',
+                'create-btn' => 'إنشاء قالب',
                     'title' => 'قوالب البريد الإلكتروني',
 
                     'datagrid' => [
@@ -2422,7 +2438,8 @@ return [
 
             'campaigns' => [
                 'index' => [
-                    'create-btn' => 'إنشاء حملة',
+                    'report-export' => 'تصدير التقرير',
+                'create-btn' => 'إنشاء حملة',
                     'title' => 'الحملات',
 
                     'datagrid' => [
@@ -2488,7 +2505,8 @@ return [
 
             'events' => [
                 'index' => [
-                    'create-btn' => 'إنشاء حدث',
+                    'report-export' => 'تصدير التقرير',
+                'create-btn' => 'إنشاء حدث',
                     'event' => 'الحدث',
                     'title' => 'الأحداث',
 
@@ -2565,7 +2583,8 @@ return [
 
             'cart-rules' => [
                 'index' => [
-                    'create-btn' => 'إنشاء قاعدة عربة',
+                    'report-export' => 'تصدير التقرير',
+                'create-btn' => 'إنشاء قاعدة عربة',
                     'title' => 'قواعد العربة',
 
                     'datagrid' => [
@@ -2752,7 +2771,8 @@ return [
 
             'catalog-rules' => [
                 'index' => [
-                    'create-btn' => 'إنشاء قاعدة الكتالوج',
+                    'report-export' => 'تصدير التقرير',
+                'create-btn' => 'إنشاء قاعدة الكتالوج',
                     'title' => 'قوانين الكتالوج',
 
                     'datagrid' => [
@@ -2879,7 +2899,8 @@ return [
         'search-seo' => [
             'search-terms' => [
                 'index' => [
-                    'create-btn' => 'إنشاء مصطلح بحث',
+                    'report-export' => 'تصدير التقرير',
+                'create-btn' => 'إنشاء مصطلح بحث',
                     'title' => 'مصطلحات البحث',
 
                     'datagrid' => [
@@ -2919,7 +2940,8 @@ return [
 
             'search-synonyms' => [
                 'index' => [
-                    'create-btn' => 'إنشاء مرادف بحث',
+                    'report-export' => 'تصدير التقرير',
+                'create-btn' => 'إنشاء مرادف بحث',
                     'title' => 'مرادفات البحث',
 
                     'datagrid' => [
@@ -2952,7 +2974,8 @@ return [
 
             'sitemaps' => [
                 'index' => [
-                    'create-btn' => 'إنشاء خريطة الموقع',
+                    'report-export' => 'تصدير التقرير',
+                'create-btn' => 'إنشاء خريطة الموقع',
                     'sitemap' => 'خريطة الموقع',
                     'title' => 'خرائط الموقع',
 
@@ -2989,7 +3012,8 @@ return [
 
             'url-rewrites' => [
                 'index' => [
-                    'create-btn' => 'إنشاء إعادة كتابة عنوان URL',
+                    'report-export' => 'تصدير التقرير',
+                'create-btn' => 'إنشاء إعادة كتابة عنوان URL',
                     'title' => 'إعادة كتابة عناوين URL',
 
                     'datagrid' => [
@@ -3040,7 +3064,8 @@ return [
         'index' => [
             'already-taken' => 'تم استخدام :name بالفعل.',
             'channel' => 'القناة',
-            'create-btn' => 'إنشاء صفحة',
+            'report-export' => 'تصدير التقرير',
+                'create-btn' => 'إنشاء صفحة',
             'language' => 'اللغة',
             'title' => 'الصفحات',
 
@@ -3097,6 +3122,7 @@ return [
     'settings' => [
         'locales' => [
             'index' => [
+                'report-export' => 'تصدير التقرير',
                 'create-btn' => 'إنشاء لغة',
                 'locale' => 'اللغة',
                 'logo-size' => 'يجب أن تكون دقة الصورة 24 بكسل × 16 بكسل',
@@ -3139,6 +3165,7 @@ return [
 
         'currencies' => [
             'index' => [
+                'report-export' => 'تصدير التقرير',
                 'create-btn' => 'إنشاء عملة',
                 'currency' => 'العملة',
                 'title' => 'العملات',
@@ -3158,7 +3185,8 @@ return [
 
                 'create' => [
                     'code' => 'الكود',
-                    'create-btn' => 'إنشاء عملة',
+                    'report-export' => 'تصدير التقرير',
+                'create-btn' => 'إنشاء عملة',
                     'currency-position' => 'موقع العملة',
                     'decimal' => 'الكسور',
                     'decimal-separator' => 'فاصل الكسور',
@@ -3294,6 +3322,7 @@ return [
 
         'exchange-rates' => [
             'index' => [
+                'report-export' => 'تصدير التقرير',
                 'create-btn' => 'إنشاء سعر صرف',
                 'exchange-rate' => 'سعر الصرف',
                 'title' => 'أسعار الصرف',
@@ -3331,6 +3360,7 @@ return [
 
         'inventory-sources' => [
             'index' => [
+                'report-export' => 'تصدير التقرير',
                 'create-btn' => 'إنشاء مصدر المخزون',
                 'title' => 'مصادر المخزون',
 
@@ -3527,6 +3557,7 @@ return [
 
         'channels' => [
             'index' => [
+                'report-export' => 'تصدير التقرير',
                 'create-btn' => 'إنشاء قناة',
                 'delete-failed' => 'فشل حذف قناة',
                 'delete-success' => 'تم حذف القناة بنجاح.',
@@ -3682,6 +3713,7 @@ return [
 
         'roles' => [
             'index' => [
+                'report-export' => 'تصدير التقرير',
                 'create-btn' => 'إنشاء الدور',
                 'title' => 'الأدوار',
 
@@ -3732,6 +3764,7 @@ return [
 
         'themes' => [
             'index' => [
+                'report-export' => 'تصدير التقرير',
                 'create-btn' => 'إنشاء موضوع',
                 'title' => 'المواضيع',
 

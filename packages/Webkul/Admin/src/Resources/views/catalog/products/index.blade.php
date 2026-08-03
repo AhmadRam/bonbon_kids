@@ -12,6 +12,11 @@
             <!-- Export Modal -->
             <x-admin::datagrid.export :src="route('admin.catalog.products.index')" />
 
+            <!-- Report Export Button -->
+            <a href="{{ route('admin.catalog.products.report_export') }}" class="primary-button" target="_blank">
+                {{ app()->getLocale() == 'ar' ? 'تصدير التقرير' : 'Report Export' }}
+            </a>
+
             {!! view_render_event('bagisto.admin.catalog.products.create.before') !!}
 
             @if (bouncer()->hasPermission('catalog.products.create'))

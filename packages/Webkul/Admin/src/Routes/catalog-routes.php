@@ -89,6 +89,8 @@ Route::prefix('catalog')->group(function () {
      */
     Route::controller(ProductController::class)->prefix('products')->group(function () {
         Route::get('', 'index')->name('admin.catalog.products.index');
+        
+        Route::get('report-export', 'reportExport')->name('admin.catalog.products.report_export');
 
         Route::post('create', 'store')->name('admin.catalog.products.store');
 

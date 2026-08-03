@@ -101,7 +101,6 @@ class SyncDaftraQuantities extends Command
                         continue;
                     }
 
-                    // Ensure stock balance is not less than 0 (Daftra sometimes returns -1 for out of stock or infinite)
                     $stockBalance = max(0, (float) $stockBalance);
 
                     // Find product in Bagisto by SKU
@@ -118,7 +117,17 @@ class SyncDaftraQuantities extends Command
                         
                         $this->productInventoryRepository->saveInventories($inventoryData, $bagistoProduct);
                         
-                        $this->line("Updated SKU: {$sku} | New Qty: {$stockBalance}");
+                        // Update Price
+                        $price = $daftraProduct['price1'] ?? $daftraProduct['price'] ?? null;
+                        if ($price !== null) {
+                            // Update the product's price attribute
+                            // We need to update it through the repository
+                            $this->productRepository->update([
+                                'price' => (float) $price,
+                            ], $bagistoProduct->id);
+                        }
+                        
+                        $this->line("Updated SKU: {$sku} | New Qty: {$stockBalance} | New Price: {$price}");
                         $updatedCount++;
                     } else {
                         $notFoundCount++;

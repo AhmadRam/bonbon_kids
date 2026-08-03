@@ -17,6 +17,10 @@ class DaftraServiceProvider extends ServiceProvider
 
         $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'daftra');
 
+        \Illuminate\Support\Facades\Event::listen('checkout.order.save.after', function ($order) {
+            app(\Webkul\Daftra\Listeners\OrderListener::class)->syncOrderToDaftra($order);
+        });
+
         if ($this->app->runningInConsole()) {
             $this->commands([
                 \Webkul\Daftra\Console\Commands\SyncDaftraQuantities::class,
@@ -24,7 +28,7 @@ class DaftraServiceProvider extends ServiceProvider
 
             $this->app->booted(function () {
                 $schedule = $this->app->make(\Illuminate\Console\Scheduling\Schedule::class);
-                $schedule->command('daftra:sync-quantities')->cron('0 */3 * * *');
+                $schedule->command('daftra:sync-quantities')->hourly();
             });
         }
     }
