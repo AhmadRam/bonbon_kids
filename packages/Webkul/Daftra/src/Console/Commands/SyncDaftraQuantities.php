@@ -118,6 +118,8 @@ class SyncDaftraQuantities extends Command
                         $this->productInventoryRepository->saveInventories($inventoryData, $bagistoProduct);
                         
                         // Update Price
+                        // Price sync is temporarily disabled as requested, but logic is kept for future use.
+                        /*
                         $price = $daftraProduct['price1'] ?? $daftraProduct['price'] ?? null;
                         if ($price !== null && (float)$price > 0) {
                             // Update the product's price attribute
@@ -126,8 +128,9 @@ class SyncDaftraQuantities extends Command
                                 'price' => (float) $price,
                             ], $bagistoProduct->id);
                         }
+                        */
                         
-                        $this->line("Updated SKU: {$sku} | New Qty: {$stockBalance} | New Price: {$price}");
+                        $this->line("Updated SKU: {$sku} | New Qty: {$stockBalance}");
                         $updatedCount++;
                     } else {
                         $notFoundCount++;
