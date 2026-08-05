@@ -46,6 +46,28 @@
     <meta property="og:url" content="{{ route('shop.product_or_category.index', $product->url_key) }}" />
 @endPush
 
+@push('scripts')
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        dataLayer.push({ ecommerce: null });
+        dataLayer.push({!! json_encode([
+            'event' => 'view_item',
+            'ecommerce' => [
+                'currency' => core()->getCurrentCurrencyCode(),
+                'value' => (float) $product->price,
+                'items' => [
+                    [
+                        'item_id' => $product->sku,
+                        'item_name' => $product->name,
+                        'price' => (float) $product->price,
+                        'item_category' => $product->categories->count() ? $product->categories->first()->name : '',
+                    ]
+                ]
+            ]
+        ]) !!});
+    </script>
+@endPush
+
 <!-- Page Layout -->
 <x-shop::layouts>
     <!-- Page Title -->

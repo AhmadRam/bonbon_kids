@@ -179,6 +179,60 @@
              */
             window.addEventListener("load", function (event) {
                 app.mount("#app");
+
+                if (window.axios) {
+                    window.axios.interceptors.response.use(function (response) {
+                        try {
+                            let url = response.config.url || '';
+                            let method = (response.config.method || '').toLowerCase();
+                            
+                            if (url.includes('/api/checkout/cart') && method === 'post' && !url.includes('destroy') && !url.includes('update')) {
+                                let reqData = typeof response.config.data === 'string' ? JSON.parse(response.config.data) : (response.config.data || {});
+                                let cart = response.data.data;
+                                if (cart && cart.items && reqData.product_id) {
+                                    let item = cart.items.find(i => i.product_id == reqData.product_id);
+                                    if (item) {
+                                        window.dataLayer = window.dataLayer || [];
+                                        window.dataLayer.push({ ecommerce: null });
+                                        let price = item.formatted_price ? parseFloat(item.formatted_price.replace(/[^0-9.]/g, '')) : 0;
+                                        window.dataLayer.push({
+                                            event: 'add_to_cart',
+                                            ecommerce: {
+                                                currency: '{{ core()->getCurrentCurrencyCode() }}',
+                                                value: price * (reqData.quantity || 1),
+                                                items: [{
+                                                    item_id: item.sku || item.product_url_key,
+                                                    item_name: item.name,
+                                                    price: price,
+                                                    quantity: reqData.quantity || 1
+                                                }]
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+
+                            if (url.includes('/api/checkout/cart/destroy') && method === 'post') {
+                                let reqData = typeof response.config.data === 'string' ? JSON.parse(response.config.data) : (response.config.data || {});
+                                window.dataLayer = window.dataLayer || [];
+                                window.dataLayer.push({ ecommerce: null });
+                                window.dataLayer.push({
+                                    event: 'remove_from_cart',
+                                    ecommerce: {
+                                        currency: '{{ core()->getCurrentCurrencyCode() }}',
+                                        items: [{
+                                            item_id: reqData.cart_item_id || 'unknown'
+                                        }]
+                                    }
+                                });
+                            }
+                        } catch (e) {}
+                        
+                        return response;
+                    }, function (error) {
+                        return Promise.reject(error);
+                    });
+                }
             });
         </script>
 

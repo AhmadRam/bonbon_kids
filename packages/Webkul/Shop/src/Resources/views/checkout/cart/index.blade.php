@@ -503,6 +503,8 @@
 
                                 this.isLoading = false;
 
+                                this.pushViewCart(this.cart);
+
                                 if (response.data.message) {
                                     this.$emitter.emit('add-flash', { type: 'info', message: response.data.message });
                                 }
@@ -612,6 +614,34 @@
                             }
                         });
                     },
+
+                    pushViewCart(cart) {
+                        if (!cart || !cart.items || cart.items.length === 0) return;
+                        window.dataLayer = window.dataLayer || [];
+                        window.dataLayer.push({ ecommerce: null });
+                        
+                        let items = cart.items.map((item, index) => {
+                            let price = item.formatted_price ? parseFloat(item.formatted_price.replace(/[^0-9.]/g, '')) : 0;
+                            return {
+                                item_id: item.sku || item.product_url_key,
+                                item_name: item.name,
+                                price: price,
+                                quantity: item.quantity,
+                                index: index
+                            };
+                        });
+                        
+                        let total = cart.formatted_grand_total ? parseFloat(cart.formatted_grand_total.replace(/[^0-9.]/g, '')) : 0;
+                        
+                        window.dataLayer.push({
+                            event: 'view_cart',
+                            ecommerce: {
+                                currency: '{{ core()->getCurrentCurrencyCode() }}',
+                                value: total,
+                                items: items
+                            }
+                        });
+                    }
                 }
             });
         </script>

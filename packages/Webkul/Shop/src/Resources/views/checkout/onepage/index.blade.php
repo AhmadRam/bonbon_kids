@@ -159,6 +159,8 @@
                         paymentMethods: null,
 
                         canPlaceOrder: false,
+
+                        hasSentBeginCheckout: false,
                     }
                 },
 
@@ -171,6 +173,11 @@
                         this.$axios.get("{{ route('shop.checkout.onepage.summary') }}")
                             .then(response => {
                                 this.cart = response.data.data;
+
+                                if (!this.hasSentBeginCheckout) {
+                                    this.pushBeginCheckout(this.cart);
+                                    this.hasSentBeginCheckout = true;
+                                }
 
                                 this.scrollToCurrentStep();
                             })
@@ -236,6 +243,34 @@
 
                                 this.$emitter.emit('add-flash', { type: 'error', message: error.response.data.message });
                             });
+                    },
+
+                    pushBeginCheckout(cart) {
+                        if (!cart || !cart.items || cart.items.length === 0) return;
+                        window.dataLayer = window.dataLayer || [];
+                        window.dataLayer.push({ ecommerce: null });
+                        
+                        let items = cart.items.map((item, index) => {
+                            let price = item.formatted_price ? parseFloat(item.formatted_price.replace(/[^0-9.]/g, '')) : 0;
+                            return {
+                                item_id: item.sku || item.product_url_key || item.id,
+                                item_name: item.name,
+                                price: price,
+                                quantity: item.quantity,
+                                index: index
+                            };
+                        });
+                        
+                        let total = cart.formatted_grand_total ? parseFloat(cart.formatted_grand_total.replace(/[^0-9.]/g, '')) : 0;
+                        
+                        window.dataLayer.push({
+                            event: 'begin_checkout',
+                            ecommerce: {
+                                currency: '{{ core()->getCurrentCurrencyCode() }}',
+                                value: total,
+                                items: items
+                            }
+                        });
                     }
                 },
             });

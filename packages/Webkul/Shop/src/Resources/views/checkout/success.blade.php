@@ -57,4 +57,29 @@
 			{{ view_render_event('bagisto.shop.checkout.success.continue-shopping.after', ['order' => $order]) }}
 		</div>
 	</div>
+    
+    @push('scripts')
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            dataLayer.push({ ecommerce: null });
+            dataLayer.push({!! json_encode([
+                'event' => 'purchase',
+                'ecommerce' => [
+                    'transaction_id' => $order->increment_id,
+                    'value' => (float) $order->grand_total,
+                    'tax' => (float) $order->tax_amount,
+                    'shipping' => (float) $order->shipping_amount,
+                    'currency' => $order->order_currency_code,
+                    'items' => $order->items->map(function($item) {
+                        return [
+                            'item_id' => $item->sku ?: $item->product_id,
+                            'item_name' => $item->name,
+                            'price' => (float) $item->price,
+                            'quantity' => (int) $item->qty_ordered,
+                        ];
+                    })->values()->toArray()
+                ]
+            ]) !!});
+        </script>
+    @endpush
 </x-shop::layouts>

@@ -305,6 +305,8 @@
                                 this.products = response.data.data;
 
                                 this.links = response.data.links;
+
+                                this.pushViewItemList(response.data.data);
                             }).catch(error => {
                                 console.log(error);
                             });
@@ -324,6 +326,8 @@
                                 this.products = [...this.products, ...response.data.data];
 
                                 this.links = response.data.links;
+
+                                this.pushViewItemList(response.data.data);
                             }).catch(error => {
                                 this.loader = false;
                                 console.log(error);
@@ -352,6 +356,28 @@
                         }
 
                         return parameters.toString();
+                    },
+
+                    pushViewItemList(products) {
+                        window.dataLayer = window.dataLayer || [];
+                        window.dataLayer.push({ ecommerce: null });
+                        let items = products.map((product, index) => {
+                            let price = product.price_html ? parseFloat(product.price_html.replace(/[^0-9.]/g, '')) : 0;
+                            return {
+                                item_id: product.sku || product.id,
+                                item_name: product.name,
+                                price: price,
+                                item_list_name: '{{ addslashes($category->name) }}',
+                                index: index
+                            };
+                        });
+                        window.dataLayer.push({
+                            event: 'view_item_list',
+                            ecommerce: {
+                                item_list_name: '{{ addslashes($category->name) }}',
+                                items: items
+                            }
+                        });
                     }
                 },
             });
