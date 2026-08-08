@@ -18,13 +18,28 @@
             </a>
             
             <!-- Google Feed Export Buttons -->
-            <a href="{{ route('admin.catalog.products.google_feed_export', ['locale' => 'ar']) }}" class="primary-button" target="_blank">
-                {{ app()->getLocale() == 'ar' ? 'تصدير الفيد (عربي)' : 'Export Feed (AR)' }}
-            </a>
-            
-            <a href="{{ route('admin.catalog.products.google_feed_export', ['locale' => 'en']) }}" class="primary-button" target="_blank">
-                {{ app()->getLocale() == 'ar' ? 'تصدير الفيد (إنجليزي)' : 'Export Feed (EN)' }}
-            </a>
+            <x-admin::dropdown position="bottom-right">
+                <x-slot:toggle>
+                    <button type="button" class="primary-button flex items-center gap-x-2">
+                        {{ app()->getLocale() == 'ar' ? 'تصدير الفيد' : 'Export Feed' }}
+                        <span class="icon-down-arrow text-lg"></span>
+                    </button>
+                </x-slot>
+
+                <x-slot:menu>
+                    <x-admin::dropdown.menu.item>
+                        <a href="{{ route('admin.catalog.products.google_feed_export', ['locale' => 'ar']) }}" target="_blank" class="block w-full">
+                            {{ app()->getLocale() == 'ar' ? 'عربي (AR)' : 'Arabic (AR)' }}
+                        </a>
+                    </x-admin::dropdown.menu.item>
+                    
+                    <x-admin::dropdown.menu.item>
+                        <a href="{{ route('admin.catalog.products.google_feed_export', ['locale' => 'en']) }}" target="_blank" class="block w-full">
+                            {{ app()->getLocale() == 'ar' ? 'إنجليزي (EN)' : 'English (EN)' }}
+                        </a>
+                    </x-admin::dropdown.menu.item>
+                </x-slot>
+            </x-admin::dropdown>
 
             {!! view_render_event('bagisto.admin.catalog.products.create.before') !!}
 
