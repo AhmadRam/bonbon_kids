@@ -76,6 +76,18 @@ class ProductController extends Controller
     }
 
     /**
+     * Google Merchant Feed Export.
+     */
+    public function googleFeedExport()
+    {
+        $locale = request()->get('locale', 'ar');
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \Webkul\Admin\Exports\GoogleMerchantFeedExport($locale, 'KWD'),
+            "google_feed_{$locale}.xlsx"
+        );
+    }
+
+    /**
      * Show the form for creating a new resource.
      *
      * @return View

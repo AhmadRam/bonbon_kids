@@ -16,6 +16,15 @@
             <a href="{{ route('admin.catalog.products.report_export') }}" class="primary-button" target="_blank">
                 {{ app()->getLocale() == 'ar' ? 'تصدير التقرير' : 'Report Export' }}
             </a>
+            
+            <!-- Google Feed Export Buttons -->
+            <a href="{{ route('admin.catalog.products.google_feed_export', ['locale' => 'ar']) }}" class="primary-button" target="_blank">
+                {{ app()->getLocale() == 'ar' ? 'تصدير الفيد (عربي)' : 'Export Feed (AR)' }}
+            </a>
+            
+            <a href="{{ route('admin.catalog.products.google_feed_export', ['locale' => 'en']) }}" class="primary-button" target="_blank">
+                {{ app()->getLocale() == 'ar' ? 'تصدير الفيد (إنجليزي)' : 'Export Feed (EN)' }}
+            </a>
 
             {!! view_render_event('bagisto.admin.catalog.products.create.before') !!}
 

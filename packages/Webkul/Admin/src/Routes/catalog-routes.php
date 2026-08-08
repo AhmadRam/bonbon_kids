@@ -91,6 +91,8 @@ Route::prefix('catalog')->group(function () {
         Route::get('', 'index')->name('admin.catalog.products.index');
         
         Route::get('report-export', 'reportExport')->name('admin.catalog.products.report_export');
+        
+        Route::get('google-feed-export', 'googleFeedExport')->name('admin.catalog.products.google_feed_export');
 
         Route::post('create', 'store')->name('admin.catalog.products.store');
 
