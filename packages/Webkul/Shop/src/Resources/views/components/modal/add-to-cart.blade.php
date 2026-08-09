@@ -63,9 +63,9 @@
                                     <p class="text-sm font-semibold text-toyBlue mb-3">طرق الدفع</p>
                                     <div class="flex justify-center items-center gap-3">
                                         <img src="{{ bagisto_asset('images/cash-on-delivery.png') }}" alt="Cash on Delivery" class="h-8 object-contain">
-                                        <img src="{{ bagisto_asset('images/apple-pay.png') }}" alt="Apple Pay" class="h-8 object-contain">
-                                        <img src="{{ bagisto_asset('images/cc.png') }}" alt="Visa Mastercard" class="h-8 object-contain">
-                                        <img src="{{ bagisto_asset('images/knet.png') }}" alt="KNET" class="h-8 object-contain">
+                                        <img src="{{ bagisto_asset('images/apple-pay.png') }}" alt="Apple Pay" class="h-10 object-contain scale-110">
+                                        <img src="{{ bagisto_asset('images/cc.png') }}" alt="Visa Mastercard" class="h-10 object-contain scale-110">
+                                        <img src="{{ bagisto_asset('images/knet.png') }}" alt="KNET" class="h-10 object-contain scale-110">
                                     </div>
                                 </div>
 
