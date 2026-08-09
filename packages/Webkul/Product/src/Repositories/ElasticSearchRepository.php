@@ -41,7 +41,7 @@ class ElasticSearchRepository
         $filters = $this->getFilters($params);
 
         if (! empty($params['category_id'])) {
-            $filters['filter'][]['term']['category_ids'] = $params['category_id'];
+            $filters['filter'][]['terms']['category_ids'] = explode(',', $params['category_id']);
         }
 
         if (! empty($params['type'])) {
@@ -245,7 +245,7 @@ class ElasticSearchRepository
         $filters = $this->getFilters($params);
 
         if (! empty($params['category_id'])) {
-            $filters['filter'][]['term']['category_ids'] = $params['category_id'];
+            $filters['filter'][]['terms']['category_ids'] = explode(',', $params['category_id']);
         }
 
         if (! empty($params['type'])) {
@@ -282,7 +282,7 @@ class ElasticSearchRepository
         $filters = $this->getFilters($params);
 
         if (! empty($params['category_id'])) {
-            $filters['filter'][]['term']['category_ids'] = $params['category_id'];
+            $filters['filter'][]['terms']['category_ids'] = explode(',', $params['category_id']);
         }
 
         if (! empty($params['type'])) {
