@@ -61,11 +61,11 @@
                                 <!-- Payment Methods -->
                                 <div class="w-full text-center mt-4 mb-2">
                                     <p class="text-sm font-semibold text-toyBlue mb-3">طرق الدفع</p>
-                                    <div class="flex justify-center items-center gap-3">
+                                    <div class="flex justify-center items-center gap-5">
                                         <img src="{{ bagisto_asset('images/cash-on-delivery.png') }}" alt="Cash on Delivery" class="h-8 object-contain">
-                                        <img src="{{ bagisto_asset('images/apple-pay.png') }}" alt="Apple Pay" class="h-12 object-contain" style="height: 48px;">
-                                        <img src="{{ bagisto_asset('images/cc.png') }}" alt="Visa Mastercard" class="h-12 object-contain" style="height: 48px;">
-                                        <img src="{{ bagisto_asset('images/knet.png') }}" alt="KNET" class="h-12 object-contain" style="height: 48px;">
+                                        <img src="{{ bagisto_asset('images/apple-pay.png') }}" alt="Apple Pay" class="h-8 object-contain" style="transform: scale(1.5); margin: 0 5px;">
+                                        <img src="{{ bagisto_asset('images/cc.png') }}" alt="Visa Mastercard" class="h-8 object-contain" style="transform: scale(1.5); margin: 0 5px;">
+                                        <img src="{{ bagisto_asset('images/knet.png') }}" alt="KNET" class="h-8 object-contain" style="transform: scale(1.5); margin: 0 5px;">
                                     </div>
                                 </div>
 
