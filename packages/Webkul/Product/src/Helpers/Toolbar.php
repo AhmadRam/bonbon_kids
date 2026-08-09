@@ -77,6 +77,14 @@ class Toolbar
             return $this->getDefaultOrder();
         }
 
+        if ($params['sort'] === 'rand') {
+            return [
+                'sort' => 'rand',
+                'order' => $params['order'] ?? 'rand',
+                'value' => 'rand',
+            ];
+        }
+
         $order = $this->getAvailableOrders()
             ->where('value', $params['sort'])
             ->first();

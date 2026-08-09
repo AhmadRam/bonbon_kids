@@ -208,7 +208,7 @@ class ElasticSearchRepository
      */
     public function getSortOptions(array $options): array
     {
-        if ($options['order'] == 'rand') {
+        if ($options['sort'] == 'rand') {
             return [
                 '_script' => [
                     'type' => 'number',

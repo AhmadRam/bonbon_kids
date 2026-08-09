@@ -74,6 +74,7 @@ class CacheResponse extends BaseCacheResponseMiddleware
             $productURLRewrite = app(URLRewriteRepository::class)->findOneWhere([
                 'entity_type' => 'product',
                 'request_path' => $slugOrPath,
+                'locale' => app()->getLocale(),
             ]);
 
             if ($productURLRewrite) {

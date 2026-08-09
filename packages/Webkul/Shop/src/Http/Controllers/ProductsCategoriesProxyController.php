@@ -95,24 +95,37 @@ class ProductsCategoriesProxyController extends Controller
         }
 
         /**
-         * If category is not found, try to find it by trimmed slug.
-         *
-         * Only needed when URL contains nested path segments.
+         * Cross-locale slug fallback:
          */
+        $crossLocaleProductAttribute = \Illuminate\Support\Facades\DB::table('product_attribute_values')
+            ->join('attributes', 'product_attribute_values.attribute_id', '=', 'attributes.id')
+            ->where('attributes.code', 'url_key')
+            ->where('product_attribute_values.text_value', $slugOrURLKey)
+            ->select('product_attribute_values.product_id')
+            ->first();
+
+        if ($crossLocaleProductAttribute) {
+            $product = $this->productRepository->find($crossLocaleProductAttribute->product_id);
+            if ($product && $product->url_key && $product->url_key !== $slugOrURLKey) {
+                return redirect()->to($product->url_key, 301);
+            } elseif ($product && $product->url_key === $slugOrURLKey) {
+                if (
+                    $product->visible_individually
+                    && $product->status
+                ) {
+                    return view('shop::products.view', compact('product'));
+                }
+            }
+        }
+
         if (str_contains($slugOrURLKey, '/')) {
             $trimmedSlug = last(explode('/', $slugOrURLKey));
-
             $category = $this->categoryRepository->findBySlug($trimmedSlug);
-
             if ($category) {
                 return redirect()->to($trimmedSlug, 301);
             }
         }
 
-        /**
-         * If neither category nor product matches,
-         * try to find it by url rewrite.
-         */
         $urlRewrite = $this->urlRewriteRepository->findOneWhere([
             'request_path' => $slugOrURLKey,
             'locale' => app()->getLocale(),

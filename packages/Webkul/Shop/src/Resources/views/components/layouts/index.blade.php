@@ -132,6 +132,9 @@
             <!-- Confirm Modal Blade Component -->
             <x-shop::modal.confirm />
 
+            <!-- Add to Cart Modal Blade Component -->
+            <x-shop::modal.add-to-cart />
+
             <!-- Page Header Blade Component -->
             @if ($hasHeader)
                 <x-shop::layouts.header />

@@ -421,7 +421,7 @@ class ProductRepository extends Repository
              */
             $sortOptions = $this->getSortOptions($params);
 
-            if ($sortOptions['order'] != 'rand') {
+            if ($sortOptions['sort'] != 'rand') {
                 $attribute = $this->attributeRepository->findOneByField('code', $sortOptions['sort']);
 
                 if ($attribute) {
@@ -454,7 +454,7 @@ class ProductRepository extends Repository
                     $qb->orderBy('products.created_at', $sortOptions['order']);
                 }
             } else {
-                return $qb->inRandomOrder();
+                $qb->inRandomOrder($sortOptions['order'] !== 'rand' ? $sortOptions['order'] : '');
             }
 
             return $qb->groupBy('products.id');

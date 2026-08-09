@@ -36,6 +36,12 @@ class ProductController extends APIController
         $query = $searchData['effective_query'] ?? $searchData['original_query'];
 
         $params = request()->query();
+
+        if (isset($params['rand']) && ! isset($params['sort'])) {
+            $params['sort'] = 'rand';
+            $params['order'] = 'rand';
+        }
+
         if (isset($params['group'])) {
             $groupValues = explode(',', $params['group']);
             $mappedIds = [];

@@ -670,7 +670,7 @@
                                 if (response.data.message) {
                                     this.$emitter.emit('update-mini-cart', response.data.data);
 
-                                    this.$emitter.emit('add-flash', { type: 'success', message: response.data.message });
+                                    this.$emitter.emit('open-add-to-cart-modal');
 
                                     if (response.data.redirect) {
                                         window.location.href= response.data.redirect;

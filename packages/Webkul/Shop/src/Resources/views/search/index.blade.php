@@ -240,6 +240,8 @@
                         links: {},
 
                         loader: false,
+
+                        randomSeed: Math.floor(Math.random() * 1000000) + 1,
                     }
                 },
 
@@ -293,12 +295,15 @@
                     getProducts() {
                         this.isDrawerActive = {
                             toolbar: false,
-
                             filter: false,
                         };
 
+                        this.isLoading = true;
+                        
+                        this.randomSeed = Math.floor(Math.random() * 1000000) + 1;
+
                         this.$axios.get(("{{ route('shop.api.products.index') }}"), {
-                            params: this.queryParams
+                            params: Object.assign({}, this.queryParams, { rand: this.randomSeed })
                         })
                             .then(response => {
                                 this.isLoading = false;
@@ -307,6 +312,7 @@
 
                                 this.links = response.data.links;
                             }).catch(error => {
+                                this.isLoading = false;
                                 console.log(error);
                             });
                     },

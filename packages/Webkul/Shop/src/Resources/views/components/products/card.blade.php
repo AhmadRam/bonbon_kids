@@ -440,7 +440,7 @@
                             if (response.data.message) {
                                 this.$emitter.emit('update-mini-cart', response.data.data );
 
-                                this.$emitter.emit('add-flash', { type: 'success', message: response.data.message });
+                                this.$emitter.emit('open-add-to-cart-modal');
                             } else {
                                 this.$emitter.emit('add-flash', { type: 'warning', message: response.data.data.message });
                             }
