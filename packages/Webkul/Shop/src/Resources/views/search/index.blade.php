@@ -265,6 +265,14 @@
                     queryParams() {
                         let queryParams = Object.assign({}, this.filters.filter, this.filters.toolbar.applied);
 
+                        let urlParams = new URLSearchParams(window.location.search);
+                        if (urlParams.has('query')) {
+                            queryParams['query'] = urlParams.get('query');
+                        }
+                        if (urlParams.has('image-search')) {
+                            queryParams['image-search'] = urlParams.get('image-search');
+                        }
+
                         return this.removeJsonEmptyValues(queryParams);
                     },
 
