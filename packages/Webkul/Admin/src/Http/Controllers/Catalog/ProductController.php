@@ -83,7 +83,7 @@ class ProductController extends Controller
         $locale = request()->get('locale', 'ar');
         return \Maatwebsite\Excel\Facades\Excel::download(
             new \Webkul\Admin\Exports\GoogleMerchantFeedExport($locale, 'KWD'),
-            "google_feed_{$locale}.xlsx"
+            "google_feed_{$locale}.csv"
         );
     }
 
