@@ -472,6 +472,7 @@
                                 <!-- Order via WhatsApp Button -->
                                 <a
                                     href="https://wa.me/96592214430?text={{ rawurlencode("مرحباً، أود شراء هذا المنتج:\n" . url()->current()) }}"
+                                    @click="trackWhatsApp()"
                                     target="_blank"
                                     class="mt-5 flex w-full max-w-[470px] items-center justify-center gap-2 rounded-[12px] py-[15px] text-[16px] font-semibold text-white transition-all hover:opacity-90 max-md:py-3 max-sm:mt-3 max-sm:rounded-lg max-sm:py-1.5"
                                     style="background-color: #25D366;"
@@ -652,6 +653,24 @@
                 },
 
                 methods: {
+                    trackWhatsApp() {
+                        window.dataLayer = window.dataLayer || [];
+                        window.dataLayer.push({ ecommerce: null });
+                        window.dataLayer.push({
+                            event: 'generate_lead',
+                            ecommerce: {
+                                currency: '{{ core()->getCurrentCurrencyCode() }}',
+                                value: {{ $product->getTypeInstance()->getMinimalPrice() ?: 0 }},
+                                items: [{
+                                    item_id: '{{ $product->sku ?: $product->url_key }}',
+                                    item_name: '{!! addslashes(str_replace("\n", "", $product->name)) !!}',
+                                    price: {{ $product->getTypeInstance()->getMinimalPrice() ?: 0 }},
+                                    quantity: 1
+                                }]
+                            }
+                        });
+                    },
+
                     addToCart(params) {
                         const operation = this.is_buy_now ? 'buyNow' : 'addToCart';
 

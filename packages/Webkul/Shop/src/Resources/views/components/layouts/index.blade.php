@@ -190,10 +190,24 @@
                             let method = (response.config.method || '').toLowerCase();
                             
                             if (url.includes('/api/checkout/cart') && method === 'post' && !url.includes('destroy') && !url.includes('update')) {
-                                let reqData = typeof response.config.data === 'string' ? JSON.parse(response.config.data) : (response.config.data || {});
+                                let productId = null;
+                                let quantity = 1;
+                                
+                                if (typeof response.config.data === 'string') {
+                                    let reqData = JSON.parse(response.config.data);
+                                    productId = reqData.product_id;
+                                    quantity = reqData.quantity || 1;
+                                } else if (response.config.data instanceof FormData) {
+                                    productId = response.config.data.get('product_id');
+                                    quantity = response.config.data.get('quantity') || 1;
+                                } else if (response.config.data) {
+                                    productId = response.config.data.product_id;
+                                    quantity = response.config.data.quantity || 1;
+                                }
+
                                 let cart = response.data.data;
-                                if (cart && cart.items && reqData.product_id) {
-                                    let item = cart.items.find(i => i.product_id == reqData.product_id);
+                                if (cart && cart.items && productId) {
+                                    let item = cart.items.find(i => i.product_id == productId);
                                     if (item) {
                                         window.dataLayer = window.dataLayer || [];
                                         window.dataLayer.push({ ecommerce: null });
@@ -202,12 +216,12 @@
                                             event: 'add_to_cart',
                                             ecommerce: {
                                                 currency: '{{ core()->getCurrentCurrencyCode() }}',
-                                                value: price * (reqData.quantity || 1),
+                                                value: price * quantity,
                                                 items: [{
                                                     item_id: item.sku || item.product_url_key,
                                                     item_name: item.name,
                                                     price: price,
-                                                    quantity: reqData.quantity || 1
+                                                    quantity: quantity
                                                 }]
                                             }
                                         });
@@ -216,7 +230,16 @@
                             }
 
                             if (url.includes('/api/checkout/cart/destroy') && method === 'post') {
-                                let reqData = typeof response.config.data === 'string' ? JSON.parse(response.config.data) : (response.config.data || {});
+                                let cartItemId = null;
+                                if (typeof response.config.data === 'string') {
+                                    let reqData = JSON.parse(response.config.data);
+                                    cartItemId = reqData.cart_item_id;
+                                } else if (response.config.data instanceof FormData) {
+                                    cartItemId = response.config.data.get('cart_item_id');
+                                } else if (response.config.data) {
+                                    cartItemId = response.config.data.cart_item_id;
+                                }
+                                
                                 window.dataLayer = window.dataLayer || [];
                                 window.dataLayer.push({ ecommerce: null });
                                 window.dataLayer.push({
@@ -224,7 +247,7 @@
                                     ecommerce: {
                                         currency: '{{ core()->getCurrentCurrencyCode() }}',
                                         items: [{
-                                            item_id: reqData.cart_item_id || 'unknown'
+                                            item_id: cartItemId || 'unknown'
                                         }]
                                     }
                                 });

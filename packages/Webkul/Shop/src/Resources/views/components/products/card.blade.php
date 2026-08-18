@@ -158,7 +158,8 @@
 
                             <!-- WhatsApp Button -->
                             <a
-                                :href="'https://wa.me/96592214430?text=' + encodeURIComponent('مرحباً، أود شراء هذا المنتج:\n' + '{{ route('shop.product_or_category.index', ':slug') }}'.replace(':slug', product.url_key))"
+                            :href="'https://wa.me/96592214430?text=' + encodeURIComponent('مرحباً، أود شراء هذا المنتج:\n' + '{{ route('shop.product_or_category.index', ':slug') }}'.replace(':slug', product.url_key))"
+                                @click="trackWhatsApp(product)"
                                 target="_blank"
                                 class="flex flex-1 md:flex-none md:w-full items-center justify-center gap-1.5 rounded-xl text-white py-2 px-3 text-sm font-semibold transition-all hover:opacity-90 max-sm:text-xs max-sm:py-1.5 max-sm:px-2 max-sm:rounded-lg"
                                 style="background-color: #25D366;"
@@ -323,6 +324,7 @@
 
                         <a
                             :href="'https://wa.me/96592214430?text=' + encodeURIComponent('مرحباً، أود شراء هذا المنتج:\n' + '{{ route('shop.product_or_category.index', ':slug') }}'.replace(':slug', product.url_key))"
+                                @click="trackWhatsApp(product)"
                             target="_blank"
                             class="flex w-max items-center justify-center gap-2 rounded-[10px] py-[10px] px-6 text-sm font-semibold text-white transition-all hover:opacity-90"
                             style="background-color: #25D366;"
@@ -427,6 +429,28 @@
                     }
 
                     return JSON.parse(value);
+                },
+
+                trackWhatsApp(product) {
+                    window.dataLayer = window.dataLayer || [];
+                    window.dataLayer.push({ ecommerce: null });
+                    
+                    let price = product.price ? parseFloat(String(product.price).replace(/[^0-9.]/g, '')) : 0;
+                    if (isNaN(price)) price = 0;
+                    
+                    window.dataLayer.push({
+                        event: 'generate_lead',
+                        ecommerce: {
+                            currency: '{{ core()->getCurrentCurrencyCode() }}',
+                            value: price,
+                            items: [{
+                                item_id: product.sku || product.url_key,
+                                item_name: product.name,
+                                price: price,
+                                quantity: 1
+                            }]
+                        }
+                    });
                 },
 
                 addToCart() {
