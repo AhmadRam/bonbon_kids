@@ -64,7 +64,7 @@ class FeedController extends Controller
                 'id' => $product->sku ?? $product->id,
                 'title' => $product->name,
                 'description' => html_entity_decode(strip_tags($product->short_description ?: $product->description), ENT_QUOTES, 'UTF-8'),
-                'link' => config('app.url') . '/' . $urlKey,
+                'link' => rtrim(config('app.url'), '/') . '/' . $urlKey,
                 'image_link' => ProductImage::getProductBaseImage($product)['original_image_url'] ?? '',
                 'availability' => $availability,
                 'price' => $formattedPrice,
