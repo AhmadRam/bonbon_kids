@@ -18,6 +18,13 @@ Route::get('page/{slug}', [PageController::class, 'view'])
     ->middleware('cache.response');
 
 /**
+ * Feeds
+ */
+Route::get('feeds/google-merchant.xml', [\Webkul\Shop\Http\Controllers\FeedController::class, 'googleMerchantFeed'])
+    ->name('shop.feeds.google_merchant');
+
+
+/**
  * Fallback route.
  */
 Route::fallback(ProductsCategoriesProxyController::class.'@index')
