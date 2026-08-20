@@ -94,9 +94,8 @@ class FeedController extends Controller
             }
             $xml .= "    <g:availability>" . htmlspecialchars($item['availability']) . "</g:availability>\n";
             $xml .= "    <g:price>" . htmlspecialchars($item['price']) . "</g:price>\n";
-            if ($item['brand']) {
-                $xml .= "    <g:brand>" . htmlspecialchars($item['brand']) . "</g:brand>\n";
-            }
+            $brandValue = $item['brand'] ?: 'BonBon';
+            $xml .= "    <g:brand>" . htmlspecialchars($brandValue) . "</g:brand>\n";
             $xml .= "    <g:condition>new</g:condition>\n";
             if ($item['age_group']) {
                 $xml .= "    <g:age_group>" . htmlspecialchars($item['age_group']) . "</g:age_group>\n";
