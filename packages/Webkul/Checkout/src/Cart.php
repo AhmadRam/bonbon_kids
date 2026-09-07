@@ -863,6 +863,27 @@ class Cart
 
         $this->calculateItemsTax();
 
+        if ($this->cart->haveStockableItems()) {
+            if (
+                ! $this->cart->shipping_method
+                || ! $this->cart->shipping_rates->where('method', $this->cart->shipping_method)->first()
+            ) {
+                Shipping::collectRates();
+
+                $this->cart->load('shipping_rates');
+
+                if ($firstRate = $this->cart->shipping_rates->first()) {
+                    $this->cart->shipping_method = $firstRate->method;
+                    $this->cart->save();
+                }
+            }
+        } else {
+            Shipping::removeAllShippingRates();
+
+            $this->cart->shipping_method = null;
+            $this->cart->save();
+        }
+
         $this->calculateShippingTax();
 
         $this->refreshCart();

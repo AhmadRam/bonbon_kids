@@ -79,13 +79,9 @@ class Shipping
 
         $shippingAddress = $cart->shipping_address;
 
-        if (! $shippingAddress) {
-            return;
-        }
-
         foreach ($this->rates as $rate) {
             $rate->cart_id = $cart->id;
-            $rate->cart_address_id = $shippingAddress->id;
+            $rate->cart_address_id = $shippingAddress?->id;
             $rate->price_incl_tax = $rate->price;
             $rate->base_price_incl_tax = $rate->base_price;
 
