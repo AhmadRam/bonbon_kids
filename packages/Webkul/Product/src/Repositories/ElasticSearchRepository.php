@@ -172,10 +172,15 @@ class ElasticSearchRepository
                     ];
                 }
 
+                $defaultField = $attribute->code;
+                if ($defaultField === 'url_key') {
+                    $defaultField = 'url_key.keyword';
+                }
+
                 return [
                     'query_string' => [
                         'query' => implode(' OR ', $synonyms),
-                        'default_field' => $attribute->code,
+                        'default_field' => $defaultField,
                     ],
                 ];
 
