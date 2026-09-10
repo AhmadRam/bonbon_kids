@@ -1,5 +1,8 @@
+@php
+    $isRtl = in_array(app()->getLocale(), ['ar', 'he', 'fa']);
+@endphp
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html dir="{{ core()->getCurrentLocale()->direction }}" lang="{{ app()->getLocale() }}">
+<html dir="{{ $isRtl ? 'rtl' : 'ltr' }}" lang="{{ app()->getLocale() }}">
 
 <head>
     <meta http-equiv="Cache-control" content="no-cache">
@@ -86,7 +89,7 @@
 
         .sale-summary {
             margin-top: 20px;
-            float: {{ core()->getCurrentLocale()->direction == 'rtl' ? 'left' : 'right' }};
+            float: {{ $isRtl ? 'left' : 'right' }};
             background-color: #005aff0d;
             border: 1px solid #d3d3d3;
             border-radius: 4px;
@@ -200,7 +203,7 @@
     @endphp
 
     <!-- Floating Print Button (Hidden in print) -->
-    <div class="no-print" style="position: fixed; top: 15px; {{ core()->getCurrentLocale()->direction == 'rtl' ? 'left: 20px;' : 'right: 20px;' }} z-index: 9999; display: flex; gap: 10px;">
+    <div class="no-print" style="position: fixed; top: 15px; {{ $isRtl ? 'left: 20px;' : 'right: 20px;' }} z-index: 9999; display: flex; gap: 10px;">
         <button onclick="window.print();" style="background: #0041FF; color: #fff; border: none; padding: 10px 22px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,65,255,0.3); display: flex; align-items: center; gap: 8px;">
             <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
             <span>{{ app()->getLocale() == 'ar' ? 'طباعة الفاتورة' : 'Print Invoice' }}</span>
@@ -282,7 +285,7 @@
             </div>
 
             <!-- Right Details -->
-            <div class="col-6" style="{{ core()->getCurrentLocale()->direction == 'rtl' ? 'padding-right: 40px;' : 'padding-left: 40px;' }}">
+            <div class="col-6" style="{{ $isRtl ? 'padding-right: 40px;' : 'padding-left: 40px;' }}">
                 <div class="merchant-details">
                     <div>
                         <span class="label">@lang('shop::app.customers.account.orders.invoice-pdf.order-id'): </span>
@@ -475,14 +478,14 @@
                 <tr>
                     <td>@lang('shop::app.customers.account.orders.invoice-pdf.subtotal')</td>
                     <td style="width: 10px;">-</td>
-                    <td style="text-align: {{ core()->getCurrentLocale()->direction == 'rtl' ? 'left' : 'right' }};">{!! core()->formatBasePrice($invoice->base_sub_total, true) !!}</td>
+                    <td style="text-align: {{ $isRtl ? 'left' : 'right' }};">{!! core()->formatBasePrice($invoice->base_sub_total, true) !!}</td>
                 </tr>
 
                 @if ((float) $invoice->base_shipping_amount > 0)
                     <tr>
                         <td>@lang('shop::app.customers.account.orders.invoice-pdf.shipping-handling')</td>
                         <td>-</td>
-                        <td style="text-align: {{ core()->getCurrentLocale()->direction == 'rtl' ? 'left' : 'right' }};">{!! core()->formatBasePrice($invoice->base_shipping_amount, true) !!}</td>
+                        <td style="text-align: {{ $isRtl ? 'left' : 'right' }};">{!! core()->formatBasePrice($invoice->base_shipping_amount, true) !!}</td>
                     </tr>
                 @endif
 
@@ -490,7 +493,7 @@
                     <tr>
                         <td>@lang('shop::app.customers.account.orders.invoice-pdf.tax')</td>
                         <td>-</td>
-                        <td style="text-align: {{ core()->getCurrentLocale()->direction == 'rtl' ? 'left' : 'right' }};">{!! core()->formatBasePrice($invoice->base_tax_amount, true) !!}</td>
+                        <td style="text-align: {{ $isRtl ? 'left' : 'right' }};">{!! core()->formatBasePrice($invoice->base_tax_amount, true) !!}</td>
                     </tr>
                 @endif
 
@@ -498,7 +501,7 @@
                     <tr>
                         <td>@lang('shop::app.customers.account.orders.invoice-pdf.discount')</td>
                         <td>-</td>
-                        <td style="text-align: {{ core()->getCurrentLocale()->direction == 'rtl' ? 'left' : 'right' }};">{!! core()->formatBasePrice($invoice->base_discount_amount, true) !!}</td>
+                        <td style="text-align: {{ $isRtl ? 'left' : 'right' }};">{!! core()->formatBasePrice($invoice->base_discount_amount, true) !!}</td>
                     </tr>
                 @endif
 
@@ -511,7 +514,7 @@
                 <tr style="font-weight: 700; font-size: 14px;">
                     <td style="color: #0041FF;">@lang('shop::app.customers.account.orders.invoice-pdf.grand-total')</td>
                     <td>-</td>
-                    <td style="text-align: {{ core()->getCurrentLocale()->direction == 'rtl' ? 'left' : 'right' }}; color: #0041FF;">{!! core()->formatBasePrice($invoice->order->base_grand_total, true) !!}</td>
+                    <td style="text-align: {{ $isRtl ? 'left' : 'right' }}; color: #0041FF;">{!! core()->formatBasePrice($invoice->order->base_grand_total, true) !!}</td>
                 </tr>
             </table>
         </div>

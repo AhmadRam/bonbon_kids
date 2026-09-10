@@ -141,6 +141,8 @@ class InvoiceController extends Controller
      */
     public function printInvoice(int $id)
     {
+        app()->setLocale('ar');
+
         $invoice = $this->invoiceRepository->findOrFail($id);
 
         return view('admin::sales.invoices.pdf', compact('invoice'));
