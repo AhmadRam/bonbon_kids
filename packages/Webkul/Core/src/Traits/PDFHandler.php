@@ -58,7 +58,11 @@ trait PDFHandler
         $tempDir = storage_path('app/mpdf');
 
         if (! file_exists($tempDir)) {
-            mkdir($tempDir, 0755, true);
+            @mkdir($tempDir, 0777, true);
+        }
+
+        if (! is_writable($tempDir)) {
+            $tempDir = sys_get_temp_dir();
         }
 
         $mpdf = new Mpdf([
