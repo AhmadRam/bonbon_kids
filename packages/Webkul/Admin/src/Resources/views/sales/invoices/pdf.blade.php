@@ -189,7 +189,7 @@
             $logoSrc = asset('themes/shop/default/build/assets/logo-DiAkDw2e.svg');
         }
 
-        $storeName = core()->getConfigData('sales.shipping.origin.store_name') ?: (app()->getLocale() == 'ar' ? 'متجر بونبون للألعاب' : 'BonBon Toys Store');
+        $storeName = core()->getConfigData('sales.shipping.origin.store_name') ?: (app()->getLocale() == 'ar' ? 'شركة عمر خالد الشراح' : 'Omar Khalid Al-Sharrah Company');
     @endphp
 
     <!-- Floating Print Button (Hidden in print) -->

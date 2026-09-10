@@ -1,33 +1,25 @@
+@php
+    app()->setLocale('ar');
+    $isRTL = true;
+@endphp
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html lang="{{ app()->getLocale() }}" dir="{{ core()->getCurrentLocale()->direction }}">
+<html lang="ar" dir="rtl">
 
 <head>
     <!-- meta tags -->
     <meta http-equiv="Cache-control" content="no-cache">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>سند تحويل بضاعة - شركة عمر خالد الشراح</title>
 
-    <!-- lang supports inclusion -->
-    <style type="text/css">
-        @font-face {
-            font-family: 'Hind';
-            src: url({{ asset('vendor/webkul/ui/assets/fonts/Hind/Hind-Regular.ttf') }}) format('truetype');
-        }
-
-        @font-face {
-            font-family: 'Noto Sans';
-            src: url({{ asset('vendor/webkul/ui/assets/fonts/Noto/NotoSans-Regular.ttf') }}) format('truetype');
-        }
-    </style>
-    @php
-        /* main font will be set on locale based */
-        $mainFontFamily = app()->getLocale() === 'ar' ? 'DejaVu Sans' : 'Noto Sans';
-        $isRTL = app()->getLocale() === 'ar';
-    @endphp
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 
     <!-- main css -->
     <style type="text/css">
         * {
-            font-family: '{{ $mainFontFamily }}';
+            font-family: 'Cairo', 'DejaVu Sans', 'Noto Sans', sans-serif;
+            box-sizing: border-box;
         }
 
         body,
@@ -304,6 +296,12 @@
             </div>
         </div>
     </div>
+    <!-- Auto Print on Load -->
+    <script type="text/javascript">
+        window.onload = function () {
+            window.print();
+        };
+    </script>
 </body>
 
 </html>

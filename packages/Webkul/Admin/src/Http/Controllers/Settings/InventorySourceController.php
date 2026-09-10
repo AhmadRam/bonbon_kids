@@ -251,6 +251,8 @@ class InventorySourceController extends Controller
      */
     public function printTransfer(int $id)
     {
+        app()->setLocale('ar');
+
         $transfer = DB::table('inventory_transfers')
             ->leftJoin('product_flat', 'inventory_transfers.product_id', '=', 'product_flat.product_id')
             ->leftJoin('inventory_sources as from_source', 'inventory_transfers.from_inventory_id', '=', 'from_source.id')
@@ -286,6 +288,7 @@ class InventorySourceController extends Controller
      */
     public function massPrintTransfer()
     {
+        app()->setLocale('ar');
 
         $indices = request()->input('indices');
 
