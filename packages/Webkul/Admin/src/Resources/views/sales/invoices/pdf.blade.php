@@ -54,31 +54,21 @@
             border-collapse: collapse;
             text-align: start;
             table-layout: fixed;
+            border: 1px solid #d3d3d3;
         }
 
         .table thead th {
             font-weight: 700;
-            border-top: solid 1px #d3d3d3;
-            border-bottom: solid 1px #d3d3d3;
-            border-left: solid 1px #d3d3d3;
+            border: 1px solid #d3d3d3;
             padding: 8px 12px;
             background: #005aff0d;
-        }
-
-        .table thead th:last-child {
-            border-right: solid 1px #d3d3d3;
         }
 
         .table tbody td {
             padding: 8px 10px;
             color: #222;
             vertical-align: top;
-            border-bottom: solid 1px #d3d3d3;
-            border-left: solid 1px #d3d3d3;
-        }
-
-        .table tbody td:last-child {
-            border-right: solid 1px #d3d3d3;
+            border: 1px solid #d3d3d3;
         }
 
         .table tbody td p,
@@ -350,17 +340,30 @@
                                             @endphp
 
                                             @if ($invoice->order->$addressType->country == 'KW' && count($addressLines) > 1)
-                                                @if (isset($addressLines[0]) && trim($addressLines[0]) !== '' && $addressLines[0] !== '0')
-                                                    <span>{{ app()->getLocale() == 'ar' ? 'القطعة' : 'Block' }}: {{ $addressLines[0] }}</span><br>
+                                                @php
+                                                    $cleanLine = function($val) {
+                                                        $v = trim($val ?? '');
+                                                        return ($v !== '' && $v !== '0' && strtoupper($v) !== 'NA' && strtoupper($v) !== 'N/A') ? $v : null;
+                                                    };
+                                                    $block = $cleanLine($addressLines[0] ?? null);
+                                                    $street = $cleanLine($addressLines[1] ?? null);
+                                                    $house = $cleanLine($addressLines[2] ?? null);
+                                                    $floor = $cleanLine($addressLines[3] ?? null);
+                                                    $flat = $cleanLine($addressLines[4] ?? null);
+                                                    $avenue = $cleanLine($addressLines[5] ?? null);
+                                                @endphp
+
+                                                @if ($block)
+                                                    <span>{{ app()->getLocale() == 'ar' ? 'القطعة' : 'Block' }}: {{ $block }}</span><br>
                                                 @endif
-                                                @if (isset($addressLines[1]) && trim($addressLines[1]) !== '' && $addressLines[1] !== '0')
-                                                    <span>{{ app()->getLocale() == 'ar' ? 'الشارع' : 'Street' }}: {{ $addressLines[1] }}</span><br>
+                                                @if ($street)
+                                                    <span>{{ app()->getLocale() == 'ar' ? 'الشارع' : 'Street' }}: {{ $street }}</span><br>
                                                 @endif
-                                                @if (isset($addressLines[2]) && trim($addressLines[2]) !== '' && $addressLines[2] !== '0')
-                                                    <span>{{ app()->getLocale() == 'ar' ? 'المنزل' : 'House' }}: {{ $addressLines[2] }}{{ (isset($addressLines[3]) && trim($addressLines[3]) !== '' && $addressLines[3] !== 'NA') ? ' / ' . (app()->getLocale() == 'ar' ? 'الدور' : 'Floor') . ': ' . $addressLines[3] : '' }}{{ (isset($addressLines[4]) && trim($addressLines[4]) !== '' && $addressLines[4] !== 'NA') ? ' / ' . (app()->getLocale() == 'ar' ? 'الشقة' : 'Flat') . ': ' . $addressLines[4] : '' }}</span><br>
+                                                @if ($house)
+                                                    <span>{{ app()->getLocale() == 'ar' ? 'المنزل' : 'House' }}: {{ $house }}{{ $floor ? ' / ' . (app()->getLocale() == 'ar' ? 'الدور' : 'Floor') . ': ' . $floor : '' }}{{ $flat ? ' / ' . (app()->getLocale() == 'ar' ? 'الشقة' : 'Flat') . ': ' . $flat : '' }}</span><br>
                                                 @endif
-                                                @if (isset($addressLines[5]) && trim($addressLines[5]) !== '' && $addressLines[5] !== 'NA')
-                                                    <span>{{ app()->getLocale() == 'ar' ? 'الجادة' : 'Avenue' }}: {{ $addressLines[5] }}</span><br>
+                                                @if ($avenue)
+                                                    <span>{{ app()->getLocale() == 'ar' ? 'الجادة' : 'Avenue' }}: {{ $avenue }}</span><br>
                                                 @endif
                                             @else
                                                 {!! nl2br(e($rawAddress)) !!}<br>
