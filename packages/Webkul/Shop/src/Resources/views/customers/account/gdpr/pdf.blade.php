@@ -14,8 +14,8 @@
 
         @php
             $fontFamily = [
-                'regular' => 'Arial, sans-serif',
-                'bold'    => 'Arial, sans-serif',
+                'regular' => 'DejaVu Sans, Arial, sans-serif',
+                'bold'    => 'DejaVu Sans, Arial, sans-serif',
             ];
         @endphp
 

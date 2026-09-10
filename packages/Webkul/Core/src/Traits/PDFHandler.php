@@ -16,9 +16,7 @@ trait PDFHandler
     {
         $fileName = $this->resolvePdfFileName($fileName);
 
-        $html = $this->preparePdfHtml($html);
-
-        if ($this->isRtlLocale()) {
+        if (class_exists(Mpdf::class)) {
             $mpdf = $this->buildMpdf($html);
 
             return response()->streamDownload(
@@ -26,6 +24,8 @@ trait PDFHandler
                 $fileName.'.pdf'
             );
         }
+
+        $html = $this->preparePdfHtml($html);
 
         return Pdf::loadHTML($html)
             ->setPaper('A4', 'portrait')
@@ -38,11 +38,11 @@ trait PDFHandler
      */
     public function generatePdf(string $html): string
     {
-        $html = $this->preparePdfHtml($html);
-
-        if ($this->isRtlLocale()) {
+        if (class_exists(Mpdf::class)) {
             return $this->buildMpdf($html)->Output('', 'S');
         }
+
+        $html = $this->preparePdfHtml($html);
 
         return Pdf::loadHTML($html)
             ->setPaper('A4', 'portrait')
@@ -55,14 +55,27 @@ trait PDFHandler
      */
     private function buildMpdf(string $html): Mpdf
     {
+        $tempDir = storage_path('app/mpdf');
+
+        if (! file_exists($tempDir)) {
+            mkdir($tempDir, 0755, true);
+        }
+
         $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
             'margin_left' => 0,
             'margin_right' => 0,
             'margin_top' => 0,
             'margin_bottom' => 0,
+            'autoScriptToLang' => true,
+            'autoLangToFont' => true,
+            'tempDir' => $tempDir,
         ]);
 
-        $mpdf->SetDirectionality('rtl');
+        if ($this->isRtlLocale()) {
+            $mpdf->SetDirectionality('rtl');
+        }
 
         $mpdf->SetDisplayMode('fullpage');
 
