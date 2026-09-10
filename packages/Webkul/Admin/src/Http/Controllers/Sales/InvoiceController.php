@@ -137,18 +137,13 @@ class InvoiceController extends Controller
     /**
      * Print and download the for the specified resource.
      *
-     * @return Response
+     * @return View
      */
     public function printInvoice(int $id)
     {
         $invoice = $this->invoiceRepository->findOrFail($id);
 
-        $orderCurrencyCode = $invoice->order->order_currency_code;
-
-        return $this->downloadPDF(
-            view('shop::customers.account.orders.pdf', compact('invoice', 'orderCurrencyCode'))->render(),
-            'invoice-'.$invoice->created_at->format('d-m-Y')
-        );
+        return view('admin::sales.invoices.pdf', compact('invoice'));
     }
 
     /**
