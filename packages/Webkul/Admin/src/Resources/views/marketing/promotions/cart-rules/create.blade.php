@@ -685,7 +685,7 @@
 
                         conditionType: "{{ old('condition_type', 1) }}",
 
-                        conditions: [],
+                        conditions: @json(old('conditions', $defaultConditions ?? [])),
 
                         actionType: "{{ old('action_type') ?: 'by_percent' }}",
                     }

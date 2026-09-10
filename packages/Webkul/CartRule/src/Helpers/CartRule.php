@@ -5,6 +5,7 @@ namespace Webkul\CartRule\Helpers;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Webkul\CartRule\Repositories\CartRuleCouponRepository;
 use Webkul\CartRule\Repositories\CartRuleCouponUsageRepository;
 use Webkul\CartRule\Repositories\CartRuleCustomerRepository;
@@ -185,6 +186,111 @@ class CartRule
     }
 
     /**
+     * Check if a cart rule (coupon) can be applied to a specific cart item.
+     *
+     * @param  \Webkul\CartRule\Contracts\CartRule  $rule
+     */
+    public function canApplyRuleToItem($rule, CartItem $item): bool
+    {
+        if (! config('cart_rules.default_restrictions', true)) {
+            return true;
+        }
+
+        if (! $rule->coupon_type) {
+            return true;
+        }
+
+        if ($this->itemHasActiveSpecialPrice($item)) {
+            return false;
+        }
+
+        if ($this->itemIsInExcludedCategory($item)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if the cart item or its products have an active special price.
+     */
+    protected function itemHasActiveSpecialPrice(CartItem $item): bool
+    {
+        $productsToCheck = array_filter([
+            $item->product,
+            $item->child?->product,
+        ]);
+
+        foreach ($productsToCheck as $product) {
+            if (! empty($product->special_price) && (float) $product->special_price > 0) {
+                if (empty($product->special_price_from) && empty($product->special_price_to)) {
+                    return true;
+                }
+
+                if (core()->isChannelDateInInterval($product->special_price_from, $product->special_price_to)) {
+                    return true;
+                }
+            }
+        }
+
+        if ($item->children()->count()) {
+            foreach ($item->children as $childItem) {
+                if ($this->itemHasActiveSpecialPrice($childItem)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if the cart item belongs to any excluded category.
+     */
+    protected function itemIsInExcludedCategory(CartItem $item): bool
+    {
+        $excludedSlugs = config('cart_rules.excluded_categories', ['under-1-dinar', 'offers-discounts']);
+
+        static $excludedCategoryIds = null;
+
+        if ($excludedCategoryIds === null) {
+            $excludedCategoryIds = DB::table('category_translations')
+                ->whereIn('slug', $excludedSlugs)
+                ->pluck('category_id')
+                ->map(fn ($id) => (int) $id)
+                ->unique()
+                ->toArray();
+
+            if (empty($excludedCategoryIds)) {
+                $excludedCategoryIds = [16, 17];
+            }
+        }
+
+        $productsToCheck = array_filter([
+            $item->product,
+            $item->child?->product,
+        ]);
+
+        foreach ($productsToCheck as $product) {
+            $categoryIds = $product->categories()->pluck('categories.id')->toArray();
+
+            if (array_intersect($categoryIds, $excludedCategoryIds)) {
+                return true;
+            }
+        }
+
+        if ($item->children()->count()) {
+            foreach ($item->children as $childItem) {
+                if ($this->itemIsInExcludedCategory($childItem)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Cart item discount calculation process
      */
     public function process(CartItem $item): array
@@ -197,6 +303,10 @@ class CartRule
 
         foreach ($rules = $this->getCartRules() as $rule) {
             if (! $this->canProcessRule($rule)) {
+                continue;
+            }
+
+            if (! $this->canApplyRuleToItem($rule, $item)) {
                 continue;
             }
 
@@ -411,6 +521,10 @@ class CartRule
                     continue;
                 }
 
+                if (! $this->canApplyRuleToItem($rule, $item)) {
+                    continue;
+                }
+
                 /* given CartItem instance to the validator */
                 if (! $this->validator->validate($rule, $item)) {
                     continue;
@@ -468,6 +582,10 @@ class CartRule
 
             foreach ($this->cart->items as $item) {
                 if (! $this->canProcessRule($rule)) {
+                    continue;
+                }
+
+                if (! $this->canApplyRuleToItem($rule, $item)) {
                     continue;
                 }
 

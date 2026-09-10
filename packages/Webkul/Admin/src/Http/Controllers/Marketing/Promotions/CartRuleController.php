@@ -5,6 +5,7 @@ namespace Webkul\Admin\Http\Controllers\Marketing\Promotions;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -43,7 +44,34 @@ class CartRuleController extends Controller
      */
     public function create()
     {
-        return view('admin::marketing.promotions.cart-rules.create');
+        $defaultConditions = [];
+
+        if (config('cart_rules.default_restrictions', true)) {
+            $excludedSlugs = config('cart_rules.excluded_categories', ['under-1-dinar', 'offers-discounts']);
+
+            $excludedCategoryIds = DB::table('category_translations')
+                ->whereIn('slug', $excludedSlugs)
+                ->pluck('category_id')
+                ->map(fn ($id) => (string) $id)
+                ->unique()
+                ->values()
+                ->toArray();
+
+            if (empty($excludedCategoryIds)) {
+                $excludedCategoryIds = ['16', '17'];
+            }
+
+            $defaultConditions = [
+                [
+                    'attribute'      => 'product|category_ids',
+                    'operator'       => '!{}',
+                    'attribute_type' => 'multiselect',
+                    'value'          => $excludedCategoryIds,
+                ],
+            ];
+        }
+
+        return view('admin::marketing.promotions.cart-rules.create', compact('defaultConditions'));
     }
 
     /**
