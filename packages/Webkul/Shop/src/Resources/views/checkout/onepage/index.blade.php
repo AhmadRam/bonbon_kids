@@ -260,16 +260,23 @@
                             }
 
                             if (paymentMethod) {
+                                let methodCode = typeof paymentMethod === 'object' 
+                                    ? (paymentMethod.method || paymentMethod.payment) 
+                                    : paymentMethod;
+
                                 await this.$axios.post('{{ route('shop.checkout.onepage.payment_methods.store') }}', {
-                                    payment: paymentMethod,
+                                    payment: { method: methodCode },
                                 });
                             }
 
                             // 4. Create Order
                             let orderResponse = await this.$axios.post('{{ route('shop.checkout.onepage.orders.store') }}');
 
-                            if (orderResponse.data.data?.redirect) {
-                                window.location.href = orderResponse.data.data.redirect_url;
+                            let redirectUrl = orderResponse.data.data?.redirect_url || orderResponse.data?.redirect_url;
+                            let isRedirect = orderResponse.data.data?.redirect || orderResponse.data?.redirect;
+
+                            if (isRedirect && redirectUrl) {
+                                window.location.href = redirectUrl;
                             } else {
                                 window.location.href = '{{ route('shop.checkout.onepage.success') }}';
                             }

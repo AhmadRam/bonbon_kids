@@ -157,8 +157,10 @@
 
                     this.$emit('processing', 'review');
 
+                    let methodCode = typeof selectedMethod === 'object' ? selectedMethod.method : selectedMethod;
+
                     this.$axios.post("{{ route('shop.checkout.onepage.payment_methods.store') }}", {
-                            payment: selectedMethod
+                            payment: { method: methodCode }
                         })
                         .then(response => {
                             this.$emit('processed', response.data.cart);
