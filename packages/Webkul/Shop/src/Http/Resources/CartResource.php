@@ -4,6 +4,7 @@ namespace Webkul\Shop\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Webkul\Payment\Facades\Payment;
 use Webkul\Tax\Facades\Tax;
 
 class CartResource extends JsonResource
@@ -49,6 +50,7 @@ class CartResource extends JsonResource
             'have_stockable_items' => $this->haveStockableItems(),
             'payment_method' => $this->payment?->method,
             'payment_method_title' => core()->getConfigData('sales.payment_methods.'.$this->payment?->method.'.title'),
+            'payment_methods' => Payment::getPaymentMethods(),
         ];
     }
 }

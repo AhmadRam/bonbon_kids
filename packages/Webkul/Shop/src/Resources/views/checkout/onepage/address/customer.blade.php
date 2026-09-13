@@ -243,15 +243,12 @@
                             </div>
                         </template>
 
-                        <!-- Proceed Button -->
-                        <div class="mt-4 flex justify-end max-md:my-4">
-                            <x-shop::button
-                                class="primary-button rounded-2xl px-11 py-3 max-md:rounded-lg max-sm:w-full max-sm:max-w-full max-sm:py-1.5"
-                                :title="trans('shop::app.checkout.onepage.address.proceed')"
-                                ::loading="isStoring"
-                                ::disabled="isStoring"
-                            />
-                        </div>
+                        <!-- Hidden Submit Button for single-button checkout -->
+                        <button
+                            type="submit"
+                            id="checkout-customer-address-submit-btn"
+                            class="hidden"
+                        ></button>
                     </form>
                 </x-shop::form>
             </template>
@@ -372,6 +369,24 @@
 
             mounted() {
                 this.getCustomerSavedAddresses();
+
+                this.$emitter.on('trigger-address-submit', () => {
+                    const btn = document.getElementById('checkout-customer-address-submit-btn');
+                    if (btn) {
+                        btn.click();
+                        setTimeout(() => {
+                            const firstError = document.querySelector('.text-red-500, [aria-invalid="true"]');
+                            if (firstError) {
+                                this.$emitter.emit('address-validation-failed');
+                                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                        }, 50);
+                    }
+                });
+            },
+
+            beforeUnmount() {
+                this.$emitter.off('trigger-address-submit');
             },
 
             methods: {
@@ -564,43 +579,10 @@
                         payload.shipping = this.getSelectedAddress('shipping', params.shipping.id);
                     }
 
-                    this.isStoring = true;
-
-                    this.moveToNextStep();
-
-                    this.$axios.post('{{ route('shop.checkout.onepage.addresses.store') }}', payload)
-                        .then((response) => {
-                            this.isStoring = false;
-
-                            if (response.data.data.redirect_url) {
-                                window.location.href = response.data.data.redirect_url;
-                            } else {
-                                if (this.cart.have_stockable_items) {
-                                    this.$emit('processed', response.data.data.shippingMethods);
-                                } else {
-                                    this.$emit('processed', response.data.data.payment_methods);
-                                }
-                            }
-                        })
-                        .catch(error => {
-                            this.isStoring = false;
-
-                            this.$emit('processing', 'address');
-
-                            if (error.response.status == 422) {
-                                const billingRegex = /^billing\./;
-
-                                if (Object.keys(error.response.data.errors).some(key => billingRegex.test(key))) {
-                                    setErrors({
-                                        'billing.id': error.response.data.message
-                                    });
-                                } else {
-                                    setErrors({
-                                        'shipping.id': error.response.data.message
-                                    });
-                                }
-                            }
-                        });
+                    this.$emitter.emit('address-validated-ready', {
+                        params: payload,
+                        setErrors: setErrors,
+                    });
                 },
 
                 getSelectedAddress(type, id) {

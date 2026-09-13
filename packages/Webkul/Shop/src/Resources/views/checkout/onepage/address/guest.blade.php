@@ -90,15 +90,12 @@
                     </div>
                 </template>
 
-                <!-- Proceed Button -->
-                <div class="mt-4 flex justify-end">
-                    <x-shop::button
-                        class="primary-button rounded-2xl px-11 py-3 max-md:w-full max-md:max-w-full max-md:rounded-lg"
-                        :title="trans('shop::app.checkout.onepage.address.proceed')"
-                        ::loading="isStoring"
-                        ::disabled="isStoring"
-                    />
-                </div>
+                <!-- Hidden Submit Button for single-button checkout -->
+                <button
+                    type="submit"
+                    id="checkout-guest-address-submit-btn"
+                    class="hidden"
+                ></button>
             </form>
         </x-shop::form>
     </script>
@@ -121,42 +118,36 @@
 
             created() {
                 this.useBillingAddressForShipping = true;
-                // if (this.cart.billing_address) {
-                //     this.useBillingAddressForShipping = this.cart.billing_address.use_for_shipping;
-                // }
+            },
+
+            mounted() {
+                this.$emitter.on('trigger-address-submit', () => {
+                    const btn = document.getElementById('checkout-guest-address-submit-btn');
+                    if (btn) {
+                        btn.click();
+                        setTimeout(() => {
+                            const firstError = document.querySelector('.text-red-500, [aria-invalid="true"]');
+                            if (firstError) {
+                                this.$emitter.emit('address-validation-failed');
+                                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                        }, 50);
+                    }
+                });
+            },
+
+            beforeUnmount() {
+                this.$emitter.off('trigger-address-submit');
             },
 
             methods: {
                 addAddress(params, { setErrors }) {
-                    this.isStoring = true;
-
                     params['billing']['use_for_shipping'] = this.useBillingAddressForShipping;
 
-                    this.moveToNextStep();
-
-                    this.$axios.post('{{ route('shop.checkout.onepage.addresses.store') }}', params)
-                        .then((response) => {
-                            this.isStoring = false;
-
-                            if (response.data.data.redirect_url) {
-                                window.location.href = response.data.data.redirect_url;
-                            } else {
-                                if (this.cart.have_stockable_items) {
-                                    this.$emit('processed', response.data.data.shippingMethods);
-                                } else {
-                                    this.$emit('processed', response.data.data.payment_methods);
-                                }
-                            }
-                        })
-                        .catch(error => {
-                            this.isStoring = false;
-
-                            this.$emit('processing', 'address');
-
-                            if (error.response.status == 422) {
-                                setErrors(error.response.data.errors);
-                            }
-                        });
+                    this.$emitter.emit('address-validated-ready', {
+                        params: params,
+                        setErrors: setErrors,
+                    });
                 },
 
                 moveToNextStep() {

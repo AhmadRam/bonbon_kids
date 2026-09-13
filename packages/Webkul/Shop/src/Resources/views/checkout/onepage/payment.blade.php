@@ -4,6 +4,7 @@
     :methods="paymentMethods"
     @processing="stepForward"
     @processed="stepProcessed"
+    @payment-selected="paymentSelected"
 >
     <x-shop::shimmer.checkout.onepage.payment-method />
 </v-payment-methods>
@@ -130,24 +131,29 @@
                 };
             },
 
-            emits: ['processing', 'processed'],
+            emits: ['processing', 'processed', 'payment-selected'],
 
             watch: {
                 methods: {
                     handler(newVal) {
                         if (newVal && newVal.length > 0) {
                             if (! this.selectedMethod) {
-                                this.store(newVal[0]);
+                                this.selectedMethod = newVal[0].method;
+                                this.$emit('payment-selected', newVal[0]);
+                                this.$emit('processing', 'review');
                             }
                         }
                     },
-                    deep: true
+                    deep: true,
+                    immediate: true
                 }
             },
 
             methods: {
                 store(selectedMethod) {
                     this.selectedMethod = selectedMethod.method;
+
+                    this.$emit('payment-selected', selectedMethod);
 
                     this.$emit('processing', 'review');
 
@@ -156,19 +162,11 @@
                         })
                         .then(response => {
                             this.$emit('processed', response.data.cart);
-
-                            // Used in mobile view. 
-                            if (window.innerWidth <= 768) {
-                                window.scrollTo({
-                                    top: document.body.scrollHeight,
-                                    behavior: 'smooth'
-                                });
-                            }
                         })
                         .catch(error => {
                             this.$emit('processing', 'payment');
 
-                            if (error.response.data.redirect_url) {
+                            if (error.response?.data?.redirect_url) {
                                 window.location.href = error.response.data.redirect_url;
                             }
                         });

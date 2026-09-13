@@ -84,19 +84,10 @@
                         id="steps-container"
                     >
                         <!-- Included Addresses Blade File -->
-                        <template v-if="['address', 'shipping', 'payment', 'review'].includes(currentStep)">
-                            @include('shop::checkout.onepage.address')
-                        </template>
-
-                        <!-- Included Shipping Methods Blade File -->
-                        <template v-if="cart.have_stockable_items && ['shipping', 'payment', 'review'].includes(currentStep)">
-                            @include('shop::checkout.onepage.shipping')
-                        </template>
+                        @include('shop::checkout.onepage.address')
 
                         <!-- Included Payment Methods Blade File -->
-                        <template v-if="['payment', 'review'].includes(currentStep)">
-                            @include('shop::checkout.onepage.payment')
-                        </template>
+                        @include('shop::checkout.onepage.payment')
                     </div>
 
                     <!-- Included Checkout Summary Blade File For Desktop view -->
@@ -129,6 +120,11 @@
                                 />
                             </template>
                         </div>
+
+                        <!-- Free Gift Wrapping Notice for Mobile view (Placed AFTER Place Order button) -->
+                        <div class="block md:hidden">
+                            @include('shop::checkout.onepage.gift-wrapping')
+                        </div>
                     </div>
                 </div>
             </template>
@@ -152,13 +148,15 @@
 
                         isPlacingOrder: false,
 
-                        currentStep: 'address',
+                        currentStep: 'review',
 
                         shippingMethods: null,
 
                         paymentMethods: null,
 
-                        canPlaceOrder: false,
+                        selectedPaymentMethod: null,
+
+                        canPlaceOrder: true,
 
                         hasSentBeginCheckout: false,
                     }
@@ -166,6 +164,19 @@
 
                 mounted() {
                     this.getCart();
+
+                    this.$emitter.on('address-validation-failed', () => {
+                        this.isPlacingOrder = false;
+                    });
+
+                    this.$emitter.on('address-validated-ready', (data) => {
+                        this.processCompleteCheckout(data);
+                    });
+                },
+
+                beforeUnmount() {
+                    this.$emitter.off('address-validation-failed');
+                    this.$emitter.off('address-validated-ready');
                 },
 
                 methods: {
@@ -174,75 +185,110 @@
                             .then(response => {
                                 this.cart = response.data.data;
 
+                                if (this.cart?.payment_methods) {
+                                    this.paymentMethods = this.cart.payment_methods;
+                                }
+
                                 if (!this.hasSentBeginCheckout) {
                                     this.pushBeginCheckout(this.cart);
                                     this.hasSentBeginCheckout = true;
                                 }
-
-                                this.scrollToCurrentStep();
                             })
                             .catch(error => {});
                     },
 
+                    paymentSelected(payment) {
+                        this.selectedPaymentMethod = payment.payment || payment.method || payment;
+                    },
+
                     stepForward(step) {
                         this.currentStep = step;
-
-                        if (step == 'review') {
-                            this.canPlaceOrder = true;
-
-                            return;
-                        }
-
-                        this.canPlaceOrder = false;
-
-                        if (this.currentStep == 'shipping') {
-                            this.shippingMethods = null;
-                        } else if (this.currentStep == 'payment') {
-                            this.paymentMethods = null;
-                        }
                     },
 
                     stepProcessed(data) {
-                        if (this.currentStep == 'shipping') {
-                            this.shippingMethods = data;
-                        } else if (this.currentStep == 'payment') {
-                            this.paymentMethods = data;
-                        }
-
                         this.getCart();
                     },
 
-                    scrollToCurrentStep() {
-                        let container = document.getElementById('steps-container');
-
-                        if (! container) {
+                    placeOrder() {
+                        if (this.isPlacingOrder) {
                             return;
                         }
 
-                        container.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'end'
-                        });
-                    },
-
-                    placeOrder() {
                         this.isPlacingOrder = true;
 
-                        this.$axios.post('{{ route('shop.checkout.onepage.orders.store') }}')
-                            .then(response => {
-                                if (response.data.data.redirect) {
-                                    window.location.href = response.data.data.redirect_url;
-                                } else {
-                                    window.location.href = '{{ route('shop.checkout.onepage.success') }}';
+                        // Trigger address validation and submission in the child address component
+                        this.$emitter.emit('trigger-address-submit');
+                    },
+
+                    async processCompleteCheckout({ params, setErrors }) {
+                        try {
+                            // 1. Store Address
+                            let addressResponse = await this.$axios.post('{{ route('shop.checkout.onepage.addresses.store') }}', params);
+
+                            if (addressResponse.data.data?.redirect_url) {
+                                window.location.href = addressResponse.data.data.redirect_url;
+                                return;
+                            }
+
+                            // 2. Auto-select and save shipping rate if stockable items
+                            if (this.cart.have_stockable_items) {
+                                let shippingMethods = addressResponse.data.data?.shippingMethods || addressResponse.data?.shippingMethods;
+                                let selectedRate = null;
+
+                                if (shippingMethods) {
+                                    for (let carrier in shippingMethods) {
+                                        if (shippingMethods[carrier].rates && shippingMethods[carrier].rates.length > 0) {
+                                            selectedRate = shippingMethods[carrier].rates[0].method;
+                                            break;
+                                        }
+                                    }
                                 }
 
-                                this.isPlacingOrder = false;
-                            })
-                            .catch(error => {
-                                this.isPlacingOrder = false
+                                if (! selectedRate) {
+                                    selectedRate = 'flatrate_flatrate';
+                                }
 
-                                this.$emitter.emit('add-flash', { type: 'error', message: error.response.data.message });
-                            });
+                                await this.$axios.post('{{ route('shop.checkout.onepage.shipping_methods.store') }}', {
+                                    shipping_method: selectedRate,
+                                });
+                            }
+
+                            // 3. Save selected payment method
+                            let paymentMethod = this.selectedPaymentMethod;
+                            if (! paymentMethod && this.paymentMethods && this.paymentMethods.length > 0) {
+                                paymentMethod = this.paymentMethods[0].method || this.paymentMethods[0].payment;
+                            }
+
+                            if (paymentMethod) {
+                                await this.$axios.post('{{ route('shop.checkout.onepage.payment_methods.store') }}', {
+                                    payment: paymentMethod,
+                                });
+                            }
+
+                            // 4. Create Order
+                            let orderResponse = await this.$axios.post('{{ route('shop.checkout.onepage.orders.store') }}');
+
+                            if (orderResponse.data.data?.redirect) {
+                                window.location.href = orderResponse.data.data.redirect_url;
+                            } else {
+                                window.location.href = '{{ route('shop.checkout.onepage.success') }}';
+                            }
+                        } catch (error) {
+                            this.isPlacingOrder = false;
+
+                            if (error.response?.status === 422 && setErrors && error.response.data?.errors) {
+                                setErrors(error.response.data.errors);
+                                setTimeout(() => {
+                                    const firstError = document.querySelector('.text-red-500, [aria-invalid="true"]');
+                                    if (firstError) {
+                                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    }
+                                }, 50);
+                            } else {
+                                let message = error.response?.data?.message || 'حدث خطأ أثناء معالجة الطلب، يرجى المحاولة مرة أخرى.';
+                                this.$emitter.emit('add-flash', { type: 'error', message: message });
+                            }
+                        }
                     },
 
                     pushBeginCheckout(cart) {
