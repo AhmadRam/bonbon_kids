@@ -117,6 +117,12 @@ return [
         'sort' => 2,
         'icon' => '',
     ], [
+        'key' => 'catalog.inventory_report',
+        'name' => 'Inventory Report',
+        'route' => 'admin.catalog.inventory_report.index',
+        'sort' => 5,
+        'icon' => '',
+    ], [
         'key' => 'catalog.attributes',
         'name' => 'admin::app.components.layouts.sidebar.attributes',
         'route' => 'admin.catalog.attributes.index',

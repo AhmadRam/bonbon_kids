@@ -11,11 +11,14 @@ use Webkul\Admin\Http\Controllers\Catalog\Product\GroupedController;
 use Webkul\Admin\Http\Controllers\Catalog\Product\SimpleController;
 use Webkul\Admin\Http\Controllers\Catalog\Product\VirtualController;
 use Webkul\Admin\Http\Controllers\Catalog\ProductController;
+use Webkul\Admin\Http\Controllers\Catalog\InventoryReportController;
 
 /**
  * Catalog routes.
  */
 Route::prefix('catalog')->group(function () {
+    Route::get('inventory-report', [InventoryReportController::class, 'index'])->name('admin.catalog.inventory_report.index');
+
     /**
      * Attributes routes.
      */
