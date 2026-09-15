@@ -81,6 +81,7 @@ class OrderListener
                 'notes' => 'Bagisto Order #' . $order->id,
                 'discount' => 0,
                 'discount_amount' => 0, // We already applied discount in line items or we can apply it here
+                'store_id' => 2, // Force invoice to deduct from the Sub-warehouse (store 2)
             ];
             
             // Daftra base currency might be different, let's use the order currency

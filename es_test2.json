@@ -1,0 +1,8 @@
+﻿{
+  "query": {
+    "query_string": {
+      "query": "\"حقيبة-الطبيبة-الصغيرة\"",
+      "default_field": "url_key.keyword"
+    }
+  }
+}

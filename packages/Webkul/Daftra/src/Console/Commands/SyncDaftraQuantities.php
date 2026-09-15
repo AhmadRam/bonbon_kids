@@ -108,11 +108,25 @@ class SyncDaftraQuantities extends Command
 
                     if ($bagistoProduct) {
                         // Update Inventory
+                        // Map Daftra store_id to Bagisto inventory_source_id
+                        $inventories = [];
+                        
+                        if (!empty($daftraProduct['ProductStock']) && is_array($daftraProduct['ProductStock'])) {
+                            foreach ($daftraProduct['ProductStock'] as $stockItem) {
+                                $storeId = $stockItem['store_id'] ?? null;
+                                $balance = max(0, (float)($stockItem['balance'] ?? 0));
+                                if ($storeId) {
+                                    $inventories[$storeId] = $balance;
+                                }
+                            }
+                        } else {
+                            // Fallback if ProductStock is not available for some reason
+                            $inventories[$defaultInventorySourceId] = $stockBalance;
+                        }
+
                         // Bagisto 2.x saveInventories structure: ['inventories' => [inventory_source_id => qty]]
                         $inventoryData = [
-                            'inventories' => [
-                                $defaultInventorySourceId => $stockBalance
-                            ]
+                            'inventories' => $inventories
                         ];
                         
                         $this->productInventoryRepository->saveInventories($inventoryData, $bagistoProduct);
