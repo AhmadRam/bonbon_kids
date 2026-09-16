@@ -22,24 +22,24 @@
 
     <!-- BreadcrumbList Schema -->
     <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-            {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "الرئيسية",
-                "item": "{{ url('/') }}/"
-            },
-            {
-                "@type": "ListItem",
-                "position": 2,
-                "name": {!! json_encode($category->name, JSON_UNESCAPED_UNICODE) !!},
-                "item": "{{ route('shop.product_or_category.index', $category->slug) }}"
-            }
-        ]
-    }
+    {!! json_encode([
+        '@context'        => 'https://schema.org',
+        '@type'           => 'BreadcrumbList',
+        'itemListElement' => [
+            [
+                '@type'    => 'ListItem',
+                'position' => 1,
+                'name'     => 'الرئيسية',
+                'item'     => url('/').'/',
+            ],
+            [
+                '@type'    => 'ListItem',
+                'position' => 2,
+                'name'     => $category->name,
+                'item'     => route('shop.product_or_category.index', $category->slug),
+            ],
+        ],
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
     </script>
 
     @if (core()->getConfigData('catalog.rich_snippets.categories.enable'))

@@ -53,67 +53,58 @@
 
     <!-- BreadcrumbList Schema -->
     <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-            {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "الرئيسية",
-                "item": "{{ url('/') }}/"
-            }
-            @if ($primaryCategory)
-            ,{
-                "@type": "ListItem",
-                "position": 2,
-                "name": {!! json_encode($primaryCategory->name, JSON_UNESCAPED_UNICODE) !!},
-                "item": "{{ route('shop.product_or_category.index', $primaryCategory->slug) }}"
-            },
-            {
-                "@type": "ListItem",
-                "position": 3,
-                "name": {!! json_encode($product->name, JSON_UNESCAPED_UNICODE) !!},
-                "item": "{{ route('shop.product_or_category.index', $product->url_key) }}"
-            }
-            @else
-            ,{
-                "@type": "ListItem",
-                "position": 2,
-                "name": {!! json_encode($product->name, JSON_UNESCAPED_UNICODE) !!},
-                "item": "{{ route('shop.product_or_category.index', $product->url_key) }}"
-            }
-            @endif
-        ]
-    }
+    {!! json_encode([
+        '@context'        => 'https://schema.org',
+        '@type'           => 'BreadcrumbList',
+        'itemListElement' => array_values(array_filter([
+            [
+                '@type'    => 'ListItem',
+                'position' => 1,
+                'name'     => 'الرئيسية',
+                'item'     => url('/').'/',
+            ],
+            $primaryCategory ? [
+                '@type'    => 'ListItem',
+                'position' => 2,
+                'name'     => $primaryCategory->name,
+                'item'     => route('shop.product_or_category.index', $primaryCategory->slug),
+            ] : null,
+            [
+                '@type'    => 'ListItem',
+                'position' => $primaryCategory ? 3 : 2,
+                'name'     => $product->name,
+                'item'     => route('shop.product_or_category.index', $product->url_key),
+            ],
+        ])),
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
     </script>
 
     <!-- Product + Offer Schema -->
     <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "Product",
-        "name": {!! json_encode($product->name, JSON_UNESCAPED_UNICODE) !!},
-        "image": [
-            "{{ $productBaseImage['large_image_url'] ?? $productBaseImage['medium_image_url'] }}"
+    {!! json_encode([
+        '@context'    => 'https://schema.org',
+        '@type'       => 'Product',
+        'name'        => $product->name,
+        'image'       => [
+            $productBaseImage['large_image_url'] ?? $productBaseImage['medium_image_url'],
         ],
-        "description": {!! json_encode(\Illuminate\Support\Str::limit(strip_tags($product->description), 500, ''), JSON_UNESCAPED_UNICODE) !!},
-        "sku": {!! json_encode($product->sku) !!},
-        "brand": {
-            "@type": "Brand",
-            "name": "بون بون تويز ستور"
-        },
-        "offers": {
-            "@type": "Offer",
-            "url": "{{ route('shop.product_or_category.index', $product->url_key) }}",
-            "priceCurrency": "KWD",
-            "price": "{{ $formattedProductPrice }}",
-            "availability": "{{ $isProductInStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock' }}",
-            "seller": {
-                "@id": "{{ url('/') }}/#organization"
-            }
-        }
-    }
+        'description' => \Illuminate\Support\Str::limit(strip_tags($product->description), 500, ''),
+        'sku'         => $product->sku,
+        'brand'       => [
+            '@type' => 'Brand',
+            'name'  => 'بون بون تويز ستور',
+        ],
+        'offers' => [
+            '@type'         => 'Offer',
+            'url'           => route('shop.product_or_category.index', $product->url_key),
+            'priceCurrency' => 'KWD',
+            'price'         => $formattedProductPrice,
+            'availability'  => $isProductInStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+            'seller'        => [
+                '@id' => url('/').'/#organization',
+            ],
+        ],
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
     </script>
 @endPush
 

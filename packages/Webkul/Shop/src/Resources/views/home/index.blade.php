@@ -27,44 +27,44 @@
 
     <!-- Organization Schema -->
     <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "OnlineStore",
-        "@id": "{{ url('/') }}/#organization",
-        "name": "بون بون تويز ستور",
-        "url": "{{ url('/') }}/",
-        "logo": "{{ core()->getCurrentChannel()->logo_url ?? bagisto_asset('images/logo.svg') }}",
-        "areaServed": {
-            "@type": "Country",
-            "name": "Kuwait"
-        },
-        "sameAs": [
-            "https://wa.me/+96592214430",
-            "https://www.facebook.com/share/1Cw2H6hLBW/?mibextid=wwXIfr",
-            "https://www.tiktok.com/@bonbon.kuwait",
-            "https://snapchat.com/t/ma2NUtXn",
-            "https://www.instagram.com/bonbon_kuwait"
-        ]
-    }
+    {!! json_encode([
+        '@context'   => 'https://schema.org',
+        '@type'      => 'OnlineStore',
+        '@id'        => url('/').'/#organization',
+        'name'       => 'بون بون تويز ستور',
+        'url'        => url('/').'/',
+        'logo'       => core()->getCurrentChannel()->logo_url ?? bagisto_asset('images/logo.svg'),
+        'areaServed' => [
+            '@type' => 'Country',
+            'name'  => 'Kuwait',
+        ],
+        'sameAs' => [
+            'https://wa.me/+96592214430',
+            'https://www.facebook.com/share/1Cw2H6hLBW/?mibextid=wwXIfr',
+            'https://www.tiktok.com/@bonbon.kuwait',
+            'https://snapchat.com/t/ma2NUtXn',
+            'https://www.instagram.com/bonbon_kuwait',
+        ],
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
     </script>
 
     <!-- WebSite Schema -->
     <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "@id": "{{ url('/') }}/#website",
-        "url": "{{ url('/') }}/",
-        "inLanguage": "ar",
-        "potentialAction": {
-            "@type": "SearchAction",
-            "target": {
-                "@type": "EntryPoint",
-                "urlTemplate": "{{ route('shop.search.index') }}?query={search_term_string}"
-            },
-            "query-input": "required name=search_term_string"
-        }
-    }
+    {!! json_encode([
+        '@context'        => 'https://schema.org',
+        '@type'           => 'WebSite',
+        '@id'             => url('/').'/#website',
+        'url'             => url('/').'/',
+        'inLanguage'      => 'ar',
+        'potentialAction' => [
+            '@type'  => 'SearchAction',
+            'target' => [
+                '@type'       => 'EntryPoint',
+                'urlTemplate' => route('shop.search.index').'?query={search_term_string}',
+            ],
+            'query-input' => 'required name=search_term_string',
+        ],
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
     </script>
 @endPush
 
