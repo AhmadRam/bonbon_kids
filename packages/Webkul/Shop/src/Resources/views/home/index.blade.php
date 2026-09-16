@@ -28,7 +28,7 @@
     <!-- Organization Schema -->
     <script type="application/ld+json">
     {!! json_encode([
-        '@context'   => 'https://schema.org',
+        '@'.'context'   => 'https://schema.org',
         '@type'      => 'OnlineStore',
         '@id'        => url('/').'/#organization',
         'name'       => 'بون بون تويز ستور',
@@ -51,7 +51,7 @@
     <!-- WebSite Schema -->
     <script type="application/ld+json">
     {!! json_encode([
-        '@context'        => 'https://schema.org',
+        '@'.'context'        => 'https://schema.org',
         '@type'           => 'WebSite',
         '@id'             => url('/').'/#website',
         'url'             => url('/').'/',

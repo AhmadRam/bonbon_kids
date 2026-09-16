@@ -54,7 +54,7 @@
     <!-- BreadcrumbList Schema -->
     <script type="application/ld+json">
     {!! json_encode([
-        '@context'        => 'https://schema.org',
+        '@'.'context'        => 'https://schema.org',
         '@type'           => 'BreadcrumbList',
         'itemListElement' => array_values(array_filter([
             [
@@ -82,7 +82,7 @@
     <!-- Product + Offer Schema -->
     <script type="application/ld+json">
     {!! json_encode([
-        '@context'    => 'https://schema.org',
+        '@'.'context'    => 'https://schema.org',
         '@type'       => 'Product',
         'name'        => $product->name,
         'image'       => [
