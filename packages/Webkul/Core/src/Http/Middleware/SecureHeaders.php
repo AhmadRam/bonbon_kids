@@ -13,7 +13,11 @@ class SecureHeaders
      *
      * @var array
      */
-    private $unwantedHeaderList = [];
+    private $unwantedHeaderList = [
+        'X-Powered-By',
+        'x-powered-by',
+        'Server',
+    ];
 
     /**
      * Handle an incoming request.
@@ -35,17 +39,25 @@ class SecureHeaders
     /**
      * Set headers.
      *
-     * @param  Response  $response
+     * @param  mixed  $response
      * @return void
      */
     private function setHeaders($response)
     {
-        $response->headers->set('Referrer-Policy', 'no-referrer-when-downgrade');
+        if (! method_exists($response, 'headers') || ! $response->headers) {
+            return;
+        }
+
+        $response->headers->remove('X-Powered-By');
+        $response->headers->remove('x-powered-by');
+        $response->headers->remove('X-Built-With');
+
+        $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('X-XSS-Protection', '1; mode=block');
-        $response->headers->set('X-Frame-Options', 'DENY');
-        $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-        $response->headers->set('X-Built-With', 'Bagisto');
+        $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
+        $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+        $response->headers->set('Content-Security-Policy', "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval';");
     }
 
     /**

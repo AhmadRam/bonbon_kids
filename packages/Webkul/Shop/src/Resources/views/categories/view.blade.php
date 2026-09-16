@@ -10,12 +10,48 @@
         content="{{ $category->meta_keywords }}"
     />
 
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="{{ trim($category->meta_title) != "" ? $category->meta_title : $category->name }}" />
+    <meta property="og:description" content="{{ trim($category->meta_description) != "" ? $category->meta_description : \Illuminate\Support\Str::limit(strip_tags($category->description), 120, '') }}" />
+    <meta property="og:url" content="{{ route('shop.product_or_category.index', $category->slug) }}" />
+    @if ($category->banner_path)
+        <meta property="og:image" content="{{ $category->banner_url }}" />
+    @else
+        <meta property="og:image" content="{{ core()->getCurrentChannel()->logo_url ?? bagisto_asset('images/logo.svg') }}" />
+    @endif
+
+    <!-- BreadcrumbList Schema -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "الرئيسية",
+                "item": "{{ url('/') }}/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": {!! json_encode($category->name, JSON_UNESCAPED_UNICODE) !!},
+                "item": "{{ route('shop.product_or_category.index', $category->slug) }}"
+            }
+        ]
+    }
+    </script>
+
     @if (core()->getConfigData('catalog.rich_snippets.categories.enable'))
         <script type="application/ld+json">
             {!! app('Webkul\Product\Helpers\SEO')->getCategoryJsonLd($category) !!}
         </script>
     @endif
 @endPush
+
+@push('canonical')
+    <link rel="canonical" href="{{ route('shop.product_or_category.index', $category->slug) }}" />
+@endpush
 
 <x-shop::layouts>
     <!-- Page Title -->
@@ -40,11 +76,16 @@
 
     {!! view_render_event('bagisto.shop.categories.view.banner_path.after') !!}
 
+    <!-- Category Title H1 for SEO -->
+    <div class="container mt-6 px-[60px] max-lg:px-8 max-md:mt-4 max-md:px-4">
+        <h1 class="text-3xl font-bold text-navyBlue max-md:text-2xl max-sm:text-xl">{{ $category->name }}</h1>
+    </div>
+
     {!! view_render_event('bagisto.shop.categories.view.description.before') !!}
 
     @if (in_array($category->display_mode, [null, 'description_only', 'products_and_description']))
         @if ($category->description)
-            <div class="container mt-[34px] px-[60px] max-lg:px-8 max-md:mt-4 max-md:px-4 max-md:text-sm max-sm:text-xs">
+            <div class="container mt-[20px] px-[60px] max-lg:px-8 max-md:mt-3 max-md:px-4 max-md:text-sm max-sm:text-xs">
                 {!! $category->description !!}
             </div>
         @endif
@@ -55,8 +96,37 @@
     @if (in_array($category->display_mode, [null, 'products_only', 'products_and_description']))
         <!-- Category Vue Component -->
         <v-category>
-            <!-- Category Shimmer Effect -->
-            <x-shop::shimmer.categories.view />
+            <!-- Initial Server Rendered Products (SSR fallback for crawlers without JS) -->
+            <div class="container px-[60px] max-lg:px-8 max-md:px-4 mt-6">
+                @if (! empty($products) && count($products))
+                    <div class="grid grid-cols-4 gap-6 max-1060:grid-cols-3 max-md:grid-cols-2 max-sm:gap-3">
+                        @foreach ($products as $product)
+                            <div class="border rounded-2xl p-3 shadow-sm bg-white flex flex-col justify-between">
+                                <a href="{{ route('shop.product_or_category.index', $product->url_key) }}" class="block">
+                                    <div class="aspect-square overflow-hidden rounded-xl bg-gray-50 flex items-center justify-center">
+                                        @php $baseImg = product_image()->getProductBaseImage($product); @endphp
+                                        <img
+                                            src="{{ $baseImg['medium_image_url'] ?? bagisto_asset('images/product-placeholder.png') }}"
+                                            alt="{{ $product->name }}"
+                                            class="w-full h-full object-contain"
+                                            loading="lazy"
+                                        />
+                                    </div>
+                                    <h2 class="mt-2 text-base font-semibold text-gray-800 line-clamp-2 h-12">{{ $product->name }}</h2>
+                                </a>
+                                <div class="mt-3 flex items-center justify-between">
+                                    <span class="text-lg font-bold text-navyBlue">{{ core()->formatPrice($product->price) }}</span>
+                                    <a href="{{ route('shop.product_or_category.index', $product->url_key) }}" class="text-sm font-medium text-toyBlue underline">
+                                        @lang('shop::app.components.products.carousel.view-all')
+                                    </a>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <x-shop::shimmer.categories.view />
+                @endif
+            </div>
         </v-category>
     @endif
 

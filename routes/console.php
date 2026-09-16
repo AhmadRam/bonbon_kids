@@ -35,3 +35,50 @@ Artisan::command('fix-footer-links', function () {
 
     $this->info('Footer links have been updated to use relative paths.');
 });
+
+Artisan::command('bagisto:sitemap:generate', function () {
+    \Webkul\Shop\Http\Controllers\SitemapController::clearCache();
+
+    $controller = app(\Webkul\Shop\Http\Controllers\SitemapController::class);
+
+    // Warm up the caches
+    $controller->index();
+    $controller->categories();
+    $controller->products();
+    $controller->pages();
+
+    $this->info('Sitemap generated and cached successfully.');
+})->describe('Generate and cache XML sitemaps');
+
+Artisan::command('fix-theme-banners-responsive', function () {
+    $customizations = DB::table('theme_customization_translations')
+        ->whereIn('theme_customization_id', [2, 15])
+        ->get();
+
+    foreach ($customizations as $c) {
+        $options = json_decode($c->options, true);
+        if (isset($options['html'])) {
+            $options['html'] = preg_replace_callback(
+                '/<img\s+src="([^"]+)"([^>]*)>/i',
+                function ($matches) {
+                    $src = $matches[1];
+                    $rest = $matches[2];
+                    if (str_contains($rest, 'srcset=')) {
+                        return $matches[0];
+                    }
+                    $medium = str_replace('storage/', 'cache/medium/', $src);
+
+                    return '<img src="'.$src.'" srcset="'.$medium.' 300w, '.$src.' 600w" sizes="(max-width: 768px) 274px, 600px" loading="lazy"'.$rest.'>';
+                },
+                $options['html']
+            );
+
+            DB::table('theme_customization_translations')
+                ->where('id', $c->id)
+                ->update(['options' => json_encode($options, JSON_UNESCAPED_UNICODE)]);
+        }
+    }
+
+    $this->info('Theme banner images have been updated with responsive srcset and sizes.');
+})->describe('Update theme banner images with responsive srcset and sizes');
+

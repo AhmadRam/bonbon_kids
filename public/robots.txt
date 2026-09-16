@@ -1,2 +1,7 @@
 User-agent: *
-Disallow:
+Disallow: /checkout/
+Disallow: /customer/
+Disallow: /compare
+Disallow: /search
+
+Sitemap: https://bonbonkw.com/sitemap.xml

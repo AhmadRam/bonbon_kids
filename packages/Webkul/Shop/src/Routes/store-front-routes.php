@@ -23,6 +23,21 @@ Route::get('page/{slug}', [PageController::class, 'view'])
 Route::get('feeds/google-merchant.xml', [\Webkul\Shop\Http\Controllers\FeedController::class, 'googleMerchantFeed'])
     ->name('shop.feeds.google_merchant');
 
+/**
+ * Sitemaps.
+ */
+Route::get('sitemap.xml', [\Webkul\Shop\Http\Controllers\SitemapController::class, 'index'])
+    ->name('shop.sitemap.index');
+
+Route::get('sitemap-categories.xml', [\Webkul\Shop\Http\Controllers\SitemapController::class, 'categories'])
+    ->name('shop.sitemap.categories');
+
+Route::get('sitemap-products.xml', [\Webkul\Shop\Http\Controllers\SitemapController::class, 'products'])
+    ->name('shop.sitemap.products');
+
+Route::get('sitemap-pages.xml', [\Webkul\Shop\Http\Controllers\SitemapController::class, 'pages'])
+    ->name('shop.sitemap.pages');
+
 
 /**
  * Fallback route.

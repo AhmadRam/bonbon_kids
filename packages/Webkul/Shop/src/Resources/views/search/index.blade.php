@@ -1,6 +1,30 @@
 <?php
     $searchTitle = $suggestion ?? $query;
-    $title = $searchTitle ? trans('shop::app.search.title', ['query' => $searchTitle]) : trans('shop::app.search.results');
+    if ($searchTitle) {
+        $title = trans('shop::app.search.title', ['query' => $searchTitle]);
+    } else {
+        $filterLabels = [];
+        foreach (request()->except(['sort', 'limit', 'mode', 'page']) as $paramKey => $paramVal) {
+            if (! empty($paramVal)) {
+                $val = is_array($paramVal) ? reset($paramVal) : $paramVal;
+                if (is_numeric($val)) {
+                    $opt = \Illuminate\Support\Facades\DB::table('attribute_option_translations')
+                        ->where('attribute_option_id', $val)
+                        ->where('locale', app()->getLocale())
+                        ->value('label');
+                    if ($opt) {
+                        $filterLabels[] = $opt;
+                    }
+                }
+            }
+        }
+
+        if (! empty($filterLabels)) {
+            $title = implode(' - ', $filterLabels) . ' | بون بون تويز ستور';
+        } else {
+            $title = trans('shop::app.search.results');
+        }
+    }
     $searchInstead = $suggestion ? $query : null;
 ?>
 <!-- SEO Meta Content -->
@@ -14,7 +38,16 @@
         name="keywords"
         content="{{ $title }}"
     />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="{{ $title }}" />
+    <meta property="og:description" content="{{ $title }}" />
+    <meta property="og:url" content="{{ route('shop.products.index') }}" />
 @endPush
+
+@push('canonical')
+    <link rel="canonical" href="{{ route('shop.products.index') }}" />
+@endpush
 
 <x-shop::layouts :has-feature="false">
     <!-- Page Title -->

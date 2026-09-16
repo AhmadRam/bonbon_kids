@@ -575,7 +575,7 @@ class ThemeCustomizationTableSeeder extends Seeder
             $cardsHtml .= '<div class="group-card-rect" style="width: 48%; min-width: 280px; max-width: 600px;">'
                 .'<a href="'.$href.'" style="display:block; text-decoration:none; color:inherit;">'
                 .'<div class="g-img-rect" style="width:100%; transition:transform .25s ease;">'
-                .'<img src="'.$img.'" alt="'.htmlspecialchars($label).'" style="width:100%; height:auto; display:block; border-radius:16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">'
+                .'<img src="'.$img.'" srcset="'.str_replace('storage/', 'cache/medium/', $img).' 300w, '.$img.' 600w" sizes="(max-width: 768px) 274px, 600px" alt="'.htmlspecialchars($label).'" style="width:100%; height:auto; display:block; border-radius:16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);" loading="lazy">'
                 .'</div>'
                 .'</a>'
                 .'</div>';
@@ -648,7 +648,7 @@ class ThemeCustomizationTableSeeder extends Seeder
             $cards .= '<div class="group-card-banner" style="width: 48%; min-width: 280px; max-width: 600px;">'
                 .'<a href="'.$href.'" style="display:block; text-decoration:none; color:inherit;">'
                 .'<div class="g-img-banner" style="width:100%; aspect-ratio: 2/3; transition:transform .25s ease; border-radius:24px; overflow:hidden; position:relative; background-color:#f8f9fa; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">'
-                .'<img src="'.$img.'" alt="'.htmlspecialchars($label).'" style="width:100%; height:100%; object-fit:cover; object-position:center;">'
+                .'<img src="'.$img.'" srcset="'.str_replace('storage/', 'cache/medium/', $img).' 300w, '.$img.' 600w" sizes="(max-width: 768px) 274px, 600px" alt="'.htmlspecialchars($label).'" style="width:100%; height:100%; object-fit:cover; object-position:center;" loading="lazy">'
                 .'</div>'
                 .'</a>'
                 .'</div>';

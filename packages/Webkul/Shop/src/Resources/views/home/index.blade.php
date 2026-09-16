@@ -18,7 +18,59 @@
         name="keywords"
         content="{{ $channel->home_seo['meta_keywords'] ?? '' }}"
     />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="{{ $channel->home_seo['meta_title'] ?? 'بون بون تويز ستور' }}" />
+    <meta property="og:description" content="{{ $channel->home_seo['meta_description'] ?? 'بون بون تويز ستور - متجر ألعاب الأطفال الأول في الكويت' }}" />
+    <meta property="og:url" content="{{ url('/') }}/" />
+    <meta property="og:image" content="{{ core()->getCurrentChannel()->logo_url ?? bagisto_asset('images/logo.svg') }}" />
+
+    <!-- Organization Schema -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "OnlineStore",
+        "@id": "{{ url('/') }}/#organization",
+        "name": "بون بون تويز ستور",
+        "url": "{{ url('/') }}/",
+        "logo": "{{ core()->getCurrentChannel()->logo_url ?? bagisto_asset('images/logo.svg') }}",
+        "areaServed": {
+            "@type": "Country",
+            "name": "Kuwait"
+        },
+        "sameAs": [
+            "https://wa.me/+96592214430",
+            "https://www.facebook.com/share/1Cw2H6hLBW/?mibextid=wwXIfr",
+            "https://www.tiktok.com/@bonbon.kuwait",
+            "https://snapchat.com/t/ma2NUtXn",
+            "https://www.instagram.com/bonbon_kuwait"
+        ]
+    }
+    </script>
+
+    <!-- WebSite Schema -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "@id": "{{ url('/') }}/#website",
+        "url": "{{ url('/') }}/",
+        "inLanguage": "ar",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "{{ route('shop.search.index') }}?query={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
 @endPush
+
+@push('canonical')
+    <link rel="canonical" href="{{ url('/') }}" />
+@endpush
 
 @push('scripts')
     @if(! empty($categories))
@@ -33,6 +85,9 @@
     <x-slot:title>
         {{  $channel->home_seo['meta_title'] ?? '' }}
     </x-slot>
+
+    <!-- Main Store Heading H1 -->
+    <h1 class="sr-only">بون بون تويز ستور - متجر ألعاب الأطفال الأول في الكويت</h1>
 
     <!-- Loop over the theme customization -->
     @foreach ($customizations as $customization)

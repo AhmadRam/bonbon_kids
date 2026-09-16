@@ -35,7 +35,7 @@
 
     <meta name="twitter:image" content="{{ $productBaseImage['medium_image_url'] }}" />
 
-    <meta property="og:type" content="og:product" />
+    <meta property="og:type" content="product" />
 
     <meta property="og:title" content="{{ $product->name }}" />
 
@@ -44,7 +44,82 @@
     <meta property="og:description" content="{!! htmlspecialchars(trim(strip_tags($product->description))) !!}" />
 
     <meta property="og:url" content="{{ route('shop.product_or_category.index', $product->url_key) }}" />
+
+    @php
+        $primaryCategory = $product->categories->first();
+        $isProductInStock = $product->isSaleable();
+        $formattedProductPrice = number_format((float) $product->price, 3, '.', '');
+    @endphp
+
+    <!-- BreadcrumbList Schema -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "الرئيسية",
+                "item": "{{ url('/') }}/"
+            }
+            @if ($primaryCategory)
+            ,{
+                "@type": "ListItem",
+                "position": 2,
+                "name": {!! json_encode($primaryCategory->name, JSON_UNESCAPED_UNICODE) !!},
+                "item": "{{ route('shop.product_or_category.index', $primaryCategory->slug) }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": {!! json_encode($product->name, JSON_UNESCAPED_UNICODE) !!},
+                "item": "{{ route('shop.product_or_category.index', $product->url_key) }}"
+            }
+            @else
+            ,{
+                "@type": "ListItem",
+                "position": 2,
+                "name": {!! json_encode($product->name, JSON_UNESCAPED_UNICODE) !!},
+                "item": "{{ route('shop.product_or_category.index', $product->url_key) }}"
+            }
+            @endif
+        ]
+    }
+    </script>
+
+    <!-- Product + Offer Schema -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": {!! json_encode($product->name, JSON_UNESCAPED_UNICODE) !!},
+        "image": [
+            "{{ $productBaseImage['large_image_url'] ?? $productBaseImage['medium_image_url'] }}"
+        ],
+        "description": {!! json_encode(\Illuminate\Support\Str::limit(strip_tags($product->description), 500, ''), JSON_UNESCAPED_UNICODE) !!},
+        "sku": {!! json_encode($product->sku) !!},
+        "brand": {
+            "@type": "Brand",
+            "name": "بون بون تويز ستور"
+        },
+        "offers": {
+            "@type": "Offer",
+            "url": "{{ route('shop.product_or_category.index', $product->url_key) }}",
+            "priceCurrency": "KWD",
+            "price": "{{ $formattedProductPrice }}",
+            "availability": "{{ $isProductInStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock' }}",
+            "seller": {
+                "@id": "{{ url('/') }}/#organization"
+            }
+        }
+    }
+    </script>
 @endPush
+
+@push('canonical')
+    <link rel="canonical" href="{{ route('shop.product_or_category.index', $product->url_key) }}" />
+@endpush
 
 @push('scripts')
     <script>
@@ -89,7 +164,46 @@
 
     <!-- Product Information Vue Component -->
     <v-product>
-        <x-shop::shimmer.products.view />
+        <!-- Initial Server Rendered Product (SSR fallback for crawlers without JS) -->
+        <div class="container px-[60px] max-1180:px-4 mt-8">
+            <div class="flex gap-9 max-1180:flex-wrap">
+                <!-- Product Image -->
+                <div class="w-1/2 max-1180:w-full max-w-[500px]">
+                    <div class="aspect-square rounded-2xl overflow-hidden border bg-white flex items-center justify-center">
+                        <img
+                            src="{{ $productBaseImage['large_image_url'] ?? $productBaseImage['medium_image_url'] }}"
+                            alt="{{ $product->name }}"
+                            class="w-full h-full object-contain"
+                        />
+                    </div>
+                </div>
+
+                <!-- Product Details & H1 -->
+                <div class="w-1/2 max-1180:w-full flex flex-col justify-start gap-4">
+                    <h1 class="break-words text-3xl font-bold text-gray-900 max-sm:text-2xl">
+                        {{ $product->name }}
+                    </h1>
+
+                    <div class="text-2xl font-bold text-navyBlue">
+                        {{ core()->formatPrice($product->price) }}
+                    </div>
+
+                    <div class="text-sm text-gray-500">
+                        <span>SKU:</span> {{ $product->sku }}
+                    </div>
+
+                    <div class="mt-2 text-base text-gray-700 leading-relaxed">
+                        {!! \Illuminate\Support\Str::limit(strip_tags($product->description), 300) !!}
+                    </div>
+
+                    <div class="mt-4 flex gap-3">
+                        <span class="inline-flex items-center px-4 py-2 rounded-xl bg-toyBlue text-white font-semibold">
+                            @lang('shop::app.products.view.add-to-cart')
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </v-product>
 
     <!-- Information Section -->

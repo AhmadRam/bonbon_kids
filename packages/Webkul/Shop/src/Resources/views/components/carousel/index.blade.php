@@ -46,8 +46,9 @@
             </div>
 
             <!-- Navigation -->
+            <!-- Navigation -->
             <span
-                class="icon-arrow-left absolute left-2.5 top-1/2 -mt-[22px] hidden w-auto rounded-full bg-black/80 p-3 text-2xl font-bold text-white opacity-30 transition-all md:inline-block"
+                class="icon-arrow-left rtl:icon-arrow-right absolute ltr:left-2.5 rtl:right-2.5 top-1/2 -mt-[22px] hidden w-auto rounded-full bg-black/80 p-3 text-2xl font-bold text-white opacity-30 transition-all md:inline-block"
                 :class="{
                     'cursor-not-allowed': direction == 'ltr' && currentIndex == 0,
                     'cursor-pointer hover:opacity-100': direction == 'ltr' ? currentIndex > 0 : currentIndex <= 0
@@ -61,7 +62,7 @@
             </span>
 
             <span
-                class="icon-arrow-right absolute right-2.5 top-1/2 -mt-[22px] hidden w-auto rounded-full bg-black/80 p-3 text-2xl font-bold text-white opacity-30 transition-all md:inline-block"
+                class="icon-arrow-right rtl:icon-arrow-left absolute ltr:right-2.5 rtl:left-2.5 top-1/2 -mt-[22px] hidden w-auto rounded-full bg-black/80 p-3 text-2xl font-bold text-white opacity-30 transition-all md:inline-block"
                 :class="{
                     'cursor-not-allowed': direction == 'rtl' && currentIndex == 0,
                     'cursor-pointer hover:opacity-100': direction == 'rtl' ? currentIndex < 0 : currentIndex >= 0

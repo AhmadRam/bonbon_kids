@@ -48,7 +48,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
     })
     ->withSchedule(function (Schedule $schedule) {
-        //
+        $schedule->command('bagisto:sitemap:generate')->daily();
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

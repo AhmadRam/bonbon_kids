@@ -39,10 +39,7 @@ class ProductsCategoriesProxyController extends Controller
     {
         $slugOrURLKey = rawurldecode(trim($request->getPathInfo(), '/'));
 
-        /**
-         * Support url for chinese, japanese, arabic and english with numbers.
-         */
-        if (! preg_match('/^([\p{L}\p{N}\p{M}\x{0900}-\x{097F}\x{0590}-\x{05FF}\x{0600}-\x{06FF}\x{0400}-\x{04FF}_ \+\-]+\/?)+$/u', $slugOrURLKey)) {
+        if (empty($slugOrURLKey)) {
             $customizations = $this->themeCustomizationRepository->orderBy('sort_order')->findWhere([
                 'status' => self::STATUS,
                 'channel_id' => core()->getCurrentChannel()->id,
@@ -51,11 +48,24 @@ class ProductsCategoriesProxyController extends Controller
             return view('shop::home.index', compact('customizations'));
         }
 
+        /**
+         * Support url for chinese, japanese, arabic and english with numbers.
+         */
+        if (! preg_match('/^([\p{L}\p{N}\p{M}\x{0900}-\x{097F}\x{0590}-\x{05FF}\x{0600}-\x{06FF}\x{0400}-\x{04FF}_ \+\-]+\/?)+$/u', $slugOrURLKey)) {
+            abort(404);
+        }
+
         $category = $this->categoryRepository->findBySlug($slugOrURLKey);
 
         if ($category) {
+            $products = $this->productRepository->getAll(array_merge(
+                request()->query(),
+                ['category_id' => $category->id]
+            ));
+
             return view('shop::categories.view', [
                 'category' => $category,
+                'products' => $products,
                 'params' => [
                     'sort' => request()->query('sort'),
                     'limit' => request()->query('limit'),
