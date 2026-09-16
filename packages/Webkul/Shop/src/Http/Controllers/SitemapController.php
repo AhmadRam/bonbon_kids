@@ -65,23 +65,22 @@ class SitemapController extends Controller
     public function categories(): Response
     {
         $xml = Cache::remember('shop_sitemap_categories_xml', self::CACHE_TTL, function () {
-            $categories = $this->categoryRepository->getModel()
-                ->where('status', 1)
-                ->whereNotNull('parent_id') // Exclude root container if desired
-                ->with('translations')
+            $categories = DB::table('category_translations as ct')
+                ->join('categories as c', 'c.id', '=', 'ct.category_id')
+                ->where('c.status', 1)
+                ->whereNotNull('ct.slug')
+                ->where('ct.slug', '!=', '')
+                ->where('ct.slug', '!=', 'root')
+                ->select('ct.slug', DB::raw('MAX(c.updated_at) as updated_at'))
+                ->groupBy('ct.slug')
                 ->get();
 
             $xml = '<?xml version="1.0" encoding="UTF-8"?>'."\n";
             $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'."\n";
 
             foreach ($categories as $category) {
-                $slug = $category->slug;
-                if (! $slug) {
-                    continue;
-                }
-
-                $loc = htmlspecialchars(url($slug), ENT_XML1, 'UTF-8');
-                $lastmod = $category->updated_at ? $category->updated_at->format('Y-m-d') : date('Y-m-d');
+                $loc = htmlspecialchars(url($category->slug), ENT_XML1, 'UTF-8');
+                $lastmod = $category->updated_at ? date('Y-m-d', strtotime($category->updated_at)) : date('Y-m-d');
 
                 $xml .= '  <url>'."\n";
                 $xml .= '    <loc>'.$loc.'</loc>'."\n";
@@ -103,23 +102,21 @@ class SitemapController extends Controller
     public function products(): Response
     {
         $xml = Cache::remember('shop_sitemap_products_xml', self::CACHE_TTL, function () {
-            $products = $this->productRepository->getModel()
+            $products = DB::table('product_flat')
                 ->where('status', 1)
                 ->where('visible_individually', 1)
                 ->whereNotNull('url_key')
-                ->select(['id', 'url_key', 'updated_at'])
+                ->where('url_key', '!=', '')
+                ->select('url_key', DB::raw('MAX(updated_at) as updated_at'))
+                ->groupBy('url_key')
                 ->get();
 
             $xml = '<?xml version="1.0" encoding="UTF-8"?>'."\n";
             $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'."\n";
 
             foreach ($products as $product) {
-                if (empty($product->url_key)) {
-                    continue;
-                }
-
                 $loc = htmlspecialchars(url($product->url_key), ENT_XML1, 'UTF-8');
-                $lastmod = $product->updated_at ? $product->updated_at->format('Y-m-d') : date('Y-m-d');
+                $lastmod = $product->updated_at ? date('Y-m-d', strtotime($product->updated_at)) : date('Y-m-d');
 
                 $xml .= '  <url>'."\n";
                 $xml .= '    <loc>'.$loc.'</loc>'."\n";
@@ -156,17 +153,15 @@ class SitemapController extends Controller
             $xml .= '    <lastmod>'.date('Y-m-d').'</lastmod>'."\n";
             $xml .= '  </url>'."\n";
 
-            $pages = DB::table('cms_pages')
-                ->join('cms_page_translations', 'cms_pages.id', '=', 'cms_page_translations.cms_page_id')
-                ->where('cms_page_translations.locale', app()->getLocale())
-                ->select(['cms_pages.id', 'cms_page_translations.url_key', 'cms_pages.updated_at'])
+            $pages = DB::table('cms_page_translations as pt')
+                ->join('cms_pages as p', 'p.id', '=', 'pt.cms_page_id')
+                ->whereNotNull('pt.url_key')
+                ->where('pt.url_key', '!=', '')
+                ->select('pt.url_key', DB::raw('MAX(p.updated_at) as updated_at'))
+                ->groupBy('pt.url_key')
                 ->get();
 
             foreach ($pages as $page) {
-                if (empty($page->url_key)) {
-                    continue;
-                }
-
                 $loc = htmlspecialchars(route('shop.cms.page', $page->url_key), ENT_XML1, 'UTF-8');
                 $lastmod = $page->updated_at ? date('Y-m-d', strtotime($page->updated_at)) : date('Y-m-d');
 
