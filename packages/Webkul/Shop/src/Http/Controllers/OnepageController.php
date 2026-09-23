@@ -76,7 +76,9 @@ class OnepageController extends Controller
      */
     public function success(OrderRepository $orderRepository)
     {
-        if (! $order = $orderRepository->find(session('order_id'))) {
+        $orderId = session('order_id') ?? (session('order') instanceof \Webkul\Sales\Contracts\Order ? session('order')->id : session('order'));
+
+        if (! $orderId || ! ($order = $orderRepository->find($orderId))) {
             return redirect()->route('shop.checkout.cart.index');
         }
 

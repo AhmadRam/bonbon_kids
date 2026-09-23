@@ -192,6 +192,8 @@ class StandardController extends Controller
 
             session()->forget(['upayments_cart_id', 'upayments_method']);
 
+            session()->flash('order_id', $order->id);
+
             session()->flash('order', $order);
 
             session()->flash('success', trans('upayments::app.response.payment-success'));
