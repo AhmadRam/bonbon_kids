@@ -12,6 +12,8 @@
 
 {!! view_render_event('bagisto.shop.checkout.onepage.address.customer.after') !!}
 
+@include('shop::checkout.onepage.address.form')
+
 @pushOnce('scripts')
     <script
         type="text/x-template"

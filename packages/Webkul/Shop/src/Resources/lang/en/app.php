@@ -1129,6 +1129,8 @@ return [
                 'notes'          => 'Notes (Special Mark)',
                 'title'          => 'Customer Details',
                 'vat-id'         => 'Vat ID',
+                'full-address'   => 'Full Address (Optional)',
+                'full-address-placeholder' => 'Enter detailed address if desired (Area, street, house/apt number...)',
             ],
 
             'index' => [

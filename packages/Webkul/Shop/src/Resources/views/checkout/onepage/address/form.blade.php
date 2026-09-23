@@ -138,6 +138,24 @@
                 {!! view_render_event('bagisto.shop.checkout.onepage.address.form.phone.after') !!}
             </div>
 
+            <!-- Full Address (Optional) -->
+            <x-shop::form.control-group class="mt-2">
+                <x-shop::form.control-group.label class="!mt-0">
+                    @lang('shop::app.checkout.onepage.address.full-address')
+                </x-shop::form.control-group.label>
+
+                <x-shop::form.control-group.control
+                    type="text"
+                    ::name="controlName + '.address.[0]'"
+                    ::value="fullAddressValue"
+                    :placeholder="trans('shop::app.checkout.onepage.address.full-address-placeholder')"
+                />
+
+                <x-shop::form.control-group.error ::name="controlName + '.address.[0]'" />
+            </x-shop::form.control-group>
+
+            {!! view_render_event('bagisto.shop.checkout.onepage.address.form.address.after') !!}
+
             <!-- Vat ID (Hidden) -->
             <template v-if="controlName=='billing'">
                 <x-shop::form.control-group class="hidden">
@@ -178,8 +196,8 @@
                 </x-shop::form.control-group.control>
             </x-shop::form.control-group>
 
-            <!-- State, City, Block (Hidden) -->
-            <div class="hidden grid-cols-3 gap-x-5 max-md:grid-cols-1">
+            <!-- State, City (Hidden) -->
+            <div class="hidden grid-cols-2 gap-x-5 max-md:grid-cols-1">
                 <!-- State -->
                 <x-shop::form.control-group>
                     <x-shop::form.control-group.label class="required !mt-0">
@@ -267,138 +285,6 @@
                 </x-shop::form.control-group>
 
                 {!! view_render_event('bagisto.shop.checkout.onepage.address.form.city.after') !!}
-
-                <!-- Block -->
-                <x-shop::form.control-group>
-                    <x-shop::form.control-group.label class="required !mt-0">
-                        @lang('shop::app.checkout.onepage.address.block')
-                    </x-shop::form.control-group.label>
-
-                    <x-shop::form.control-group.control
-                        type="text"
-                        ::name="controlName + '.address.[0]'"
-                        ::value="address.address[0]"
-                        rules="required|numeric"
-                        :label="trans('shop::app.checkout.onepage.address.block')"
-                        :placeholder="trans('shop::app.checkout.onepage.address.block')"
-                    />
-
-                    <x-shop::form.control-group.error
-                        class="mb-2"
-                        ::name="controlName + '.address.[0]'"
-                    />
-                </x-shop::form.control-group>
-            </div>
-
-            <!-- Custom Address Inputs Row 2 (Street, Avenue) (Hidden) -->
-            <div class="hidden grid-cols-2 gap-x-5 max-md:grid-cols-1 mt-2">
-                <!-- Street -->
-                <x-shop::form.control-group>
-                    <x-shop::form.control-group.label class="required !mt-0">
-                        @lang('shop::app.checkout.onepage.address.street')
-                    </x-shop::form.control-group.label>
-
-                    <x-shop::form.control-group.control
-                        type="text"
-                        ::name="controlName + '.address.[1]'"
-                        ::value="address.address[1]"
-                        rules="required|address"
-                        :label="trans('shop::app.checkout.onepage.address.street')"
-                        :placeholder="trans('shop::app.checkout.onepage.address.street')"
-                    />
-
-                    <x-shop::form.control-group.error
-                        class="mb-2"
-                        ::name="controlName + '.address.[1]'"
-                    />
-                </x-shop::form.control-group>
-
-                <!-- Avenue -->
-                <x-shop::form.control-group>
-                    <x-shop::form.control-group.label class="!mt-0">
-                        @lang('shop::app.checkout.onepage.address.avenue')
-                    </x-shop::form.control-group.label>
-
-                    <x-shop::form.control-group.control
-                        type="text"
-                        ::name="controlName + '.address.[2]'"
-                        ::value="address.address[2]"
-                        rules="address"
-                        :label="trans('shop::app.checkout.onepage.address.avenue')"
-                        :placeholder="trans('shop::app.checkout.onepage.address.avenue')"
-                    />
-
-                    <x-shop::form.control-group.error
-                        class="mb-2"
-                        ::name="controlName + '.address.[2]'"
-                    />
-                </x-shop::form.control-group>
-            </div>
-
-            <!-- Custom Address Inputs Row 3 (House, Floor, Apartment) (Hidden) -->
-            <div class="hidden grid-cols-3 gap-x-5 max-md:grid-cols-1 mt-2">
-                <!-- House -->
-                <x-shop::form.control-group>
-                    <x-shop::form.control-group.label class="required !mt-0">
-                        @lang('shop::app.checkout.onepage.address.house')
-                    </x-shop::form.control-group.label>
-
-                    <x-shop::form.control-group.control
-                        type="text"
-                        ::name="controlName + '.address.[3]'"
-                        ::value="address.address[3]"
-                        rules="required|address"
-                        :label="trans('shop::app.checkout.onepage.address.house')"
-                        :placeholder="trans('shop::app.checkout.onepage.address.house')"
-                    />
-
-                    <x-shop::form.control-group.error
-                        class="mb-2"
-                        ::name="controlName + '.address.[3]'"
-                    />
-                </x-shop::form.control-group>
-
-                <!-- Floor -->
-                <x-shop::form.control-group>
-                    <x-shop::form.control-group.label class="required !mt-0">
-                        @lang('shop::app.checkout.onepage.address.floor')
-                    </x-shop::form.control-group.label>
-
-                    <x-shop::form.control-group.control
-                        type="text"
-                        ::name="controlName + '.address.[4]'"
-                        ::value="address.address[4]"
-                        rules="required|address"
-                        :label="trans('shop::app.checkout.onepage.address.floor')"
-                        :placeholder="trans('shop::app.checkout.onepage.address.floor')"
-                    />
-
-                    <x-shop::form.control-group.error
-                        class="mb-2"
-                        ::name="controlName + '.address.[4]'"
-                    />
-                </x-shop::form.control-group>
-
-                <!-- Apartment -->
-                <x-shop::form.control-group>
-                    <x-shop::form.control-group.label class="required !mt-0">
-                        @lang('shop::app.checkout.onepage.address.apartment')
-                    </x-shop::form.control-group.label>
-
-                    <x-shop::form.control-group.control
-                        type="text"
-                        ::name="controlName + '.address.[5]'"
-                        ::value="address.address[5]"
-                        rules="required|address"
-                        :label="trans('shop::app.checkout.onepage.address.apartment')"
-                        :placeholder="trans('shop::app.checkout.onepage.address.apartment')"
-                    />
-
-                    <x-shop::form.control-group.error
-                        class="mb-2"
-                        ::name="controlName + '.address.[5]'"
-                    />
-                </x-shop::form.control-group>
             </div>
 
             <!-- Notes (Hidden) -->
@@ -467,7 +353,7 @@
                         first_name: '',
                         last_name: '',
                         email: '',
-                        address: ['0', 'NA', '', 'NA', 'NA', 'NA'],
+                        address: [''],
                         country: '',
                         state: '',
                         city: '',
@@ -510,6 +396,16 @@
             },
 
             computed: {
+                fullAddressValue() {
+                    if (!this.address || !this.address.address) return '';
+                    if (Array.isArray(this.address.address)) {
+                        if (this.address.address[0] === '0' && this.address.address[1] === 'NA') {
+                            return '';
+                        }
+                        return this.address.address.filter(Boolean).join(', ');
+                    }
+                    return this.address.address;
+                },
                 currentStates() {
                     if (!this.selectedCountry || !this.states[this.selectedCountry]) return [];
 
