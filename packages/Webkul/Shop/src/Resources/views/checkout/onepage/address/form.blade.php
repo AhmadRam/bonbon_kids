@@ -180,112 +180,31 @@
             <!-- Country (Hidden) -->
             <x-shop::form.control-group class="hidden">
                 <x-shop::form.control-group.control
-                    type="select"
+                    type="text"
                     ::name="controlName + '.country'"
-                    ::value="address.country"
+                    ::value="address.country || 'KW'"
                     v-model="selectedCountry"
-                    rules="required"
-                >
-                    <option
-                        v-for="country in countries"
-                        :key="country.code"
-                        :value="country.code"
-                    >
-                        @{{ country.name }}
-                    </option>
-                </x-shop::form.control-group.control>
+                />
             </x-shop::form.control-group>
 
             <!-- State, City (Hidden) -->
-            <div class="hidden grid-cols-2 gap-x-5 max-md:grid-cols-1">
-                <!-- State -->
-                <x-shop::form.control-group>
-                    <x-shop::form.control-group.label class="required !mt-0">
-                        @lang('shop::app.checkout.onepage.address.governorate')
-                    </x-shop::form.control-group.label>
+            <x-shop::form.control-group class="hidden">
+                <x-shop::form.control-group.control
+                    type="text"
+                    ::name="controlName + '.state'"
+                    ::value="address.state || ''"
+                    v-model="address.state"
+                />
+            </x-shop::form.control-group>
 
-                    <template v-if="haveStates">
-                        <x-shop::form.control-group.control
-                            type="select"
-                            ::key="`state-select-${selectedCountry}`"
-                            ::name="controlName + '.state'"
-                            v-model="address.state"
-                            @change="handleStateChange"
-                            rules="required"
-                            ::value="address.state"
-                            :label="trans('shop::app.checkout.onepage.address.governorate')"
-                        >
-                            <option
-                                v-for='(state, index) in currentStates'
-                                :key="state.id"
-                                :value="state.code"
-                            >
-                                @{{ state.default_name }}
-                            </option>
-                        </x-shop::form.control-group.control>
-                    </template>
-
-                    <template v-else>
-                        <x-shop::form.control-group.control
-                            type="text"
-                            ::key="`state-input-${selectedCountry}`"
-                            ::name="controlName + '.state'"
-                            v-model="address.state"
-                            ::value="address.state"
-                            rules="required"
-                            :label="trans('shop::app.checkout.onepage.address.governorate')"
-                            :placeholder="trans('shop::app.checkout.onepage.address.governorate')"
-                        />
-                    </template>
-
-                    <x-shop::form.control-group.error ::name="controlName + '.state'" />
-                </x-shop::form.control-group>
-
-                {!! view_render_event('bagisto.shop.checkout.onepage.address.form.state.after') !!}
-
-                <!-- City -->
-                <x-shop::form.control-group>
-                    <x-shop::form.control-group.label class="required !mt-0">
-                        @lang('shop::app.checkout.onepage.address.area')
-                    </x-shop::form.control-group.label>
-
-                    <template v-if="haveCities">
-                        <x-shop::form.control-group.control
-                            type="select"
-                            ::key="`city-select-${selectedStateId || 'none'}`"
-                            ::name="controlName + '.city'"
-                            v-model="address.city"
-                            rules="required"
-                            ::value="address.city"
-                            :label="trans('shop::app.checkout.onepage.address.area')"
-                        >
-                            <option
-                                v-for='(cityData, index) in currentCities'
-                                :key="cityData.id"
-                                :value="cityData.code"
-                            >
-                                @{{ cityData.default_name }}
-                            </option>
-                        </x-shop::form.control-group.control>
-                    </template>
-
-                    <template v-else>
-                        <x-shop::form.control-group.control
-                            type="text"
-                            ::key="`city-input-${selectedStateId || 'none'}`"
-                            ::name="controlName + '.city'"
-                            v-model="address.city"
-                            rules="required"
-                            :label="trans('shop::app.checkout.onepage.address.area')"
-                            :placeholder="trans('shop::app.checkout.onepage.address.area')"
-                        />
-                    </template>
-
-                    <x-shop::form.control-group.error ::name="controlName + '.city'" />
-                </x-shop::form.control-group>
-
-                {!! view_render_event('bagisto.shop.checkout.onepage.address.form.city.after') !!}
-            </div>
+            <x-shop::form.control-group class="hidden">
+                <x-shop::form.control-group.control
+                    type="text"
+                    ::name="controlName + '.city'"
+                    ::value="address.city || ''"
+                    v-model="address.city"
+                />
+            </x-shop::form.control-group>
 
             <!-- Notes (Hidden) -->
             <x-shop::form.control-group class="mt-2 hidden">
@@ -354,10 +273,10 @@
                         last_name: '',
                         email: '',
                         address: [''],
-                        country: '',
+                        country: 'KW',
                         state: '',
                         city: '',
-                        postcode: '',
+                        postcode: '00000',
                         phone: '',
                         notes: '',
                     }),
@@ -556,32 +475,12 @@
                 },
 
                 loadAllData() {
-                    this.isLoadingData = true;
-
-                    this.$axios.get("{{ route('shop.api.core.countries') }}")
-                        .then(response => {
-                            this.countries = response.data.data;
-                            this.selectedCountry = 'KW';
-                            this.address.country = 'KW';
-
-                            return this.$axios.get("{{ route('shop.api.core.states') }}");
-                        })
-                        .then(response => {
-                            this.states = response.data.data || {};
-                            this.syncStateSelection();
-
-                            return this.$axios.get("{{ route('shop.api.core.cities') }}");
-                        })
-                        .then(response => {
-                            this.cities = response.data.data || {};
-                            this.syncStateSelection();
-                            this.isLoadingData = false;
-                            this.dataReady = true;
-                        })
-                        .catch(() => {
-                            this.isLoadingData = false;
-                            this.dataReady = true;
-                        });
+                    this.selectedCountry = 'KW';
+                    this.address.country = 'KW';
+                    this.address.state = '';
+                    this.address.city = '';
+                    this.isLoadingData = false;
+                    this.dataReady = true;
                 },
             }
         });

@@ -458,6 +458,8 @@ class Cart
                 'customer_id' => $this->cart->customer_id,
                 'address' => implode(PHP_EOL, $params['address']),
                 'use_for_shipping' => (bool) ($params['use_for_shipping'] ?? false),
+                'city' => $params['city'] ?? '',
+                'state' => $params['state'] ?? '',
             ])
             ->toArray();
 
@@ -524,6 +526,8 @@ class Cart
                     'cart_id' => $this->cart->id,
                     'customer_id' => $this->cart->customer_id,
                     'address' => implode(PHP_EOL, $params['address']),
+                    'city' => $params['city'] ?? '',
+                    'state' => $params['state'] ?? '',
                 ])
                 ->toArray();
         }

@@ -40,7 +40,7 @@ class OrderDataGrid extends DataGrid
                 'customer_email',
                 'orders.cart_id as items',
                 DB::raw('CONCAT('.DB::getTablePrefix().'orders.customer_first_name, " ", '.DB::getTablePrefix().'orders.customer_last_name) as full_name'),
-                DB::raw('CONCAT('.DB::getTablePrefix().'order_address_billing.city, ", ", '.DB::getTablePrefix().'order_address_billing.state,", ", '.DB::getTablePrefix().'order_address_billing.country) as location')
+                DB::raw('CONCAT_WS(", ", NULLIF('.DB::getTablePrefix().'order_address_billing.city, ""), NULLIF('.DB::getTablePrefix().'order_address_billing.state, ""), '.DB::getTablePrefix().'order_address_billing.country) as location')
             )
             ->groupBy('orders.id');
 

@@ -23,13 +23,19 @@
         class="!leading-6 text-gray-600 dark:text-gray-300"
         v-pre
     >
-        {{ $address->address }}<br>
+        @if ($address->address)
+            {{ $address->address }}<br>
+        @endif
 
-        {{ $address->city }}<br>
+        @if ($address->city)
+            {{ $address->city }}<br>
+        @endif
 
-        {{ $address->state }}<br>
+        @if ($address->state)
+            {{ $address->state }}<br>
+        @endif
 
-        {{ core()->country_name($address->country) }} @if ($address->postcode) ({{ $address->postcode }}) @endif<br>
+        {{ core()->country_name($address->country) }} @if ($address->postcode && $address->postcode !== '00000') ({{ $address->postcode }}) @endif<br>
 
         {{ trans('admin::app.sales.orders.view.contact') }} : {{ $address->phone }}
     </p>
