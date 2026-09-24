@@ -80,6 +80,36 @@
                     <!-- Drawer Content -->
                     <x-slot:content class="!p-0">
                         <div class="grid p-4 !pt-0">
+                            @if ($order->channel && $order->channel->inventory_sources->count())
+                                <div class="py-3 border-b border-slate-300 dark:border-gray-800">
+                                    <x-admin::form.control-group class="!mb-0">
+                                        <x-admin::form.control-group.label class="required">
+                                            @lang('admin::app.sales.shipments.view.inventory-source')
+                                        </x-admin::form.control-group.label>
+
+                                        <x-admin::form.control-group.control
+                                            type="select"
+                                            id="refund[inventory_source_id]"
+                                            name="refund[inventory_source_id]"
+                                            rules="required"
+                                            v-model="refund.inventory_source_id"
+                                            :label="trans('admin::app.sales.shipments.view.inventory-source')"
+                                        >
+                                            @foreach ($order->channel->inventory_sources as $inventorySource)
+                                                <option 
+                                                    value="{{ $inventorySource->id }}"
+                                                    v-pre
+                                                >
+                                                    {{ $inventorySource->name }}
+                                                </option>
+                                            @endforeach
+                                        </x-admin::form.control-group.control>
+
+                                        <x-admin::form.control-group.error control-name="refund[inventory_source_id]" />
+                                    </x-admin::form.control-group>
+                                </div>
+                            @endif
+
                             <div class="grid">
                                 <!-- Item Listing -->
                                 @foreach ($order->items as $item)
@@ -364,6 +394,8 @@
                         adjustment_refund: 0,
 
                         adjustment_fee: 0,
+
+                        inventory_source_id: "{{ $order->channel?->inventory_sources?->first()?->id ?? '' }}",
                     },
 
                     totals: null,

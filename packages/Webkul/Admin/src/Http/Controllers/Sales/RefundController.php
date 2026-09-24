@@ -8,6 +8,7 @@ use Illuminate\View\View;
 use Webkul\Admin\DataGrids\Sales\OrderRefundDataGrid;
 use Webkul\Admin\Http\Controllers\Controller;
 use Webkul\Sales\Exceptions\InvalidRefundQuantityException;
+use Webkul\Sales\Jobs\CreateDaftraOrderRefund;
 use Webkul\Sales\Repositories\OrderItemRepository;
 use Webkul\Sales\Repositories\OrderRepository;
 use Webkul\Sales\Repositories\RefundRepository;
@@ -69,6 +70,7 @@ class RefundController extends Controller
         $this->validate(request(), [
             'refund.items' => 'array',
             'refund.items.*' => 'required|numeric|min:0',
+            'refund.inventory_source_id' => 'nullable|exists:inventory_sources,id',
         ]);
 
         $data = request()->all();
@@ -107,7 +109,11 @@ class RefundController extends Controller
             return redirect()->back();
         }
 
-        $this->refundRepository->create(array_merge($data, ['order_id' => $orderId]));
+        $refund = $this->refundRepository->create(array_merge($data, ['order_id' => $orderId]));
+
+        if ($refund) {
+            CreateDaftraOrderRefund::dispatch($order->id, $refund->id)->onQueue('daftra');
+        }
 
         session()->flash('success', trans('admin::app.sales.refunds.create.create-success'));
 

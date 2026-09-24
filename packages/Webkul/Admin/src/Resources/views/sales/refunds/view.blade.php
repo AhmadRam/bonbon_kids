@@ -370,6 +370,18 @@
                                     @lang('admin::app.sales.refunds.view.' . $item)
                                 </p>
                             @endforeach
+
+                            @if ($refund->inventory_source)
+                                <p class="font-semibold text-gray-600 dark:text-gray-300">
+                                    @lang('admin::app.sales.shipments.view.inventory-source')
+                                </p>
+                            @endif
+
+                            @if ($refund->daftra_refund_id)
+                                <p class="font-semibold text-gray-600 dark:text-gray-300">
+                                    Daftra Refund ID
+                                </p>
+                            @endif
                         </div>
 
                         <!-- Order Info Right Section  -->
@@ -397,6 +409,21 @@
                             >
                                 {{ $order->channel_name }}
                             </p>
+
+                            @if ($refund->inventory_source)
+                                <p 
+                                    class="text-gray-600 dark:text-gray-300"
+                                    v-pre
+                                >
+                                    {{ $refund->inventory_source->name }}
+                                </p>
+                            @endif
+
+                            @if ($refund->daftra_refund_id)
+                                <p class="text-gray-600 dark:text-gray-300">
+                                    #{{ $refund->daftra_refund_id }}
+                                </p>
+                            @endif
                         </div>
                     </div>
                 </x-slot>

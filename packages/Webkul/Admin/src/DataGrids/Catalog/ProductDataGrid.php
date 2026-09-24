@@ -459,6 +459,14 @@ class ProductDataGrid extends DataGrid
             return;
         }
 
+        $sortColumn = $params['sort']['column'] ?? $this->primaryColumn;
+
+        if (in_array($sortColumn, ['quantity', 'has_images', 'base_image', 'category_name'])) {
+            parent::processRequest();
+
+            return;
+        }
+
         $this->dispatchEvent('process_request.before', $this);
 
         $pagination = $params['pagination'];
@@ -469,19 +477,25 @@ class ProductDataGrid extends DataGrid
             return Product::formatElasticSearchIndexName($channelCode, app()->getLocale());
         })->toArray();
 
-        $results = ElasticSearch::search([
-            'index' => $indexNames,
-            'body' => [
-                'from' => ($pagination['page'] * $pagination['per_page']) - $pagination['per_page'],
-                'size' => $pagination['per_page'],
-                'stored_fields' => [],
-                'query' => [
-                    'bool' => $this->getElasticFilters($params['filters'] ?? []) ?: new \stdClass,
+        try {
+            $results = ElasticSearch::search([
+                'index' => $indexNames,
+                'body' => [
+                    'from' => ($pagination['page'] * $pagination['per_page']) - $pagination['per_page'],
+                    'size' => $pagination['per_page'],
+                    'stored_fields' => [],
+                    'query' => [
+                        'bool' => $this->getElasticFilters($params['filters'] ?? []) ?: new \stdClass,
+                    ],
+                    'sort' => $this->getElasticSort($params['sort'] ?? []),
+                    'track_total_hits' => true,
                 ],
-                'sort' => $this->getElasticSort($params['sort'] ?? []),
-                'track_total_hits' => true,
-            ],
-        ]);
+            ]);
+        } catch (\Exception) {
+            parent::processRequest();
+
+            return;
+        }
 
         $ids = collect($results['hits']['hits'])->pluck('_id')->toArray();
 

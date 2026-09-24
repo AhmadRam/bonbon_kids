@@ -52,6 +52,7 @@ class RefundRepository extends Repository
                 'order_id' => $order->id,
                 'total_qty' => $totalQty,
                 'state' => 'refunded',
+                'inventory_source_id' => $data['refund']['inventory_source_id'] ?? null,
                 'base_currency_code' => $order->base_currency_code,
                 'channel_currency_code' => $order->channel_currency_code,
                 'order_currency_code' => $order->order_currency_code,
@@ -131,7 +132,7 @@ class RefundRepository extends Repository
                             $childOrderItem->getTypeInstance()->isStockable()
                             || $childOrderItem->getTypeInstance()->showQuantityBox()
                         ) {
-                            $this->refundItemRepository->returnQtyToProductInventory($childOrderItem, $finalQty);
+                            $this->refundItemRepository->returnQtyToProductInventory($childOrderItem, $finalQty, $data['refund']['inventory_source_id'] ?? null);
                         }
 
                         $this->orderItemRepository->collectTotals($childOrderItem);
@@ -142,7 +143,7 @@ class RefundRepository extends Repository
                         $orderItem->getTypeInstance()->isStockable()
                         || $orderItem->getTypeInstance()->showQuantityBox()
                     ) {
-                        $this->refundItemRepository->returnQtyToProductInventory($orderItem, $qty);
+                        $this->refundItemRepository->returnQtyToProductInventory($orderItem, $qty, $data['refund']['inventory_source_id'] ?? null);
                     }
                 }
 

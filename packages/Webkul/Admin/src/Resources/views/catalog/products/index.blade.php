@@ -256,7 +256,7 @@
                                                 v-else
                                             >
                                                 <span class="text-red-600">
-                                                    @lang('admin::app.catalog.products.index.datagrid.out-of-stock')
+                                                    @{{ (record.quantity || 0) }} @lang('admin::app.catalog.products.index.datagrid.out-of-stock')
                                                 </span>
                                             </p>
                                         </div>
@@ -368,7 +368,7 @@
                                         v-else
                                     >
                                         <span class="text-red-600">
-                                            @lang('admin::app.catalog.products.index.datagrid.out-of-stock')
+                                            @{{ (record.quantity || 0) }} @lang('admin::app.catalog.products.index.datagrid.out-of-stock')
                                         </span>
                                     </p>
                                 </div>

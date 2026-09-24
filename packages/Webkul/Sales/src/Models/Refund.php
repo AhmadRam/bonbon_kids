@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Webkul\Inventory\Models\InventorySource;
 use Webkul\Sales\Contracts\Refund as RefundContract;
 use Webkul\Sales\Database\Factories\RefundFactory;
 
@@ -80,6 +81,14 @@ class Refund extends Model implements RefundContract
     public function address(): BelongsTo
     {
         return $this->belongsTo(OrderAddressProxy::modelClass(), 'order_address_id');
+    }
+
+    /**
+     * Get the inventory source associated with the refund.
+     */
+    public function inventory_source(): BelongsTo
+    {
+        return $this->belongsTo(InventorySource::class, 'inventory_source_id');
     }
 
     /**

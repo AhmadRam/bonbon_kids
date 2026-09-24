@@ -20,9 +20,10 @@ class RefundItemRepository extends Repository
      *
      * @param  Order  $orderItem
      * @param  int  $quantity
+     * @param  int|null  $inventorySourceId
      * @return void
      */
-    public function returnQtyToProductInventory($orderItem, $quantity)
+    public function returnQtyToProductInventory($orderItem, $quantity, $inventorySourceId = null)
     {
         if (! $product = $orderItem->product) {
             return;
@@ -46,7 +47,9 @@ class RefundItemRepository extends Repository
                         break;
                     }
 
-                    if (! $shipmentItem->shipment->inventory_source_id) {
+                    $targetInventorySourceId = $inventorySourceId ?: $shipmentItem->shipment->inventory_source_id;
+
+                    if (! $targetInventorySourceId) {
                         continue;
                     }
 
@@ -64,10 +67,12 @@ class RefundItemRepository extends Repository
 
                     $inventory = $product->inventories()
                         //  ->where('vendor_id', $data['vendor_id'])
-                        ->where('inventory_source_id', $shipmentItem->shipment->inventory_source_id)
+                        ->where('inventory_source_id', $targetInventorySourceId)
                         ->first();
 
-                    $inventory->update(['qty' => $inventory->qty + $shippedQtyToRefund]);
+                    if ($inventory) {
+                        $inventory->update(['qty' => $inventory->qty + $shippedQtyToRefund]);
+                    }
                 }
 
                 $quantity -= $totalShippedQtyToRefund;
@@ -76,11 +81,16 @@ class RefundItemRepository extends Repository
             ! $orderItem->getTypeInstance()->isStockable()
             && $orderItem->getTypeInstance()->showQuantityBox()
         ) {
-            $inventory = $orderItem->product->inventories()
-                // ->where('vendor_id', $data['vendor_id'])
-                ->whereIn('inventory_source_id', $orderItem->order->channel->inventory_sources()->pluck('id'))
-                ->orderBy('qty', 'desc')
-                ->first();
+            $inventoryQuery = $orderItem->product->inventories();
+
+            if ($inventorySourceId) {
+                $inventoryQuery->where('inventory_source_id', $inventorySourceId);
+            } else {
+                $inventoryQuery->whereIn('inventory_source_id', $orderItem->order->channel->inventory_sources()->pluck('id'))
+                    ->orderBy('qty', 'desc');
+            }
+
+            $inventory = $inventoryQuery->first();
 
             if ($inventory) {
                 $inventory->update(['qty' => $inventory->qty + $quantity]);
