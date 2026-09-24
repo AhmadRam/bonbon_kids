@@ -136,32 +136,19 @@
 
                     <span class="block w-full border-b dark:border-gray-800"></span>
 
-                    @if ($order->billing_address || $order->shipping_address)
-                        <!-- Billing Address -->
-                        @if ($order->billing_address)
-                            <div class="flex items-center justify-between">
-                                <p class="py-4 text-base font-semibold text-gray-600 dark:text-gray-300">
-                                    @lang('admin::app.sales.shipments.view.billing-address')
-                                </p>
-                            </div>
+                    @php
+                        $displayAddress = $order->shipping_address ?? $order->billing_address;
+                    @endphp
 
-                            @include ('admin::sales.address', ['address' => $order->billing_address])
-
-                        @endif
-
+                    @if ($displayAddress)
                         <!-- Shipping Address -->
-                        @if ($order->shipping_address)
-                            <span class="block w-full mt-4 border-b dark:border-gray-800"></span>
+                        <div class="flex items-center justify-between">
+                            <p class="py-4 text-base font-semibold text-gray-600 dark:text-gray-300">
+                                @lang('admin::app.sales.shipments.view.shipping-address')
+                            </p>
+                        </div>
 
-                            <div class="flex items-center justify-between">
-                                <p class="py-4 text-base font-semibold text-gray-600 dark:text-gray-300">
-                                    @lang('admin::app.sales.shipments.view.shipping-address')
-                                </p>
-                            </div>
-
-                            @include ('admin::sales.address', ['address' => $order->shipping_address])
-
-                        @endif
+                        @include ('admin::sales.address', ['address' => $displayAddress])
                     @endif
                 </x-slot>
             </x-admin::accordion>

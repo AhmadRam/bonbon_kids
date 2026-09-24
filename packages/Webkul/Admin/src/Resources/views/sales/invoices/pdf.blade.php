@@ -305,91 +305,87 @@
         </div>
 
         <div class="invoice-summary">
-            <!-- Billing & Shipping Address Details -->
-            <div class="table address">
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="table-header" style="width: 50%;">
-                                {{ ucwords(trans('shop::app.customers.account.orders.invoice-pdf.bill-to')) }}
-                            </th>
+            <!-- Shipping Address Details -->
+            @php
+                $displayAddress = $invoice->order->shipping_address ?? $invoice->order->billing_address;
+            @endphp
 
-                            @if ($invoice->order->shipping_address)
-                                <th class="table-header" style="width: 50%;">
+            @if ($displayAddress)
+                <div class="table address">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="table-header" style="width: 100%;">
                                     {{ ucwords(trans('shop::app.customers.account.orders.invoice-pdf.ship-to')) }}
                                 </th>
-                            @endif
-                        </tr>
-                    </thead>
+                            </tr>
+                        </thead>
 
-                    <tbody>
-                        <tr>
-                            @foreach (['billing_address', 'shipping_address'] as $addressType)
-                                @if ($invoice->order->$addressType)
-                                    <td>
-                                        @if (!empty($invoice->order->$addressType->company_name))
-                                            <p><strong>{{ $invoice->order->$addressType->company_name }}</strong></p>
-                                        @endif
+                        <tbody>
+                            <tr>
+                                <td>
+                                    @if (!empty($displayAddress->company_name))
+                                        <p><strong>{{ $displayAddress->company_name }}</strong></p>
+                                    @endif
 
-                                        <p><strong>{{ $invoice->order->$addressType->name }}</strong></p>
+                                    <p><strong>{{ $displayAddress->name }}</strong></p>
 
-                                        <p>
+                                    <p>
+                                        @php
+                                            $rawAddress = $displayAddress->address;
+                                            $addressLines = preg_split('/\r\n|\r|\n/', trim($rawAddress));
+                                        @endphp
+
+                                        @if ($displayAddress->country == 'KW' && count($addressLines) > 1)
                                             @php
-                                                $rawAddress = $invoice->order->$addressType->address;
-                                                $addressLines = preg_split('/\r\n|\r|\n/', trim($rawAddress));
+                                                $cleanLine = function($val) {
+                                                    $v = trim($val ?? '');
+                                                    return ($v !== '' && $v !== '0' && strtoupper($v) !== 'NA' && strtoupper($v) !== 'N/A') ? $v : null;
+                                                };
+                                                $block = $cleanLine($addressLines[0] ?? null);
+                                                $street = $cleanLine($addressLines[1] ?? null);
+                                                $house = $cleanLine($addressLines[2] ?? null);
+                                                $floor = $cleanLine($addressLines[3] ?? null);
+                                                $flat = $cleanLine($addressLines[4] ?? null);
+                                                $avenue = $cleanLine($addressLines[5] ?? null);
                                             @endphp
 
-                                            @if ($invoice->order->$addressType->country == 'KW' && count($addressLines) > 1)
-                                                @php
-                                                    $cleanLine = function($val) {
-                                                        $v = trim($val ?? '');
-                                                        return ($v !== '' && $v !== '0' && strtoupper($v) !== 'NA' && strtoupper($v) !== 'N/A') ? $v : null;
-                                                    };
-                                                    $block = $cleanLine($addressLines[0] ?? null);
-                                                    $street = $cleanLine($addressLines[1] ?? null);
-                                                    $house = $cleanLine($addressLines[2] ?? null);
-                                                    $floor = $cleanLine($addressLines[3] ?? null);
-                                                    $flat = $cleanLine($addressLines[4] ?? null);
-                                                    $avenue = $cleanLine($addressLines[5] ?? null);
-                                                @endphp
-
-                                                @if ($block)
-                                                    <span>{{ app()->getLocale() == 'ar' ? 'القطعة' : 'Block' }}: {{ $block }}</span><br>
-                                                @endif
-                                                @if ($street)
-                                                    <span>{{ app()->getLocale() == 'ar' ? 'الشارع' : 'Street' }}: {{ $street }}</span><br>
-                                                @endif
-                                                @if ($house)
-                                                    <span>{{ app()->getLocale() == 'ar' ? 'المنزل' : 'House' }}: {{ $house }}{{ $floor ? ' / ' . (app()->getLocale() == 'ar' ? 'الدور' : 'Floor') . ': ' . $floor : '' }}{{ $flat ? ' / ' . (app()->getLocale() == 'ar' ? 'الشقة' : 'Flat') . ': ' . $flat : '' }}</span><br>
-                                                @endif
-                                                @if ($avenue)
-                                                    <span>{{ app()->getLocale() == 'ar' ? 'الجادة' : 'Avenue' }}: {{ $avenue }}</span><br>
-                                                @endif
-                                            @else
-                                                {!! nl2br(e($rawAddress)) !!}<br>
+                                            @if ($block)
+                                                <span>{{ app()->getLocale() == 'ar' ? 'القطعة' : 'Block' }}: {{ $block }}</span><br>
                                             @endif
-                                        </p>
-
-                                        @if (!empty($invoice->order->$addressType->postcode) || !empty($invoice->order->$addressType->city))
-                                            <p>{{ trim(($invoice->order->$addressType->postcode ?? '') . ' ' . ($invoice->order->$addressType->city ?? '')) }}</p>
+                                            @if ($street)
+                                                <span>{{ app()->getLocale() == 'ar' ? 'الشارع' : 'Street' }}: {{ $street }}</span><br>
+                                            @endif
+                                            @if ($house)
+                                                <span>{{ app()->getLocale() == 'ar' ? 'المنزل' : 'House' }}: {{ $house }}{{ $floor ? ' / ' . (app()->getLocale() == 'ar' ? 'الدور' : 'Floor') . ': ' . $floor : '' }}{{ $flat ? ' / ' . (app()->getLocale() == 'ar' ? 'الشقة' : 'Flat') . ': ' . $flat : '' }}</span><br>
+                                            @endif
+                                            @if ($avenue)
+                                                <span>{{ app()->getLocale() == 'ar' ? 'الجادة' : 'Avenue' }}: {{ $avenue }}</span><br>
+                                            @endif
+                                        @else
+                                            {!! nl2br(e($rawAddress)) !!}<br>
                                         @endif
+                                    </p>
 
-                                        @if (!empty($invoice->order->$addressType->state))
-                                            <p>{{ $invoice->order->$addressType->state }}</p>
-                                        @endif
+                                    @if (!empty($displayAddress->postcode) || !empty($displayAddress->city))
+                                        <p>{{ trim(($displayAddress->postcode ?? '') . ' ' . ($displayAddress->city ?? '')) }}</p>
+                                    @endif
 
-                                        @if (!empty($invoice->order->$addressType->country))
-                                            <p>{{ core()->country_name($invoice->order->$addressType->country) }}</p>
-                                        @endif
+                                    @if (!empty($displayAddress->state))
+                                        <p>{{ $displayAddress->state }}</p>
+                                    @endif
 
-                                        <p><strong>@lang('shop::app.customers.account.orders.invoice-pdf.contact'):</strong> {{ $invoice->order->$addressType->phone }}</p>
-                                    </td>
-                                @endif
-                            @endforeach
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+                                    @if (!empty($displayAddress->country))
+                                        <p>{{ core()->country_name($displayAddress->country) }}</p>
+                                    @endif
+
+                                    <p><strong>@lang('shop::app.customers.account.orders.invoice-pdf.contact'):</strong> {{ $displayAddress->phone }}</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            @endif
 
             <!-- Payment & Shipping Methods -->
             <div class="table payment-shipment">

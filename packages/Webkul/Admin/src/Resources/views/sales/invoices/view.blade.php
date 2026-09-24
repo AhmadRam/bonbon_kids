@@ -391,38 +391,23 @@
                         {!! view_render_event('bagisto.admin.sales.invoice.customer_email.after', ['order' => $order]) !!}
                     </div>
 
-                    @if ($order->billing_address || $order->shipping_address)
-                        <!-- Billing Address -->
-                        @if ($order->billing_address)
-                            <div class="{{ $order->shipping_address ? 'pb-4' : '' }}">
-                                <span class="block w-full border-b dark:border-gray-800"></span>
+                    @php
+                        $displayAddress = $order->shipping_address ?? $order->billing_address;
+                    @endphp
 
-                                <div class="flex items-center justify-between">
-                                    <p class="py-4 text-base font-semibold text-gray-600 dark:text-gray-300">
-                                        @lang('admin::app.sales.invoices.view.billing-address')
-                                    </p>
-                                </div>
-
-                                @include ('admin::sales.address', ['address' => $order->billing_address])
-
-                                {!! view_render_event('bagisto.admin.sales.invoice.billing_address.after', ['order' => $order]) !!}
-                            </div>
-                        @endif
-
+                    @if ($displayAddress)
                         <!-- Shipping Address -->
-                        @if ($order->shipping_address)
-                            <span class="block w-full border-b dark:border-gray-800"></span>
+                        <span class="block w-full border-b dark:border-gray-800"></span>
 
-                            <div class="flex items-center justify-between">
-                                <p class="py-4 text-base font-semibold text-gray-600 dark:text-gray-300">
-                                    @lang('admin::app.sales.invoices.view.shipping-address')
-                                </p>
-                            </div>
+                        <div class="flex items-center justify-between">
+                            <p class="py-4 text-base font-semibold text-gray-600 dark:text-gray-300">
+                                @lang('admin::app.sales.invoices.view.shipping-address')
+                            </p>
+                        </div>
 
-                            @include ('admin::sales.address', ['address' => $order->shipping_address])
+                        @include ('admin::sales.address', ['address' => $displayAddress])
 
-                            {!! view_render_event('bagisto.admin.sales.invoice.shipping_address.after', ['order' => $order]) !!}
-                        @endif
+                        {!! view_render_event('bagisto.admin.sales.invoice.shipping_address.after', ['order' => $order]) !!}
                     @endif
                 </x-slot>
             </x-admin::accordion>

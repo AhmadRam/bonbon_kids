@@ -613,26 +613,12 @@
                             </div>
                         </div>
 
-                        <!-- Billing Address -->
-                        @if ($order->billing_address)
-                            <span class="block w-full border-b dark:border-gray-800"></span>
-
-                            <div class="{{ $order->shipping_address ? 'pb-4' : '' }}">
-
-                                <div class="flex items-center justify-between">
-                                    <p class="py-4 text-base font-semibold text-gray-600 dark:text-gray-300">
-                                        @lang('admin::app.sales.orders.view.billing-address')
-                                    </p>
-                                </div>
-
-                                @include ('admin::sales.address', ['address' => $order->billing_address])
-
-                                {!! view_render_event('bagisto.admin.sales.order.billing_address.after', ['order' => $order]) !!}
-                            </div>
-                        @endif
+                        @php
+                            $displayAddress = $order->shipping_address ?? $order->billing_address;
+                        @endphp
 
                         <!-- Shipping Address -->
-                        @if ($order->shipping_address)
+                        @if ($displayAddress)
                             <span class="block w-full border-b dark:border-gray-800"></span>
 
                             <div class="flex items-center justify-between">
@@ -641,7 +627,7 @@
                                 </p>
                             </div>
 
-                            @include ('admin::sales.address', ['address' => $order->shipping_address])
+                            @include ('admin::sales.address', ['address' => $displayAddress])
 
                             {!! view_render_event('bagisto.admin.sales.order.shipping_address.after', ['order' => $order]) !!}
                         @endif

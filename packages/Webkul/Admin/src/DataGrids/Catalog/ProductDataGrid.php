@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Webkul\Admin\Exports\ProductDataGridExport;
 use Webkul\Attribute\Repositories\AttributeFamilyRepository;
+use Webkul\Attribute\Repositories\AttributeRepository;
+use Webkul\Category\Repositories\CategoryRepository;
 use Webkul\Core\Facades\ElasticSearch;
 use Webkul\DataGrid\DataGrid;
 use Webkul\Product\Helpers\Product;
@@ -26,7 +28,11 @@ class ProductDataGrid extends DataGrid
      *
      * @return void
      */
-    public function __construct(protected AttributeFamilyRepository $attributeFamilyRepository) {}
+    public function __construct(
+        protected AttributeFamilyRepository $attributeFamilyRepository,
+        protected AttributeRepository $attributeRepository,
+        protected CategoryRepository $categoryRepository
+    ) {}
 
     /**
      * Prepare query builder.
@@ -36,6 +42,9 @@ class ProductDataGrid extends DataGrid
     public function prepareQueryBuilder()
     {
         $tablePrefix = DB::getTablePrefix();
+
+        $ageGroupAttribute = $this->attributeRepository->findOneByField('code', 'age_group');
+        $suitableForAttribute = $this->attributeRepository->findOneByField('code', 'suitable_for');
 
         /**
          * Query Builder to fetch records from `product_flat` table
@@ -49,28 +58,45 @@ class ProductDataGrid extends DataGrid
             ->leftJoin('category_translations as ct', function ($leftJoin) {
                 $leftJoin->on('pc.category_id', '=', 'ct.category_id')
                     ->where('ct.locale', app()->getLocale());
-            })
-            ->select(
-                'product_flat.locale',
-                'product_flat.channel',
-                'product_images.path as base_image',
-                'pc.category_id',
-                'ct.name as category_name',
-                'product_flat.product_id',
-                'product_flat.sku',
-                'product_flat.name',
-                'product_flat.type',
-                'product_flat.status',
-                'product_flat.price',
-                'product_flat.url_key',
-                'product_flat.visible_individually',
-                'af.name as attribute_family',
-            )
-            ->addSelect(DB::raw('SUM(DISTINCT '.$tablePrefix.'product_inventories.qty) as quantity'))
-            ->addSelect(DB::raw('COUNT(DISTINCT '.$tablePrefix.'product_images.id) as images_count'))
-            ->addSelect(DB::raw('IF(COUNT(DISTINCT '.$tablePrefix.'product_images.id) > 0, "Yes", "No") as has_images'))
-            ->where('product_flat.locale', app()->getLocale())
-            ->groupBy('product_flat.product_id');
+            });
+
+        if ($ageGroupAttribute) {
+            $queryBuilder->leftJoin('product_attribute_values as pav_age', function ($leftJoin) use ($ageGroupAttribute) {
+                $leftJoin->on('product_flat.product_id', '=', 'pav_age.product_id')
+                    ->where('pav_age.attribute_id', $ageGroupAttribute->id);
+            });
+        }
+
+        if ($suitableForAttribute) {
+            $queryBuilder->leftJoin('product_attribute_values as pav_suitable', function ($leftJoin) use ($suitableForAttribute) {
+                $leftJoin->on('product_flat.product_id', '=', 'pav_suitable.product_id')
+                    ->where('pav_suitable.attribute_id', $suitableForAttribute->id);
+            });
+        }
+
+        $queryBuilder->select(
+            'product_flat.locale',
+            'product_flat.channel',
+            'product_images.path as base_image',
+            'pc.category_id',
+            'ct.name as category_name',
+            'product_flat.product_id',
+            'product_flat.sku',
+            'product_flat.name',
+            'product_flat.type',
+            'product_flat.status',
+            'product_flat.price',
+            'product_flat.url_key',
+            'product_flat.visible_individually',
+            'af.name as attribute_family',
+            'pav_age.integer_value as age_group',
+            'pav_suitable.text_value as suitable_for',
+        )
+        ->addSelect(DB::raw('SUM(DISTINCT '.$tablePrefix.'product_inventories.qty) as quantity'))
+        ->addSelect(DB::raw('COUNT(DISTINCT '.$tablePrefix.'product_images.id) as images_count'))
+        ->addSelect(DB::raw('IF(COUNT(DISTINCT '.$tablePrefix.'product_images.id) > 0, "Yes", "No") as has_images'))
+        ->where('product_flat.locale', app()->getLocale())
+        ->groupBy('product_flat.product_id');
 
         $this->addFilter('product_id', 'product_flat.product_id');
         $this->addFilter('channel', 'product_flat.channel');
@@ -79,6 +105,8 @@ class ProductDataGrid extends DataGrid
         $this->addFilter('type', 'product_flat.type');
         $this->addFilter('status', 'product_flat.status');
         $this->addFilter('attribute_family', 'af.id');
+        $this->addFilter('category_id', 'pc.category_id');
+        $this->addFilter('age_group', 'pav_age.integer_value');
 
         return $queryBuilder;
     }
@@ -216,6 +244,95 @@ class ProductDataGrid extends DataGrid
                 ->toArray(),
             'sortable' => true,
         ]);
+
+        $categoryOptions = $this->categoryRepository
+            ->with('translations')
+            ->where('id', '>', 1)
+            ->get()
+            ->map(fn ($cat) => ['label' => $cat->name, 'value' => $cat->id])
+            ->values()
+            ->toArray();
+
+        $this->addColumn([
+            'index' => 'category_id',
+            'label' => trans('admin::app.catalog.products.index.datagrid.category'),
+            'type' => 'string',
+            'filterable' => true,
+            'filterable_type' => 'dropdown',
+            'filterable_options' => $categoryOptions,
+            'visibility' => false,
+        ]);
+
+        $suitableForAttribute = $this->attributeRepository->findOneByField('code', 'suitable_for');
+        $suitableForOptions = [];
+        if ($suitableForAttribute) {
+            foreach ($suitableForAttribute->options as $option) {
+                $suitableForOptions[] = [
+                    'label' => $option->label ?? $option->admin_name,
+                    'value' => $option->id,
+                ];
+            }
+        }
+
+        $this->addColumn([
+            'index' => 'suitable_for',
+            'label' => $suitableForAttribute?->name ?? 'مناسب لـ',
+            'type' => 'string',
+            'filterable' => true,
+            'filterable_type' => 'dropdown',
+            'filterable_options' => $suitableForOptions,
+            'visibility' => false,
+            'closure' => function ($row) use ($suitableForOptions) {
+                if (empty($row->suitable_for)) {
+                    return '-';
+                }
+
+                $ids = explode(',', (string) $row->suitable_for);
+                $labels = [];
+
+                foreach ($suitableForOptions as $opt) {
+                    if (in_array($opt['value'], $ids)) {
+                        $labels[] = $opt['label'];
+                    }
+                }
+
+                return implode(', ', $labels) ?: '-';
+            },
+        ]);
+
+        $ageGroupAttribute = $this->attributeRepository->findOneByField('code', 'age_group');
+        $ageGroupOptions = [];
+        if ($ageGroupAttribute) {
+            foreach ($ageGroupAttribute->options as $option) {
+                $ageGroupOptions[] = [
+                    'label' => $option->label ?? $option->admin_name,
+                    'value' => $option->id,
+                ];
+            }
+        }
+
+        $this->addColumn([
+            'index' => 'age_group',
+            'label' => $ageGroupAttribute?->name ?? 'الأعمار',
+            'type' => 'string',
+            'filterable' => true,
+            'filterable_type' => 'dropdown',
+            'filterable_options' => $ageGroupOptions,
+            'visibility' => false,
+            'closure' => function ($row) use ($ageGroupOptions) {
+                if (empty($row->age_group)) {
+                    return '-';
+                }
+
+                foreach ($ageGroupOptions as $opt) {
+                    if ($opt['value'] == $row->age_group) {
+                        return $opt['label'];
+                    }
+                }
+
+                return '-';
+            },
+        ]);
     }
 
     /**
@@ -293,6 +410,28 @@ class ProductDataGrid extends DataGrid
     public function getExporter(): ProductDataGridExport
     {
         return new ProductDataGridExport($this);
+    }
+
+    /**
+     * Process requested filters.
+     *
+     * @return \Illuminate\Database\Query\Builder
+     */
+    protected function processRequestedFilters(array $requestedFilters)
+    {
+        if (isset($requestedFilters['suitable_for'])) {
+            $values = (array) $requestedFilters['suitable_for'];
+
+            $this->queryBuilder->where(function ($scopeQueryBuilder) use ($values) {
+                foreach ($values as $value) {
+                    $scopeQueryBuilder->orWhereRaw('FIND_IN_SET(?, pav_suitable.text_value)', [$value]);
+                }
+            });
+
+            unset($requestedFilters['suitable_for']);
+        }
+
+        return parent::processRequestedFilters($requestedFilters);
     }
 
     /**
@@ -405,6 +544,27 @@ class ProductDataGrid extends DataGrid
                 return [
                     'terms' => [
                         'attribute_family_id' => $values,
+                    ],
+                ];
+
+            case 'category_id':
+                return [
+                    'terms' => [
+                        'category_ids' => (array) $values,
+                    ],
+                ];
+
+            case 'suitable_for':
+                return [
+                    'terms' => [
+                        'suitable_for' => (array) $values,
+                    ],
+                ];
+
+            case 'age_group':
+                return [
+                    'terms' => [
+                        'age_group' => (array) $values,
                     ],
                 ];
 

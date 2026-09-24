@@ -2153,39 +2153,24 @@
                 </div>
 
                 <div class="grid gap-1.5 rounded-md rounded-t-none border border-t-0 bg-white px-4 py-3 text-xs font-medium">
+                    @php
+                        $displayAddress = $order->shipping_address ?? $order->billing_address;
+                    @endphp
+
                     <!-- Shipping Address -->
-                    @if ($order->shipping_address)
+                    @if ($displayAddress)
                         <div class="text-sm font-medium text-zinc-500">
                             @lang('shop::app.customers.account.orders.view.shipping-address')
 
                             <div class="mt-1 grid gap-2 text-xs text-black">
                                 <div class="grid gap-2.5 max-md:gap-0">
-                                    @include ('shop::customers.account.orders.view.address', ['address' => $order->shipping_address])
+                                    @include ('shop::customers.account.orders.view.address', ['address' => $displayAddress])
                                 </div>
 
                                 {!! view_render_event('bagisto.shop.customers.account.orders.view.shipping_address_details.after', ['order' => $order]) !!}
                             </div>
 
                             {!! view_render_event('bagisto.shop.customers.account.orders.view.shipping_address.after', ['order' => $order]) !!}
-
-                        </div>
-                    @endif
-
-                    <!-- Billing Address -->
-                    @if ($order->billing_address)
-                        <div class="text-sm font-medium text-zinc-500">
-                            @lang('shop::app.customers.account.orders.view.billing-address')
-
-                            <div class="mt-1 grid gap-2 text-xs text-gray-800">
-                                <div class="grid gap-2.5 max-md:gap-0">
-                                    @include ('shop::customers.account.orders.view.address', ['address' => $order->billing_address])
-                                </div>
-
-                                {!! view_render_event('bagisto.shop.customers.account.orders.view.billing_address_details.after', ['order' => $order]) !!}
-
-                            </div>
-
-                            {!! view_render_event('bagisto.shop.customers.account.orders.view.billing_address.after', ['order' => $order]) !!}
 
                         </div>
                     @endif
@@ -2233,28 +2218,12 @@
                 class="mt-11 flex flex-wrap justify-between gap-x-11 gap-y-8 border-t border-zinc-200 pt-7 max-md:hidden"
                 v-pre
             >
-                <!-- Billing Address -->
-                @if ($order->billing_address)
-                    <div class="grid max-w-[200px] gap-4 max-868:w-full max-868:max-w-full max-md:max-w-full max-md:gap-2">
-                        <p class="text-base text-zinc-500 max-md:text-lg max-md:text-black">
-                            @lang('shop::app.customers.account.orders.view.billing-address')
-                        </p>
-
-                        <div class="grid gap-2.5 max-md:gap-0">
-                            <p class="text-sm">
-                                @include ('shop::customers.account.orders.view.address', ['address' => $order->billing_address])
-                            </p>
-                        </div>
-
-                        {!! view_render_event('bagisto.shop.customers.account.orders.view.billing_address_details.after', ['order' => $order]) !!}
-                    </div>
-
-                {!! view_render_event('bagisto.shop.customers.account.orders.view.billing_address.after', ['order' => $order]) !!}
-
-                @endif
+                @php
+                    $displayAddress = $order->shipping_address ?? $order->billing_address;
+                @endphp
 
                 <!-- Shipping Address -->
-                @if ($order->shipping_address)
+                @if ($displayAddress)
                     <div class="grid max-w-[200px] gap-4 max-868:w-full max-868:max-w-full max-md:max-w-full max-md:gap-2">
                         <p class="text-base text-zinc-500 max-md:text-lg max-md:text-black">
                             @lang('shop::app.customers.account.orders.view.shipping-address')
@@ -2262,7 +2231,7 @@
 
                         <div class="grid gap-2.5 max-md:gap-0">
                             <p class="text-sm">
-                                @include ('shop::customers.account.orders.view.address', ['address' => $order->shipping_address])
+                                @include ('shop::customers.account.orders.view.address', ['address' => $displayAddress])
                             </p>
                         </div>
 
@@ -2270,6 +2239,7 @@
                     </div>
 
                     {!! view_render_event('bagisto.shop.customers.account.orders.view.shipping_address.after', ['order' => $order]) !!}
+                @endif
 
                     <!-- Shipping Method -->
                     <div class="grid max-w-[200px] place-content-baseline gap-4 max-868:w-full max-868:max-w-full max-md:max-w-full max-md:gap-2">

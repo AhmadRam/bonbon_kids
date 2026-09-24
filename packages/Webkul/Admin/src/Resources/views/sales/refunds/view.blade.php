@@ -333,23 +333,13 @@
                             </p>
                         </div>
 
-                        <!-- Billing Address -->
-                        @if ($order->billing_address)
-                            <span class="block w-full border-b dark:border-gray-800"></span>
-
-                            <!-- Billing Address -->
-                            <div class="flex items-center justify-between">
-                                <p class="py-4 text-base font-semibold text-gray-600 dark:text-gray-300">
-                                    @lang('admin::app.sales.refunds.view.billing-address')
-                                </p>
-                            </div>
-
-                            @include ('admin::sales.address', ['address' => $order->billing_address])
-                        @endif
+                        @php
+                            $displayAddress = $order->shipping_address ?? $order->billing_address;
+                        @endphp
 
                         <!-- Shipping Address -->
-                        @if ($order->shipping_address)
-                            <span class="mt-4 block w-full border-b dark:border-gray-800"></span>
+                        @if ($displayAddress)
+                            <span class="block w-full border-b dark:border-gray-800"></span>
 
                             <div class="flex items-center justify-between">
                                 <p class="py-4 text-base font-semibold text-gray-600 dark:text-gray-300">
@@ -357,7 +347,7 @@
                                 </p>
                             </div>
 
-                            @include ('admin::sales.address', ['address' => $order->shipping_address])
+                            @include ('admin::sales.address', ['address' => $displayAddress])
                         @endif
                     </x-slot>
                 </x-admin::accordion>
