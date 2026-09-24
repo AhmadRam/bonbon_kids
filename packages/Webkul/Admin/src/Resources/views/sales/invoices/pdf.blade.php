@@ -136,6 +136,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            direction: ltr;
         }
 
         .row {
@@ -189,6 +190,14 @@
             $logoSrc = asset('themes/shop/default/build/assets/logo-DiAkDw2e.svg');
         }
 
+        $companyLogoPath = public_path('images/company-logo.png');
+        $companyLogoSrc = null;
+        if (file_exists($companyLogoPath)) {
+            $companyLogoSrc = 'data:image/png;base64,' . base64_encode(file_get_contents($companyLogoPath));
+        } else {
+            $companyLogoSrc = asset('images/company-logo.png');
+        }
+
         $storeName = core()->getConfigData('sales.shipping.origin.store_name') ?: (app()->getLocale() == 'ar' ? 'شركة عمر خالد الشراح' : 'Omar Khalid Al-Sharrah Company');
     @endphp
 
@@ -209,7 +218,7 @@
             </div>
 
             <!-- Invoice Title in the Middle -->
-            <div style="text-align: center;">
+            <div style="text-align: center; direction: {{ $isRtl ? 'rtl' : 'ltr' }};">
                 <span style="font-size: 30px; color: #0041FF; font-weight: 800; letter-spacing: 1px;">
                     {{ strtoupper(__('shop::app.customers.account.orders.invoice-pdf.invoice')) }}
                 </span><br>
@@ -220,7 +229,7 @@
 
             <!-- Right Logo -->
             <div class="image">
-                <img style="max-height: 80px; width: auto;" src="{{ $logoSrc }}" alt="Bonbon Logo" />
+                <img style="max-height: 80px; width: auto;" src="{{ $companyLogoSrc }}" alt="Omar Al-Sharrah Logo" />
             </div>
         </div>
 
