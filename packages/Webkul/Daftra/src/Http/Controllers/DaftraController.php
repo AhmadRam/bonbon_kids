@@ -308,6 +308,28 @@ class DaftraController extends Controller
         }
     }
 
+    /**
+     * البحث عن عميل بواسطة البريد الإلكتروني
+     */
+    public function getClientsByEmail($email)
+    {
+        try {
+            $response = Http::withHeaders($this->getHeaders())
+                ->get($this->baseUrl . '/api2/clients.json', [
+                    'email' => $email,
+                    'limit' => 50,
+                ]);
+
+            if ($response->successful()) {
+                return $response->json();
+            }
+
+            return null;
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
 
 
     /**

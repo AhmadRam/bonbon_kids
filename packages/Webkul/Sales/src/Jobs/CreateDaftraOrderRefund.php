@@ -383,11 +383,24 @@ class CreateDaftraOrderRefund implements ShouldQueue
 
         if ($email) {
             try {
+                $response = $this->daftraService->getClientsByEmail($email);
+                if (isset($response['data']) && is_array($response['data'])) {
+                    foreach ($response['data'] as $item) {
+                        if (isset($item['Client']) && strcasecmp($item['Client']['email'] ?? '', $email) === 0) {
+                            return $item['Client']['id'];
+                        }
+                    }
+                }
+            } catch (Exception $e) {
+                Log::warning('searchClientByEmail failed in refund: '.$e->getMessage());
+            }
+
+            try {
                 $clientsResponse = $this->daftraService->getClients(1, 100);
 
                 if (isset($clientsResponse['data']) && is_array($clientsResponse['data'])) {
                     foreach ($clientsResponse['data'] as $clientItem) {
-                        if (isset($clientItem['Client']) && $clientItem['Client']['email'] === $email) {
+                        if (isset($clientItem['Client']) && strcasecmp($clientItem['Client']['email'] ?? '', $email) === 0) {
                             return $clientItem['Client']['id'];
                         }
                     }
@@ -422,6 +435,27 @@ class CreateDaftraOrderRefund implements ShouldQueue
             Log::error('Daftra Create Client returned unexpected format', ['response' => $response]);
         } catch (Exception $e) {
             Log::error('Daftra Create Client Exception: '.$e->getMessage());
+
+            if (!empty($email) && (str_contains($e->getMessage(), 'متواجد سابقاً') || str_contains($e->getMessage(), 'already exists') || str_contains($e->getMessage(), 'validation_errors'))) {
+                for ($page = 1; $page <= 10; $page++) {
+                    try {
+                        $pagedResp = $this->daftraService->getClients($page, 100);
+                        if (isset($pagedResp['data']) && is_array($pagedResp['data'])) {
+                            foreach ($pagedResp['data'] as $item) {
+                                if (isset($item['Client']) && strcasecmp($item['Client']['email'] ?? '', $email) === 0) {
+                                    return (int) $item['Client']['id'];
+                                }
+                            }
+                        }
+                        $pageCount = $pagedResp['pagination']['page_count'] ?? 1;
+                        if ($page >= $pageCount) {
+                            break;
+                        }
+                    } catch (Exception $pageEx) {
+                        break;
+                    }
+                }
+            }
         }
 
         return null;

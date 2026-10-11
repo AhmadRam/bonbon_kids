@@ -96,15 +96,17 @@ class OrderListener
             $response = $this->daftraController->createInvoice($invoiceData);
 
             // 6. Save the daftra_invoice_id to Bagisto order
-            if (isset($response['data']['Invoice']['id'])) {
-                $daftraInvoiceId = $response['data']['Invoice']['id'];
-                
+            $daftraInvoiceId = $response['id']
+                ?? $response['data']['Invoice']['id']
+                ?? null;
+
+            if ($daftraInvoiceId) {
                 // Avoid firing save events infinitely
                 \Webkul\Sales\Models\Order::withoutEvents(function () use ($order, $daftraInvoiceId) {
                     $order->daftra_invoice_id = $daftraInvoiceId;
                     $order->save();
                 });
-                
+
                 Log::info("Successfully synced order #{$order->id} to Daftra Invoice #{$daftraInvoiceId}");
             } else {
                 Log::error("Daftra Sync Failed: Could not get Invoice ID from response", ['response' => $response]);
@@ -117,19 +119,25 @@ class OrderListener
 
     protected function findOrCreateClient($order)
     {
-        $email = $order->customer_email;
+        $email = trim((string) $order->customer_email);
         $firstName = $order->customer_first_name;
         $lastName = $order->customer_last_name;
         $phone = $order->billing_address ? $order->billing_address->phone : '';
 
-        // 1. Try to find the client
-        $page = 1;
-        $limit = 100; // Search in recent clients (we might need a search endpoint if Daftra supports it)
+        // 1. Try to find the client by email if available
+        if (!empty($email)) {
+            $clientId = $this->searchClientByEmail($email);
+            if ($clientId) {
+                return $clientId;
+            }
+        }
+
+        // 2. Search in recent clients (page 1)
         try {
-            $clientsResponse = $this->daftraController->getClients($page, $limit);
+            $clientsResponse = $this->daftraController->getClients(1, 100);
             if (isset($clientsResponse['data']) && is_array($clientsResponse['data'])) {
                 foreach ($clientsResponse['data'] as $clientItem) {
-                    if (isset($clientItem['Client']) && $clientItem['Client']['email'] === $email) {
+                    if (isset($clientItem['Client']) && !empty($email) && strcasecmp($clientItem['Client']['email'] ?? '', $email) === 0) {
                         return $clientItem['Client']['id'];
                     }
                 }
@@ -138,11 +146,11 @@ class OrderListener
             Log::warning("Daftra find client failed: " . $e->getMessage());
         }
 
-        // 2. Client not found, create new
+        // 3. Client not found, create new
         try {
             $clientData = [
                 'Client' => [
-                    'business_name' => trim($firstName . ' ' . $lastName),
+                    'business_name' => trim($firstName . ' ' . $lastName) ?: 'Customer',
                     'first_name' => $firstName,
                     'last_name' => $lastName,
                     'email' => $email,
@@ -154,18 +162,74 @@ class OrderListener
             ];
 
             $response = $this->daftraController->createClient($clientData);
-            
+
             if (isset($response['id'])) {
                 return $response['id'];
             } elseif (isset($response['data']['Client']['id'])) {
                 return $response['data']['Client']['id'];
             }
-            
-            // Log response if format is unexpected
+
             Log::error("Daftra Create Client returned unexpected format", ['response' => $response]);
-            
+
         } catch (\Exception $e) {
             Log::error("Daftra Create Client Exception: " . $e->getMessage());
+
+            // If creation failed because email already exists, search across multiple pages
+            if (!empty($email) && (str_contains($e->getMessage(), 'متواجد سابقاً') || str_contains($e->getMessage(), 'already exists') || str_contains($e->getMessage(), 'validation_errors'))) {
+                $foundId = $this->searchClientAcrossPages($email);
+                if ($foundId) {
+                    return $foundId;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Search for a client by email using API query
+     */
+    protected function searchClientByEmail(string $email)
+    {
+        try {
+            $response = $this->daftraController->getClientsByEmail($email);
+            if (isset($response['data']) && is_array($response['data'])) {
+                foreach ($response['data'] as $item) {
+                    if (isset($item['Client']) && strcasecmp($item['Client']['email'] ?? '', $email) === 0) {
+                        return $item['Client']['id'];
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            Log::warning("searchClientByEmail failed: " . $e->getMessage());
+        }
+
+        return null;
+    }
+
+    /**
+     * Search for a client by paginating clients if email already exists
+     */
+    protected function searchClientAcrossPages(string $email): ?int
+    {
+        for ($page = 1; $page <= 10; $page++) {
+            try {
+                $response = $this->daftraController->getClients($page, 100);
+                if (isset($response['data']) && is_array($response['data'])) {
+                    foreach ($response['data'] as $item) {
+                        if (isset($item['Client']) && strcasecmp($item['Client']['email'] ?? '', $email) === 0) {
+                            return (int) $item['Client']['id'];
+                        }
+                    }
+                }
+
+                $pageCount = $response['pagination']['page_count'] ?? 1;
+                if ($page >= $pageCount) {
+                    break;
+                }
+            } catch (\Exception $e) {
+                break;
+            }
         }
 
         return null;
