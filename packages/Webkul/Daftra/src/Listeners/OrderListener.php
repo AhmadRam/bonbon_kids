@@ -67,8 +67,16 @@ class OrderListener
             // 3. Build Payments (Optional, if we want to mark it based on order status)
             $payments = [];
             if ($order->status === 'processing' || $order->status === 'completed') {
+                $rawMethod = $order->payment->method ?? 'cash';
+                $paymentMethod = match (true) {
+                    str_contains($rawMethod, 'cash') => 'cash',
+                    str_contains($rawMethod, 'transfer') => 'bank_transfer',
+                    str_contains($rawMethod, 'cheque') => 'cheque',
+                    default => 'cash',
+                };
+
                 $payments[] = $this->daftraController->buildPayment(
-                    $order->payment->method ?? 'cash',
+                    $paymentMethod,
                     $order->grand_total,
                     $order->created_at->format('Y-m-d H:i:s'),
                     'order_' . $order->id
