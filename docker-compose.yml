@@ -25,6 +25,7 @@ services:
             - elasticsearch
             - kibana
             - mailpit
+        restart: unless-stopped
     horizon:
         image: bagisto/app
         extra_hosts:
@@ -82,6 +83,7 @@ services:
             - bonbon_network
         depends_on:
             - app
+        restart: unless-stopped
     mysql:
         image: 'mysql:8.0'
         ports:
@@ -105,6 +107,7 @@ services:
                 - '-p${DB_PASSWORD}'
             retries: 3
             timeout: 5s
+        restart: unless-stopped
     redis:
         image: 'redis:alpine'
         ports:
@@ -120,6 +123,7 @@ services:
                 - ping
             retries: 3
             timeout: 5s
+        restart: unless-stopped
     elasticsearch:
         image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
         ports:
@@ -141,6 +145,7 @@ services:
             - 'elasticsearch:/usr/share/elasticsearch/data'
         networks:
             - bonbon_network
+        restart: unless-stopped
     kibana:
         image: docker.elastic.co/kibana/kibana:7.17.0
         ports:
@@ -151,6 +156,7 @@ services:
             - bonbon_network
         depends_on:
             - elasticsearch
+        restart: unless-stopped
     mailpit:
         image: 'axllent/mailpit:latest'
         ports:
@@ -158,6 +164,7 @@ services:
             - '${FORWARD_MAILPIT_DASHBOARD_PORT:-8025}:8025'
         networks:
             - bonbon_network
+        restart: unless-stopped
 networks:
     bonbon_network:
         driver: bridge
