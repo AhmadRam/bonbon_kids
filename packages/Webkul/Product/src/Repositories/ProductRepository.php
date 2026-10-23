@@ -332,8 +332,18 @@ class ProductRepository extends Repository
             foreach ($attributes as $attribute) {
                 $alias = $attribute->code.'_product_attribute_values';
 
-                $qb->leftJoin('product_attribute_values as '.$alias, 'products.id', '=', $alias.'.product_id')
-                    ->where($alias.'.attribute_id', $attribute->id);
+                $qb->leftJoin('product_attribute_values as '.$alias, function ($join) use ($alias, $attribute) {
+                    $join->on('products.id', '=', $alias.'.product_id')
+                        ->where($alias.'.attribute_id', $attribute->id);
+
+                    if ($attribute->value_per_channel) {
+                        $join->where($alias.'.channel', core()->getRequestedChannelCode());
+                    }
+
+                    if ($attribute->value_per_locale) {
+                        $join->where($alias.'.locale', core()->getRequestedLocaleCode());
+                    }
+                });
 
                 if ($attribute->code == 'name') {
                     $synonyms = $this->searchSynonymRepository->getSynonymsByQuery(urldecode($params['name']));
