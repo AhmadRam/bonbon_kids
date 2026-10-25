@@ -175,8 +175,22 @@
                         {{ $product->name }}
                     </h1>
 
-                    <div class="text-2xl font-bold text-navyBlue">
-                        {{ core()->formatPrice($product->price) }}
+                    <div class="flex items-center gap-3">
+                        <div class="text-2xl font-bold text-navyBlue">
+                            {{ core()->formatPrice($product->price) }}
+                        </div>
+
+                        @if ($isProductInStock)
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 border border-emerald-200">
+                                <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                                {{ app()->getLocale() == 'ar' ? 'متوفر بالمخزن' : 'In Stock' }}
+                            </span>
+                        @else
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 border border-red-200">
+                                <span class="h-2 w-2 rounded-full bg-red-500"></span>
+                                {{ app()->getLocale() == 'ar' ? 'غير متوفر بالمخزن حالياً' : 'Out of Stock' }}
+                            </span>
+                        @endif
                     </div>
 
                     <div class="text-sm text-gray-500">
@@ -187,10 +201,24 @@
                         {!! \Illuminate\Support\Str::limit(strip_tags($product->description), 300) !!}
                     </div>
 
+                    @if (! $isProductInStock)
+                        <div class="rounded-xl border border-red-200 bg-red-50 p-3.5 text-red-700">
+                            <p class="text-sm font-bold text-red-800">
+                                {{ app()->getLocale() == 'ar' ? 'غير متوفر بالمخزن حالياً' : 'Currently Out of Stock' }}
+                            </p>
+                        </div>
+                    @endif
+
                     <div class="mt-4 flex gap-3">
-                        <span class="inline-flex items-center px-4 py-2 rounded-xl bg-toyBlue text-white font-semibold">
-                            @lang('shop::app.products.view.add-to-cart')
-                        </span>
+                        @if ($isProductInStock)
+                            <span class="inline-flex items-center px-4 py-2 rounded-xl bg-toyBlue text-white font-semibold">
+                                @lang('shop::app.products.view.add-to-cart')
+                            </span>
+                        @else
+                            <span class="inline-flex items-center px-4 py-2 rounded-xl bg-gray-200 text-gray-500 font-semibold border border-gray-300">
+                                {{ app()->getLocale() == 'ar' ? 'غير متوفر بالمخزن حالياً' : 'Out of Stock' }}
+                            </span>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -469,9 +497,40 @@
                                 <!-- Pricing -->
                                 {!! view_render_event('bagisto.shop.products.price.before', ['product' => $product]) !!}
 
-                                <p class="mt-[22px] flex items-center gap-2.5 text-2xl !font-medium max-sm:mt-2 max-sm:gap-x-2.5 max-sm:gap-y-0 max-sm:text-lg">
-                                    {!! $product->getTypeInstance()->getPriceHtml() !!}
-                                </p>
+                                <div class="mt-[22px] flex items-center flex-wrap gap-3 max-sm:mt-2">
+                                    <p class="flex items-center gap-2.5 text-2xl !font-medium max-sm:gap-x-2.5 max-sm:gap-y-0 max-sm:text-lg">
+                                        {!! $product->getTypeInstance()->getPriceHtml() !!}
+                                    </p>
+
+                                    @if ($isProductInStock)
+                                        <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 border border-emerald-200">
+                                            <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                                            {{ app()->getLocale() == 'ar' ? 'متوفر بالمخزن' : 'In Stock' }}
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 border border-red-200">
+                                            <span class="h-2 w-2 rounded-full bg-red-500"></span>
+                                            {{ app()->getLocale() == 'ar' ? 'غير متوفر بالمخزن حالياً' : 'Out of Stock' }}
+                                        </span>
+                                    @endif
+                                </div>
+
+                                @if (! $isProductInStock)
+                                    <div class="mt-4 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+
+                                        <div>
+                                            <p class="text-base font-bold text-red-800">
+                                                {{ app()->getLocale() == 'ar' ? 'غير متوفر بالمخزن حالياً' : 'Currently Out of Stock' }}
+                                            </p>
+                                            <p class="text-sm text-red-600 mt-0.5">
+                                                {{ app()->getLocale() == 'ar' ? 'هذا المنتج نفذت كميته من المخزن حالياً. يمكنك التواصل معنا عبر واتساب لمعرفة موعد توفره مجدداً.' : 'This product is currently out of stock. You can contact us via WhatsApp to inquire about availability.' }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                @endif
 
                                 @if (\Webkul\Tax\Facades\Tax::isInclusiveTaxProductPrices())
                                     <span class="text-sm font-normal text-zinc-500 max-sm:text-xs">
@@ -516,7 +575,7 @@
 
                                     {!! view_render_event('bagisto.shop.products.view.quantity.before', ['product' => $product]) !!}
 
-                                    @if ($product->getTypeInstance()->showQuantityBox())
+                                    @if ($isProductInStock && $product->getTypeInstance()->showQuantityBox())
                                         <x-shop::quantity-changer
                                             name="quantity"
                                             value="1"
@@ -530,17 +589,29 @@
                                         <!-- Add To Cart Button -->
                                         {!! view_render_event('bagisto.shop.products.view.add_to_cart.before', ['product' => $product]) !!}
 
-                                        <x-shop::button
-                                            type="submit"
-                                            class="secondary-button w-full max-w-full max-md:py-3 max-sm:rounded-lg max-sm:py-1.5"
-                                            button-type="secondary-button"
-                                            :loading="false"
-                                            :title="trans('shop::app.products.view.add-to-cart')"
-                                            :disabled="! $product->isSaleable(1)"
-                                            ::loading="isStoring.addToCart"
-                                            ::disabled="isStoring.addToCart"
-                                            @click="is_buy_now=0;"
-                                        />
+                                        @if ($isProductInStock)
+                                            <x-shop::button
+                                                type="submit"
+                                                class="secondary-button w-full max-w-full max-md:py-3 max-sm:rounded-lg max-sm:py-1.5"
+                                                button-type="secondary-button"
+                                                :loading="false"
+                                                :title="trans('shop::app.products.view.add-to-cart')"
+                                                ::loading="isStoring.addToCart"
+                                                ::disabled="isStoring.addToCart"
+                                                @click="is_buy_now=0;"
+                                            />
+                                        @else
+                                            <button
+                                                type="button"
+                                                disabled
+                                                class="flex w-full cursor-not-allowed items-center justify-center rounded-full border border-gray-300 bg-gray-200 px-8 py-4 text-base font-semibold text-gray-500 max-md:py-3 max-sm:rounded-lg max-sm:py-1.5 opacity-70 select-none"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ltr:mr-2 rtl:ml-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                                </svg>
+                                                {{ app()->getLocale() == 'ar' ? 'غير متوفر بالمخزن حالياً' : 'Out of Stock' }}
+                                            </button>
+                                        @endif
 
                                         {!! view_render_event('bagisto.shop.products.view.add_to_cart.after', ['product' => $product]) !!}
                                     @else
@@ -555,7 +626,7 @@
                                 </div>
 
                                 <!-- Buy Now Button -->
-                                @if (core()->getConfigData('sales.checkout.shopping_cart.cart_page'))
+                                @if ($isProductInStock && core()->getConfigData('sales.checkout.shopping_cart.cart_page'))
                                     {!! view_render_event('bagisto.shop.products.view.buy_now.before', ['product' => $product]) !!}
 
                                     @if (core()->getConfigData('catalog.products.storefront.buy_now_button_display'))
@@ -564,7 +635,6 @@
                                             class="primary-button mt-5 w-full max-w-[470px] max-md:py-3 max-sm:mt-3 max-sm:rounded-lg max-sm:py-1.5"
                                             button-type="primary-button"
                                             :title="trans('shop::app.products.view.buy-now')"
-                                            :disabled="! $product->isSaleable(1)"
                                             ::loading="isStoring.buyNow"
                                             @click="is_buy_now=1;"
                                             ::disabled="isStoring.buyNow"
@@ -576,7 +646,9 @@
 
                                 <!-- Order via WhatsApp Button -->
                                 <a
-                                    href="https://wa.me/96592214430?text={{ rawurlencode("مرحباً، أود شراء هذا المنتج:\n" . url()->current()) }}"
+                                    href="{{ $isProductInStock 
+                                        ? 'https://wa.me/96592214430?text=' . rawurlencode("مرحباً، أود شراء هذا المنتج:\n" . url()->current())
+                                        : 'https://wa.me/96592214430?text=' . rawurlencode("مرحباً، أود الاستفسار عن موعد توفر هذا المنتج (غير متوفر حالياً بالمخزن):\n" . url()->current()) }}"
                                     @click="trackWhatsApp()"
                                     target="_blank"
                                     class="mt-5 flex w-full max-w-[470px] items-center justify-center gap-2 rounded-[12px] py-[15px] text-[16px] font-semibold text-white transition-all hover:opacity-90 max-md:py-3 max-sm:mt-3 max-sm:rounded-lg max-sm:py-1.5"
@@ -585,7 +657,9 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
                                     </svg>
-                                    الطلب عن طريق واتساب
+                                    {{ $isProductInStock 
+                                        ? (app()->getLocale() == 'ar' ? 'الطلب عن طريق واتساب' : 'Order via WhatsApp') 
+                                        : (app()->getLocale() == 'ar' ? 'الاستفسار عن التوفر عبر واتساب' : 'Inquire Availability via WhatsApp') }}
                                 </a>
 
                                 {!! view_render_event('bagisto.shop.products.view.additional_actions.before', ['product' => $product]) !!}
@@ -777,6 +851,15 @@
                     },
 
                     addToCart(params) {
+                        @if (! $isProductInStock)
+                            this.$emitter.emit('add-flash', {
+                                type: 'warning',
+                                message: "{{ app()->getLocale() == 'ar' ? 'عذراً، هذا المنتج غير متوفر بالمخزن حالياً.' : 'Sorry, this product is currently out of stock.' }}"
+                            });
+
+                            return;
+                        @endif
+
                         const operation = this.is_buy_now ? 'buyNow' : 'addToCart';
 
                         this.isStoring[operation] = true;

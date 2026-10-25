@@ -147,13 +147,15 @@
                         <div class="flex flex-row md:flex-col items-center gap-2.5 max-sm:gap-3 w-full">
                             <!-- Add to Cart Button -->
                             <button
-                                class="flex flex-1 md:flex-none md:w-full items-center justify-center gap-1.5 rounded-xl bg-toyBlue text-white py-2 px-3 text-sm font-semibold transition-all hover:bg-opacity-90 disabled:opacity-50 max-sm:min-h-[44px] max-sm:h-[44px] max-sm:text-xs max-sm:px-2.5"
+                                class="flex flex-1 md:flex-none md:w-full items-center justify-center gap-1.5 rounded-xl bg-toyBlue text-white py-2 px-3 text-sm font-semibold transition-all hover:bg-opacity-90 disabled:opacity-60 max-sm:min-h-[44px] max-sm:h-[44px] max-sm:text-xs max-sm:px-2.5"
+                                :class="{'!bg-gray-200 !text-gray-500 !border !border-gray-300 cursor-not-allowed': ! product.is_saleable}"
                                 :disabled="! product.is_saleable || isAddingToCart"
                                 @click="addToCart()"
-                                aria-label="@lang('shop::app.components.products.card.add-to-cart')"
+                                :aria-label="product.is_saleable ? '@lang('shop::app.components.products.card.add-to-cart')' : '{{ app()->getLocale() == 'ar' ? 'غير متوفر' : 'Out of Stock' }}'"
                             >
-                                <span class="icon-cart text-lg max-sm:text-base"></span>
-                                <span class="max-sm:hidden">@lang('shop::app.components.products.card.add-to-cart')</span>
+                                <span class="icon-cart text-lg max-sm:text-base" v-if="product.is_saleable"></span>
+                                <span class="max-sm:hidden" v-if="product.is_saleable">@lang('shop::app.components.products.card.add-to-cart')</span>
+                                <span v-else>{{ app()->getLocale() == 'ar' ? 'غير متوفر' : 'Out of Stock' }}</span>
                             </button>
 
                             <!-- WhatsApp Button -->
