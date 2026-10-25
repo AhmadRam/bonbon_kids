@@ -180,14 +180,25 @@ class ProductController extends APIController
             return ProductResource::collection(collect());
         }
 
+        $searchEngine = 'database';
+
+        if (core()->getConfigData('catalog.products.search.engine') == 'elastic') {
+            $searchEngine = core()->getConfigData('catalog.products.search.storefront_mode');
+        }
+
         $params = [
-            'category_id' => $categoryIds,
-            'limit'       => core()->getConfigData('catalog.products.product_view_page.no_of_related_products') ?: 10,
-            'sort'        => 'rand',
-            'order'       => 'rand',
+            'category_id'          => $categoryIds,
+            'channel_id'           => core()->getCurrentChannel()->id,
+            'status'               => 1,
+            'visible_individually' => 1,
+            'limit'                => core()->getConfigData('catalog.products.product_view_page.no_of_related_products') ?: 10,
+            'sort'                 => 'rand',
+            'order'                => 'rand',
         ];
 
-        $sameCategoryProducts = $this->productRepository->getAll($params)
+        $sameCategoryProducts = $this->productRepository
+            ->setSearchEngine($searchEngine)
+            ->getAll($params)
             ->filter(function ($item) use ($product) {
                 return $item->id != $product->id;
             });
@@ -222,14 +233,25 @@ class ProductController extends APIController
 
         $cartProductIds = $cart->items->pluck('product_id')->toArray();
 
+        $searchEngine = 'database';
+
+        if (core()->getConfigData('catalog.products.search.engine') == 'elastic') {
+            $searchEngine = core()->getConfigData('catalog.products.search.storefront_mode');
+        }
+
         $params = [
-            'category_id' => implode(',', $categoryIds),
-            'limit'       => 10,
-            'sort'        => 'rand',
-            'order'       => 'rand',
+            'category_id'          => implode(',', $categoryIds),
+            'channel_id'           => core()->getCurrentChannel()->id,
+            'status'               => 1,
+            'visible_individually' => 1,
+            'limit'                => 10,
+            'sort'                 => 'rand',
+            'order'                => 'rand',
         ];
 
-        $cartCategoryProducts = $this->productRepository->getAll($params)
+        $cartCategoryProducts = $this->productRepository
+            ->setSearchEngine($searchEngine)
+            ->getAll($params)
             ->filter(function ($item) use ($cartProductIds) {
                 return ! in_array($item->id, $cartProductIds);
             });

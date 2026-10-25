@@ -58,10 +58,23 @@ class ProductsCategoriesProxyController extends Controller
         $category = $this->categoryRepository->findBySlug($slugOrURLKey);
 
         if ($category) {
-            $products = $this->productRepository->getAll(array_merge(
-                request()->query(),
-                ['category_id' => $category->id]
-            ));
+            $searchEngine = 'database';
+
+            if (core()->getConfigData('catalog.products.search.engine') == 'elastic') {
+                $searchEngine = core()->getConfigData('catalog.products.search.storefront_mode');
+            }
+
+            $products = $this->productRepository
+                ->setSearchEngine($searchEngine)
+                ->getAll(array_merge(
+                    request()->query(),
+                    [
+                        'channel_id'           => core()->getCurrentChannel()->id,
+                        'status'               => 1,
+                        'visible_individually' => 1,
+                        'category_id'          => $category->id,
+                    ]
+                ));
 
             return view('shop::categories.view', [
                 'category' => $category,
@@ -107,11 +120,18 @@ class ProductsCategoriesProxyController extends Controller
         /**
          * Cross-locale slug fallback:
          */
-        $crossLocaleProductAttribute = \Illuminate\Support\Facades\DB::table('product_attribute_values')
-            ->join('attributes', 'product_attribute_values.attribute_id', '=', 'attributes.id')
-            ->where('attributes.code', 'url_key')
-            ->where('product_attribute_values.text_value', $slugOrURLKey)
-            ->select('product_attribute_values.product_id')
+        $crossLocaleProductAttribute = \Illuminate\Support\Facades\DB::table('product_attribute_values as pav_url')
+            ->join('attributes as a_url', 'pav_url.attribute_id', '=', 'a_url.id')
+            ->leftJoin('product_attribute_values as pav_status', function ($join) {
+                $join->on('pav_url.product_id', '=', 'pav_status.product_id')
+                    ->whereIn('pav_status.attribute_id', function ($query) {
+                        $query->select('id')->from('attributes')->where('code', 'status');
+                    });
+            })
+            ->where('a_url.code', 'url_key')
+            ->where('pav_url.text_value', $slugOrURLKey)
+            ->orderByDesc('pav_status.boolean_value')
+            ->select('pav_url.product_id')
             ->first();
 
         if ($crossLocaleProductAttribute) {

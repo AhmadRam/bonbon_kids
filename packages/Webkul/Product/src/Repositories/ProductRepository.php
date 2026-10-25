@@ -183,7 +183,11 @@ class ProductRepository extends Repository
             }
         }
 
-        return $filteredAttributeValues->first()?->product;
+        $activeAttributeValue = $filteredAttributeValues->first(function ($val) {
+            return $val->product && $val->product->status && $val->product->visible_individually;
+        });
+
+        return ($activeAttributeValue ?? $filteredAttributeValues->first())?->product;
     }
 
     /**
@@ -202,7 +206,13 @@ class ProductRepository extends Repository
                 'order' => 'desc',
             ]);
 
-            return $this->find(current($indices['ids']));
+            if (! empty($indices['ids'])) {
+                $product = $this->find(current($indices['ids']));
+
+                if ($product) {
+                    return $product;
+                }
+            }
         }
 
         return $this->findByAttributeCode('url_key', $slug);
