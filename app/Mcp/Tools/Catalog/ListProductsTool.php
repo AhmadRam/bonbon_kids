@@ -38,7 +38,10 @@ class ListProductsTool extends BaseAdminTool
         }
 
         if ($status !== null && $status !== '') {
-            $productsQuery->where('status', (bool) $status);
+            $productsQuery->whereHas('attribute_values', function ($aq) use ($status) {
+                $aq->whereHas('attribute', fn ($a) => $a->where('code', 'status'))
+                    ->where('boolean_value', (bool) $status);
+            });
         }
 
         if ($hasImages !== null && $hasImages !== '') {

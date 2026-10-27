@@ -29,10 +29,15 @@ class GetCatalogStatsTool extends BaseAdminTool
 
         $totalProducts = $productModel->count();
         $productsWithImages = $productModel->whereHas('images')->count();
-        $productsWithoutImages = $totalProducts - $productsWithImages;
+        $productsWithoutImages = max(0, $totalProducts - $productsWithImages);
 
-        $activeProducts = $productModel->where('status', 1)->count();
-        $inactiveProducts = $totalProducts - $activeProducts;
+        $activeProducts = DB::table('product_attribute_values')
+            ->join('attributes', 'attributes.id', '=', 'product_attribute_values.attribute_id')
+            ->where('attributes.code', 'status')
+            ->where('product_attribute_values.boolean_value', 1)
+            ->count();
+
+        $inactiveProducts = max(0, $totalProducts - $activeProducts);
 
         $inStockCount = DB::table('product_inventories')
             ->select('product_id')
