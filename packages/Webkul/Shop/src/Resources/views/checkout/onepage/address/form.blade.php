@@ -96,7 +96,10 @@
                     </x-shop::form.control-group.label>
 
                     <div class="flex" style="direction: ltr !important;">
-                        <span class="inline-flex items-center px-4 rounded-s-lg border border-r-0 border-zinc-200 bg-gray-50 text-gray-600 text-base font-medium select-none max-md:py-2 max-sm:px-3 max-sm:text-sm">
+                        <span
+                            class="inline-flex items-center justify-center bg-zinc-100 text-zinc-700 font-medium text-base px-4 border border-zinc-200 select-none min-w-[75px] max-md:text-sm max-md:px-3 max-md:min-w-[65px]"
+                            style="border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem; border-top-right-radius: 0; border-bottom-right-radius: 0; border-right: 0;"
+                        >
                             +965
                         </span>
 
@@ -108,7 +111,8 @@
                                 rules="required|numeric"
                                 :label="trans('shop::app.checkout.onepage.address.telephone')"
                                 :placeholder="trans('shop::app.checkout.onepage.address.telephone')"
-                                class="!rounded-s-none !text-left"
+                                class="!text-left !mb-0"
+                                style="border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important;"
                             />
 
                             <x-shop::form.control-group.control 
@@ -119,7 +123,7 @@
                         </div>
                     </div>
 
-                    <x-shop::form.control-group.error ::name="controlName + '.phone_number'" />
+                    <x-shop::form.control-group.error ::name="controlName + '.phone_number'" class="mt-1" />
                 </x-shop::form.control-group>
 
                 {!! view_render_event('bagisto.shop.checkout.onepage.address.form.phone.after') !!}
