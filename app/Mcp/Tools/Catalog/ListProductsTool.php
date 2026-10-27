@@ -11,7 +11,7 @@ use Laravel\Mcp\Server\Attributes\Name;
 use Webkul\Product\Repositories\ProductRepository;
 
 #[Name('list_products')]
-#[Description('List products with optional search query, status filter, and pagination.')]
+#[Description('List products with optional search query, status filter, has_images filter, and pagination.')]
 class ListProductsTool extends BaseAdminTool
 {
     public function handle(Request $request, ProductRepository $productRepository): Response
@@ -23,9 +23,10 @@ class ListProductsTool extends BaseAdminTool
         $query = $request->get('query');
         $limit = (int) ($request->get('limit', 20));
         $status = $request->get('status');
+        $hasImages = $request->get('has_images');
 
         $productsQuery = $productRepository->getModel()->newQuery()
-            ->with(['inventories', 'categories']);
+            ->with(['inventories', 'categories', 'images']);
 
         if ($query) {
             $productsQuery->where(function ($q) use ($query) {
@@ -40,6 +41,14 @@ class ListProductsTool extends BaseAdminTool
             $productsQuery->where('status', (bool) $status);
         }
 
+        if ($hasImages !== null && $hasImages !== '') {
+            if ((bool) $hasImages) {
+                $productsQuery->whereHas('images');
+            } else {
+                $productsQuery->whereDoesntHave('images');
+            }
+        }
+
         $paginator = $productsQuery->orderBy('id', 'desc')->paginate(min($limit, 50));
 
         $items = collect($paginator->items())->map(function ($product) {
@@ -50,6 +59,8 @@ class ListProductsTool extends BaseAdminTool
                 'name' => $product->name,
                 'price' => (float) $product->price,
                 'status' => (bool) $product->status,
+                'has_images' => $product->images->isNotEmpty(),
+                'images_count' => $product->images->count(),
                 'total_quantity' => (int) $product->inventories->sum('qty'),
                 'created_at' => $product->created_at?->toIso8601String(),
             ];
@@ -70,6 +81,7 @@ class ListProductsTool extends BaseAdminTool
         return [
             'query' => $schema->string()->description('Optional search keyword to match against SKU or product name.'),
             'status' => $schema->boolean()->description('Filter by active (true) or inactive (false) status.'),
+            'has_images' => $schema->boolean()->description('Filter products by image presence: true (has images) or false (missing images).'),
             'limit' => $schema->integer()->description('Number of results to return (default 20, max 50).'),
             'page' => $schema->integer()->description('Page number for pagination.'),
         ];

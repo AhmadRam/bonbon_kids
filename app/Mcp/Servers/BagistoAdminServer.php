@@ -7,6 +7,7 @@ use App\Mcp\Tools\Analytics\GetTopSellingProductsTool;
 use App\Mcp\Tools\Catalog\CreateCategoryTool;
 use App\Mcp\Tools\Catalog\CreateProductTool;
 use App\Mcp\Tools\Catalog\DeleteProductTool;
+use App\Mcp\Tools\Catalog\GetCatalogStatsTool;
 use App\Mcp\Tools\Catalog\GetProductDetailsTool;
 use App\Mcp\Tools\Catalog\ListCategoriesTool;
 use App\Mcp\Tools\Catalog\ListProductsTool;
@@ -45,6 +46,7 @@ class BagistoAdminServer extends Server
         // Catalog & Products
         ListProductsTool::class,
         GetProductDetailsTool::class,
+        GetCatalogStatsTool::class,
         CreateProductTool::class,
         UpdateProductTool::class,
         DeleteProductTool::class,
