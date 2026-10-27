@@ -95,23 +95,10 @@
                         @lang('shop::app.checkout.onepage.address.telephone')
                     </x-shop::form.control-group.label>
 
-                    <div class="flex gap-x-2" style="direction: ltr !important;">
-                        <div class="w-[130px] min-w-[130px]">
-                            <select
-                                :name="controlName + '.phone_prefix'"
-                                v-model="phonePrefix"
-                                class="!mb-0 w-full rounded-lg border border-zinc-200 bg-white px-3 py-3 text-base text-gray-600 transition-all hover:border-gray-400 focus-visible:outline-none max-md:py-2 max-sm:px-4 max-sm:text-sm appearance-none"
-                                style="appearance: none; -webkit-appearance: none; -moz-appearance: none; background-image: none;"
-                            >
-                                <option
-                                    v-for="country in availableCountriesWithPhoneCodes"
-                                    :key="'prefix-' + country.code"
-                                    :value="countryPhoneCodes[country.code]"
-                                >
-                                    @{{ country.code }} (@{{ countryPhoneCodes[country.code] }})
-                                </option>
-                            </select>
-                        </div>
+                    <div class="flex" style="direction: ltr !important;">
+                        <span class="inline-flex items-center px-4 rounded-s-lg border border-r-0 border-zinc-200 bg-gray-50 text-gray-600 text-base font-medium select-none max-md:py-2 max-sm:px-3 max-sm:text-sm">
+                            +965
+                        </span>
 
                         <div class="flex-1">
                             <x-shop::form.control-group.control
@@ -121,7 +108,7 @@
                                 rules="required|numeric"
                                 :label="trans('shop::app.checkout.onepage.address.telephone')"
                                 :placeholder="trans('shop::app.checkout.onepage.address.telephone')"
-                                class="!text-left"
+                                class="!rounded-s-none !text-left"
                             />
 
                             <x-shop::form.control-group.control 
@@ -136,6 +123,76 @@
                 </x-shop::form.control-group>
 
                 {!! view_render_event('bagisto.shop.checkout.onepage.address.form.phone.after') !!}
+            </div>
+
+            <!-- State & City (Governorate & Area) -->
+            <div class="grid grid-cols-2 gap-x-5 max-md:grid-cols-1">
+                <!-- State (Governorate) -->
+                <x-shop::form.control-group>
+                    <x-shop::form.control-group.label class="required !mt-0">
+                        @lang('shop::app.checkout.onepage.address.governorate')
+                    </x-shop::form.control-group.label>
+
+                    <x-shop::form.control-group.control
+                        type="select"
+                        ::key="`state-select-${selectedCountry}`"
+                        ::name="controlName + '.state'"
+                        v-model="address.state"
+                        @change="handleStateChange"
+                        rules="required"
+                        ::value="address.state"
+                        :label="trans('shop::app.checkout.onepage.address.governorate')"
+                    >
+                        <option value="">
+                            @lang('shop::app.checkout.onepage.address.select-state')
+                        </option>
+
+                        <option
+                            v-for="state in currentStates"
+                            :key="state.id"
+                            :value="state.code"
+                        >
+                            @{{ state.default_name }}
+                        </option>
+                    </x-shop::form.control-group.control>
+
+                    <x-shop::form.control-group.error ::name="controlName + '.state'" />
+                </x-shop::form.control-group>
+
+                {!! view_render_event('bagisto.shop.checkout.onepage.address.form.state.after') !!}
+
+                <!-- City (Area) -->
+                <x-shop::form.control-group>
+                    <x-shop::form.control-group.label class="required !mt-0">
+                        @lang('shop::app.checkout.onepage.address.area')
+                    </x-shop::form.control-group.label>
+
+                    <x-shop::form.control-group.control
+                        type="select"
+                        ::key="`city-select-${selectedStateId || 'none'}`"
+                        ::name="controlName + '.city'"
+                        v-model="address.city"
+                        rules="required"
+                        ::value="address.city"
+                        :label="trans('shop::app.checkout.onepage.address.area')"
+                    >
+                        <option value="">
+                            @lang('shop::app.checkout.onepage.address.select-city')
+                        </option>
+
+                        <option
+                            v-for="cityData in currentCities"
+                            :key="cityData.id"
+                            :value="cityData.default_name"
+                        >
+                            @{{ cityData.default_name }}
+                        </option>
+                    </x-shop::form.control-group.control>
+
+                    <x-shop::form.control-group.error ::name="controlName + '.city'" />
+                </x-shop::form.control-group>
+
+                {!! view_render_event('bagisto.shop.checkout.onepage.address.form.city.after') !!}
             </div>
 
             <!-- Full Address (Optional) -->
@@ -187,24 +244,6 @@
                 />
             </x-shop::form.control-group>
 
-            <!-- State, City (Hidden) -->
-            <x-shop::form.control-group class="hidden">
-                <x-shop::form.control-group.control
-                    type="text"
-                    ::name="controlName + '.state'"
-                    ::value="address.state || ''"
-                    v-model="address.state"
-                />
-            </x-shop::form.control-group>
-
-            <x-shop::form.control-group class="hidden">
-                <x-shop::form.control-group.control
-                    type="text"
-                    ::name="controlName + '.city'"
-                    ::value="address.city || ''"
-                    v-model="address.city"
-                />
-            </x-shop::form.control-group>
 
             <!-- Notes (Hidden) -->
             <x-shop::form.control-group class="mt-2 hidden">
@@ -285,22 +324,13 @@
 
             data() {
                 return {
-                    selectedCountry: this.address.country,
+                    selectedCountry: this.address?.country || 'KW',
 
                     countries: [],
 
                     states: {},
 
                     cities: {},
-
-                    countryPhoneCodes: {
-                        'KW': '+965',
-                        'SA': '+966',
-                        'AE': '+971',
-                        'QA': '+974',
-                        'BH': '+973',
-                        'OM': '+968',
-                    },
 
                     phonePrefix: '+965',
 
@@ -317,14 +347,18 @@
             computed: {
                 fullAddressValue() {
                     if (!this.address || !this.address.address) return '';
+
                     if (Array.isArray(this.address.address)) {
                         if (this.address.address[0] === '0' && this.address.address[1] === 'NA') {
                             return '';
                         }
+
                         return this.address.address.filter(Boolean).join(', ');
                     }
+
                     return this.address.address;
                 },
+
                 currentStates() {
                     if (!this.selectedCountry || !this.states[this.selectedCountry]) return [];
 
@@ -354,34 +388,39 @@
                 haveCities() {
                     return this.currentCities.length > 0;
                 },
-
-                availableCountriesWithPhoneCodes() {
-                    return this.countries.filter(country => this.countryPhoneCodes[country.code]);
-                },
             },
 
             watch: {
-                selectedCountry(newVal) {
-                    this.address.country = newVal;
-                    this.syncStateSelection();
+                phoneNumber(newVal) {
+                    if (newVal) {
+                        let val = String(newVal).trim();
 
-                    if (this.countryPhoneCodes[newVal]) {
-                        this.phonePrefix = this.countryPhoneCodes[newVal];
+                        if (val.startsWith('+965')) {
+                            this.phoneNumber = val.substring(4);
+                            return;
+                        } else if (val.startsWith('00965')) {
+                            this.phoneNumber = val.substring(5);
+                            return;
+                        } else if (val.startsWith('965') && val.length > 8) {
+                            this.phoneNumber = val.substring(3);
+                            return;
+                        }
                     }
-                },
 
-                currentCities(newCities) {
-                    if (!newCities || !newCities.length) return;
-
-                    this.syncCitySelection();
-                },
-
-                phonePrefix() {
                     this.mergePhone();
                 },
 
-                phoneNumber() {
-                    this.mergePhone();
+                'address.phone'() {
+                    this.initPhone();
+                },
+
+                'address.state'(newVal) {
+                    if (!newVal) {
+                        this.activeStateId = null;
+                    } else {
+                        const matchedState = this.currentStates.find(state => this.isSameState(state, newVal));
+                        this.activeStateId = matchedState ? matchedState.id : null;
+                    }
                 },
             },
 
@@ -392,72 +431,76 @@
 
             methods: {
                 initPhone() {
-                    if (this.address.phone) {
-                        const prefixes = Object.values(this.countryPhoneCodes);
-                        let found = false;
+                    this.phonePrefix = '+965';
 
-                        for (const prefix of prefixes) {
-                            if (this.address.phone.startsWith(prefix)) {
-                                this.phonePrefix = prefix;
-                                this.phoneNumber = this.address.phone.substring(prefix.length);
-                                found = true;
+                    if (this.address && this.address.phone) {
+                        let phone = String(this.address.phone).trim();
 
-                                break;
-                            }
+                        if (phone.startsWith('+965')) {
+                            phone = phone.substring(4);
+                        } else if (phone.startsWith('00965')) {
+                            phone = phone.substring(5);
+                        } else if (phone.startsWith('965')) {
+                            phone = phone.substring(3);
                         }
 
-                        if (!found) {
-                            this.phoneNumber = this.address.phone;
-                        }
+                        this.phoneNumber = phone;
                     }
+
+                    this.mergePhone();
                 },
 
                 mergePhone() {
-                    this.address.phone = this.phonePrefix + this.phoneNumber;
+                    if (this.phoneNumber) {
+                        const cleaned = String(this.phoneNumber).replace(/^(\+965|00965|965)/, '');
+                        this.address.phone = '+965' + cleaned;
+                    } else {
+                        this.address.phone = '';
+                    }
                 },
 
                 handleStateChange(event) {
-                    const selectedState = this.currentStates.find(state => state.code === event.target.value);
+                    const selectedCode = event.target.value;
+                    const selectedState = this.currentStates.find(state => state.code === selectedCode);
 
-                    this.address.state = event.target.value;
+                    this.address.state = selectedCode;
                     this.activeStateId = selectedState ? selectedState.id : null;
-
-                    this.syncCitySelection(true);
+                    this.address.city = '';
                 },
 
                 isSameState(state, value) {
-                    return state.code === value || state.default_name === value;
+                    if (!value || !state) return false;
+                    return state.code === value || state.default_name === value || state.id == value;
                 },
 
-                resolveSelectedCountry() {
-                    if (!this.countries.length) {
-                        return '';
-                    }
-
-                    return this.countries.some(country => country.code === this.selectedCountry)
-                        ? this.selectedCountry
-                        : this.countries[0].code;
+                isSameCity(city, value) {
+                    if (!value || !city) return false;
+                    return city.default_name === value || city.code === value || city.id == value;
                 },
 
                 syncStateSelection() {
                     if (!this.currentStates.length) {
                         this.activeStateId = null;
-                        this.address.state = '';
-                        this.address.city = '';
-
                         return;
                     }
 
-                    const matchedState = this.currentStates.find(state => this.isSameState(state, this.address.state));
-                    const resolvedState = matchedState || this.currentStates[0];
+                    if (this.address.state) {
+                        const matchedState = this.currentStates.find(state => this.isSameState(state, this.address.state));
 
-                    this.address.state = resolvedState.code;
-                    this.activeStateId = resolvedState.id;
+                        if (matchedState) {
+                            this.address.state = matchedState.code;
+                            this.activeStateId = matchedState.id;
+                            this.syncCitySelection();
+                            return;
+                        }
+                    }
 
-                    this.syncCitySelection();
+                    this.activeStateId = null;
+                    this.address.state = '';
+                    this.address.city = '';
                 },
 
-                syncCitySelection(forceFirst = false) {
+                syncCitySelection() {
                     const targetStateId = this.selectedStateId;
                     const currentValue = this.address.city;
 
@@ -466,21 +509,44 @@
                         return;
                     }
 
-                    const matchedCity = this.currentCities.find(city => city.default_name === currentValue || city.code === currentValue);
-                    const nextCity = forceFirst
-                        ? this.currentCities[0].code
-                        : (matchedCity ? matchedCity.code : this.currentCities[0].code);
+                    if (currentValue) {
+                        const matchedCity = this.currentCities.find(city => this.isSameCity(city, currentValue));
 
-                    this.address.city = nextCity;
+                        if (matchedCity) {
+                            this.address.city = matchedCity.default_name;
+                            return;
+                        }
+                    }
+
+                    this.address.city = '';
                 },
 
                 loadAllData() {
-                    this.selectedCountry = 'KW';
-                    this.address.country = 'KW';
-                    this.address.state = '';
-                    this.address.city = '';
-                    this.isLoadingData = false;
-                    this.dataReady = true;
+                    this.isLoadingData = true;
+
+                    this.$axios.get("{{ route('shop.api.core.countries') }}")
+                        .then(response => {
+                            this.countries = response.data.data;
+                            this.selectedCountry = 'KW';
+                            this.address.country = 'KW';
+
+                            return this.$axios.get("{{ route('shop.api.core.states') }}");
+                        })
+                        .then(response => {
+                            this.states = response.data.data || {};
+
+                            return this.$axios.get("{{ route('shop.api.core.cities') }}");
+                        })
+                        .then(response => {
+                            this.cities = response.data.data || {};
+                            this.syncStateSelection();
+                            this.isLoadingData = false;
+                            this.dataReady = true;
+                        })
+                        .catch(() => {
+                            this.isLoadingData = false;
+                            this.dataReady = true;
+                        });
                 },
             }
         });
