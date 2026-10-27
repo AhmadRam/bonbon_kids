@@ -52,13 +52,21 @@
 
                     <template v-else>
                         <img
-                            class="aspect-square max-h-full w-full max-w-full select-none transition-transform duration-300 ease-in-out"
+                            class="aspect-square max-h-full w-full max-w-full select-none transition-transform duration-300 ease-in-out {{ ! $product->isSaleable(1) ? 'grayscale opacity-85' : '' }}"
                             :src="media.large_image_url"
                             :alt="media.large_image_url"
                         />
                     </template>
                 </div>
             </div>
+
+            @if (! $product->isSaleable(1))
+                <div class="absolute inset-0 flex items-center justify-center bg-black/25 pointer-events-none z-10">
+                    <span class="rounded-xl bg-black/80 px-5 py-2 text-base font-bold text-white shadow-xl border border-white/20 whitespace-nowrap tracking-wide backdrop-blur-sm">
+                        {{ app()->getLocale() == 'ar' ? 'انتهى من المخزون' : 'Out of Stock' }}
+                    </span>
+                </div>
+            @endif
 
             <!-- Pagination -->
             <div

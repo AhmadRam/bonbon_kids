@@ -160,12 +160,20 @@
             <div class="flex gap-9 max-1180:flex-wrap">
                 <!-- Product Image -->
                 <div class="w-1/2 max-1180:w-full max-w-[500px]">
-                    <div class="aspect-square rounded-2xl overflow-hidden border bg-white flex items-center justify-center">
+                    <div class="aspect-square rounded-2xl overflow-hidden border bg-white flex items-center justify-center relative">
                         <img
                             src="{{ $productBaseImage['large_image_url'] ?? $productBaseImage['medium_image_url'] }}"
                             alt="{{ $product->name }}"
-                            class="w-full h-full object-contain"
+                            class="w-full h-full object-contain {{ ! $isProductInStock ? 'grayscale opacity-85' : '' }}"
                         />
+
+                        @if (! $isProductInStock)
+                            <div class="absolute inset-0 flex items-center justify-center bg-black/25 pointer-events-none">
+                                <span class="rounded-xl bg-black/80 px-6 py-2.5 text-lg font-bold text-white shadow-xl border border-white/20 whitespace-nowrap tracking-wide backdrop-blur-sm max-sm:text-base max-sm:px-4 max-sm:py-2">
+                                    {{ app()->getLocale() == 'ar' ? 'انتهى من المخزون' : 'Out of Stock' }}
+                                </span>
+                            </div>
+                        @endif
                     </div>
                 </div>
 

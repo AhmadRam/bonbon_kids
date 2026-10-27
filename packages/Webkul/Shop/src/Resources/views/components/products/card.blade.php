@@ -21,6 +21,8 @@
                 <a
                     :href="'{{ route('shop.product_or_category.index', ':slug') }}'.replace(':slug', product.url_key)"
                     :aria-label="product.name + ' '"
+                    class="relative block"
+                    :class="{'[&_img]:grayscale [&_img]:opacity-85': ! product.is_saleable}"
                 >
                     <x-shop::media.images.lazy
                         class="after:content-[' '] relative bg-zinc-100 transition-all duration-300 after:block after:pb-[calc(100%+9px)] group-hover:scale-105"
@@ -36,6 +38,16 @@
                         height="300"
                         ::alt="product.name"
                     />
+
+                    <!-- Out of stock center overlay -->
+                    <div
+                        class="absolute inset-0 flex items-center justify-center bg-black/25 z-[5] pointer-events-none"
+                        v-if="! product.is_saleable"
+                    >
+                        <span class="rounded-xl bg-black/80 px-3.5 py-1.5 text-sm font-bold text-white shadow-xl border border-white/20 whitespace-nowrap tracking-wide backdrop-blur-sm max-sm:text-xs max-sm:px-2.5 max-sm:py-1">
+                            {{ app()->getLocale() == 'ar' ? 'انتهى من المخزون' : 'Out of Stock' }}
+                        </span>
+                    </div>
                 </a>
 
                 {!! view_render_event('bagisto.shop.components.products.card.image.after') !!}
@@ -64,18 +76,10 @@
                 {!! view_render_event('bagisto.shop.components.products.card.average_ratings.after') !!}
 
                 <div class="action-items bg-black">
-                    <!-- Product Out of Stock Badge -->
-                    <p
-                        class="absolute top-1.5 inline-block rounded-full bg-red-600 px-2.5 py-0.5 text-xs text-white max-sm:px-2 max-sm:py-0.5 max-sm:text-[11px] ltr:left-1.5 max-sm:ltr:left-1 rtl:right-1.5 max-sm:rtl:right-1 shadow-md font-bold z-10"
-                        v-if="! product.is_saleable"
-                    >
-                        {{ app()->getLocale() == 'ar' ? 'غير متوفر' : 'Out of Stock' }}
-                    </p>
-
                     <!-- Product Sale Badge -->
                     <p
                         class="absolute top-1.5 inline-block rounded-full bg-toyRed px-2.5 text-sm text-white max-sm:px-2 max-sm:py-0.5 max-sm:text-xs ltr:left-1.5 max-sm:ltr:left-0 rtl:right-1.5 max-sm:rtl:right-0 shadow-sm font-bold"
-                        v-else-if="product.on_sale"
+                        v-if="product.is_saleable && product.on_sale"
                     >
                         @lang('shop::app.components.products.card.sale')
                     </p>
@@ -83,7 +87,7 @@
                     <!-- Product New Badge -->
                     <p
                         class="absolute top-1.5 inline-block rounded-full bg-toyYellow px-2.5 text-sm text-toyBlue max-sm:px-2 max-sm:py-0.5 max-sm:text-xs ltr:left-1.5 max-sm:ltr:left-0 rtl:right-1.5 max-sm:rtl:right-0 shadow-sm font-bold"
-                        v-else-if="product.is_new"
+                        v-else-if="product.is_saleable && product.is_new"
                     >
                         @lang('shop::app.components.products.card.new')
                     </p>
@@ -200,7 +204,11 @@
 
                 {!! view_render_event('bagisto.shop.components.products.card.image.before') !!}
 
-                <a :href="'{{ route('shop.product_or_category.index', ':slug') }}'.replace(':slug', product.url_key)">
+                <a
+                    :href="'{{ route('shop.product_or_category.index', ':slug') }}'.replace(':slug', product.url_key)"
+                    class="relative block"
+                    :class="{'[&_img]:grayscale [&_img]:opacity-85': ! product.is_saleable}"
+                >
                     <x-shop::media.images.lazy
                         class="after:content-[' '] relative min-w-[250px] bg-zinc-100 transition-all duration-300 after:block after:pb-[calc(100%+9px)] group-hover:scale-105"
                         ::src="product.base_image.medium_image_url"
@@ -210,29 +218,31 @@
                         height="300"
                         ::alt="product.name"
                     />
+
+                    <!-- Out of stock center overlay -->
+                    <div
+                        class="absolute inset-0 flex items-center justify-center bg-black/25 z-[5] pointer-events-none"
+                        v-if="! product.is_saleable"
+                    >
+                        <span class="rounded-xl bg-black/80 px-4 py-2 text-sm font-bold text-white shadow-xl border border-white/20 whitespace-nowrap tracking-wide backdrop-blur-sm max-sm:text-xs">
+                            {{ app()->getLocale() == 'ar' ? 'انتهى من المخزون' : 'Out of Stock' }}
+                        </span>
+                    </div>
                 </a>
 
                 {!! view_render_event('bagisto.shop.components.products.card.image.after') !!}
 
                 <div class="action-items bg-black">
-                    <!-- Product Out of Stock Badge -->
-                    <p
-                        class="absolute top-5 inline-block rounded-[44px] bg-red-600 px-2.5 py-0.5 text-sm text-white ltr:left-5 max-sm:ltr:left-2 rtl:right-5 font-bold z-10"
-                        v-if="! product.is_saleable"
-                    >
-                        {{ app()->getLocale() == 'ar' ? 'غير متوفر' : 'Out of Stock' }}
-                    </p>
-
                     <p
                         class="absolute top-5 inline-block rounded-[44px] bg-red-500 px-2.5 text-sm text-white ltr:left-5 max-sm:ltr:left-2 rtl:right-5"
-                        v-else-if="product.on_sale"
+                        v-if="product.is_saleable && product.on_sale"
                     >
                         @lang('shop::app.components.products.card.sale')
                     </p>
 
                     <p
                         class="absolute top-5 inline-block rounded-[44px] bg-navyBlue px-2.5 text-sm text-white ltr:left-5 max-sm:ltr:left-2 rtl:right-5"
-                        v-else-if="product.is_new"
+                        v-else-if="product.is_saleable && product.is_new"
                     >
                         @lang('shop::app.components.products.card.new')
                     </p>

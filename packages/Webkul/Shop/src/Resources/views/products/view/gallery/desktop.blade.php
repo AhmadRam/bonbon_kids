@@ -34,7 +34,7 @@
 
                 <img
                     v-else
-                    :class="`transparent max-h-[100px] min-w-[100px] cursor-pointer rounded-xl border ${isActiveMedia(index) ? 'pointer-events-none border border-navyBlue' : 'border-white'}`"
+                    :class="`transparent max-h-[100px] min-w-[100px] cursor-pointer rounded-xl border {{ ! $product->isSaleable(1) ? 'grayscale' : '' }} ${isActiveMedia(index) ? 'pointer-events-none border border-navyBlue' : 'border-white'}`"
                     :src="media.small_image_url"
                     alt="{{ $product->name }}"
                     width="100"
@@ -66,11 +66,11 @@
     </div>
 
     <div
-        class="max-h-[610px] max-w-[560px]"
+        class="max-h-[610px] max-w-[560px] relative"
         v-show="! isMediaLoading"
     >
         <img
-            class="min-w-[450px] cursor-pointer rounded-xl"
+            class="min-w-[450px] cursor-pointer rounded-xl {{ ! $product->isSaleable(1) ? 'grayscale opacity-85' : '' }}"
             :src="baseFile.path"
             v-if="baseFile.type == 'image'"
             alt="{{ $product->name }}"
@@ -81,6 +81,14 @@
             @load="onMediaLoad()"
             fetchpriority="high"
         />
+
+        @if (! $product->isSaleable(1))
+            <div class="absolute inset-0 flex items-center justify-center bg-black/25 pointer-events-none rounded-xl">
+                <span class="rounded-xl bg-black/80 px-7 py-3 text-xl font-bold text-white shadow-2xl border border-white/20 whitespace-nowrap tracking-wide backdrop-blur-sm">
+                    {{ app()->getLocale() == 'ar' ? 'انتهى من المخزون' : 'Out of Stock' }}
+                </span>
+            </div>
+        @endif
 
         <div
             class="min-w-[450px] cursor-pointer rounded-xl"
