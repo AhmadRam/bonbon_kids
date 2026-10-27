@@ -77,6 +77,8 @@
 
                     this.baseFile.path = this.media.videos[0].video_url;
                 }
+
+                this.isMediaLoading = false;
             },
 
             computed: {
