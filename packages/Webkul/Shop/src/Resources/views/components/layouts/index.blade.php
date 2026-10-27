@@ -93,6 +93,21 @@
 
         <style>
             {!! core()->getConfigData('general.content.custom_scripts.custom_css') !!}
+
+            .grayscale {
+                -webkit-filter: grayscale(100%) !important;
+                filter: grayscale(100%) !important;
+            }
+
+            .out-of-stock-image,
+            .out-of-stock img,
+            .is-out-of-stock img,
+            img.out-of-stock,
+            [data-is-saleable="false"] img {
+                -webkit-filter: grayscale(100%) !important;
+                filter: grayscale(100%) !important;
+                opacity: 0.85 !important;
+            }
         </style>
 
         @if(core()->getConfigData('general.content.speculation_rules.enabled'))

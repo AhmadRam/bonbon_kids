@@ -35,6 +35,7 @@
                 <img
                     v-else
                     :class="`transparent max-h-[100px] min-w-[100px] cursor-pointer rounded-xl border {{ ! $product->isSaleable(1) ? 'grayscale' : '' }} ${isActiveMedia(index) ? 'pointer-events-none border border-navyBlue' : 'border-white'}`"
+                    style="{{ ! $product->isSaleable(1) ? 'filter: grayscale(100%) !important; -webkit-filter: grayscale(100%) !important; opacity: 0.85;' : '' }}"
                     :src="media.small_image_url"
                     alt="{{ $product->name }}"
                     width="100"
@@ -71,6 +72,7 @@
     >
         <img
             class="min-w-[450px] cursor-pointer rounded-xl {{ ! $product->isSaleable(1) ? 'grayscale opacity-85' : '' }}"
+            style="{{ ! $product->isSaleable(1) ? 'filter: grayscale(100%) !important; -webkit-filter: grayscale(100%) !important; opacity: 0.85;' : '' }}"
             :src="baseFile.path"
             v-if="baseFile.type == 'image'"
             alt="{{ $product->name }}"

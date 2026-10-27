@@ -22,10 +22,12 @@
                     :href="'{{ route('shop.product_or_category.index', ':slug') }}'.replace(':slug', product.url_key)"
                     :aria-label="product.name + ' '"
                     class="relative block"
-                    :class="{'[&_img]:grayscale [&_img]:opacity-85': ! product.is_saleable}"
+                    :class="{'out-of-stock': ! product.is_saleable}"
                 >
                     <x-shop::media.images.lazy
                         class="after:content-[' '] relative bg-zinc-100 transition-all duration-300 after:block after:pb-[calc(100%+9px)] group-hover:scale-105"
+                        ::class="{'grayscale': ! product.is_saleable}"
+                        ::style="! product.is_saleable ? 'filter: grayscale(100%) !important; -webkit-filter: grayscale(100%) !important; opacity: 0.85;' : ''"
                         ::src="product.base_image.medium_image_url"
                         ::srcset="`
                             ${product.base_image.small_image_url} 150w,
@@ -207,10 +209,12 @@
                 <a
                     :href="'{{ route('shop.product_or_category.index', ':slug') }}'.replace(':slug', product.url_key)"
                     class="relative block"
-                    :class="{'[&_img]:grayscale [&_img]:opacity-85': ! product.is_saleable}"
+                    :class="{'out-of-stock': ! product.is_saleable}"
                 >
                     <x-shop::media.images.lazy
                         class="after:content-[' '] relative min-w-[250px] bg-zinc-100 transition-all duration-300 after:block after:pb-[calc(100%+9px)] group-hover:scale-105"
+                        ::class="{'grayscale': ! product.is_saleable}"
+                        ::style="! product.is_saleable ? 'filter: grayscale(100%) !important; -webkit-filter: grayscale(100%) !important; opacity: 0.85;' : ''"
                         ::src="product.base_image.medium_image_url"
                         ::key="product.id"
                         ::index="product.id"

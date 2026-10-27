@@ -165,6 +165,7 @@
                             src="{{ $productBaseImage['large_image_url'] ?? $productBaseImage['medium_image_url'] }}"
                             alt="{{ $product->name }}"
                             class="w-full h-full object-contain {{ ! $isProductInStock ? 'grayscale opacity-85' : '' }}"
+                            style="{{ ! $isProductInStock ? 'filter: grayscale(100%) !important; -webkit-filter: grayscale(100%) !important; opacity: 0.85;' : '' }}"
                         />
 
                         @if (! $isProductInStock)

@@ -53,6 +53,7 @@
                     <template v-else>
                         <img
                             class="aspect-square max-h-full w-full max-w-full select-none transition-transform duration-300 ease-in-out {{ ! $product->isSaleable(1) ? 'grayscale opacity-85' : '' }}"
+                            style="{{ ! $product->isSaleable(1) ? 'filter: grayscale(100%) !important; -webkit-filter: grayscale(100%) !important; opacity: 0.85;' : '' }}"
                             :src="media.large_image_url"
                             :alt="media.large_image_url"
                         />
