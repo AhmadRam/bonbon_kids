@@ -58,6 +58,10 @@ class ProductsCategoriesProxyController extends Controller
         $category = $this->categoryRepository->findBySlug($slugOrURLKey);
 
         if ($category) {
+            if (! $category->status) {
+                abort(404);
+            }
+
             $searchEngine = 'database';
 
             if (core()->getConfigData('catalog.products.search.engine') == 'elastic') {
