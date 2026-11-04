@@ -3,9 +3,12 @@
 namespace Webkul\Daftra\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
+use Spatie\ResponseCache\Facades\ResponseCache;
 use Webkul\Daftra\Http\Controllers\DaftraController;
-use Webkul\Product\Repositories\ProductRepository;
 use Webkul\Product\Repositories\ProductInventoryRepository;
+use Webkul\Product\Repositories\ProductRepository;
 
 class SyncDaftraQuantities extends Command
 {
@@ -76,7 +79,7 @@ class SyncDaftraQuantities extends Command
 
             do {
                 $this->info("Fetching page {$page} from Daftra...");
-                
+
                 // Get products from Daftra API
                 $daftraProductsData = $this->daftraController->getProducts($page, $limit);
 
@@ -86,7 +89,7 @@ class SyncDaftraQuantities extends Command
 
                 foreach ($daftraProductsData as $daftraItem) {
                     // Daftra returns an array of items, inside each item there is a 'Product' key
-                    if (!isset($daftraItem['Product'])) {
+                    if (! isset($daftraItem['Product'])) {
                         continue;
                     }
 
@@ -110,11 +113,11 @@ class SyncDaftraQuantities extends Command
                         // Update Inventory
                         // Map Daftra store_id to Bagisto inventory_source_id
                         $inventories = [];
-                        
-                        if (!empty($daftraProduct['ProductStock']) && is_array($daftraProduct['ProductStock'])) {
+
+                        if (! empty($daftraProduct['ProductStock']) && is_array($daftraProduct['ProductStock'])) {
                             foreach ($daftraProduct['ProductStock'] as $stockItem) {
                                 $storeId = $stockItem['store_id'] ?? null;
-                                $balance = max(0, (float)($stockItem['balance'] ?? 0));
+                                $balance = max(0, (float) ($stockItem['balance'] ?? 0));
                                 if ($storeId) {
                                     $inventories[$storeId] = $balance;
                                 }
@@ -126,11 +129,23 @@ class SyncDaftraQuantities extends Command
 
                         // Bagisto 2.x saveInventories structure: ['inventories' => [inventory_source_id => qty]]
                         $inventoryData = [
-                            'inventories' => $inventories
+                            'inventories' => $inventories,
                         ];
-                        
+
                         $this->productInventoryRepository->saveInventories($inventoryData, $bagistoProduct);
-                        
+
+                        // Ensure manage_stock attribute is set to 1 for this product
+                        $manageStockAttr = DB::table('attributes')->where('code', 'manage_stock')->first();
+                        if ($manageStockAttr) {
+                            DB::table('product_attribute_values')->updateOrInsert([
+                                'product_id' => $bagistoProduct->id,
+                                'attribute_id' => $manageStockAttr->id,
+                                'channel' => core()->getDefaultChannelCode(),
+                            ], [
+                                'boolean_value' => 1,
+                            ]);
+                        }
+
                         // Update Price
                         // Price sync is temporarily disabled as requested, but logic is kept for future use.
                         /*
@@ -143,7 +158,7 @@ class SyncDaftraQuantities extends Command
                             ], $bagistoProduct->id);
                         }
                         */
-                        
+
                         $this->line("Updated SKU: {$sku} | New Qty: {$stockBalance}");
                         $updatedCount++;
                     } else {
@@ -160,14 +175,27 @@ class SyncDaftraQuantities extends Command
 
             } while (true);
 
-            $this->info("Sync completed successfully!");
+            $this->info('Sync completed successfully!');
             $this->info("Updated Products: {$updatedCount}");
             $this->info("Not Found in Bagisto: {$notFoundCount}");
+
+            if ($updatedCount > 0) {
+                $this->info('Reindexing inventory indices...');
+                Artisan::call('indexer:index', [
+                    '--type' => ['inventory'],
+                    '--mode' => ['full'],
+                ]);
+
+                if (class_exists(ResponseCache::class)) {
+                    ResponseCache::clear();
+                }
+            }
 
             return 0;
 
         } catch (\Exception $e) {
-            $this->error('Error during sync: ' . $e->getMessage());
+            $this->error('Error during sync: '.$e->getMessage());
+
             return 1;
         }
     }
