@@ -473,8 +473,12 @@ class ProductRepository extends Repository
                     /* `created_at` is not an attribute so it will be in else case */
                     $qb->orderBy('products.created_at', $sortOptions['order']);
                 }
+
+                $qb->orderBy('products.id', $sortOptions['order'] === 'asc' ? 'asc' : 'desc');
             } else {
-                $qb->inRandomOrder($sortOptions['order'] !== 'rand' ? $sortOptions['order'] : '');
+                $seed = is_numeric($sortOptions['order']) ? (int) $sortOptions['order'] : null;
+                $qb->inRandomOrder($seed)
+                    ->orderBy('products.id', 'desc');
             }
 
             return $qb->groupBy('products.id');

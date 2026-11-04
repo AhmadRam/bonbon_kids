@@ -396,7 +396,7 @@
                     },
 
                     loadMoreProducts() {
-                        if (! this.links.next) {
+                        if (! this.links?.next || this.loader) {
                             return;
                         }
 
@@ -406,7 +406,10 @@
                             .then(response => {
                                 this.loader = false;
 
-                                this.products = [...this.products, ...response.data.data];
+                                const existingIds = new Set(this.products.map(p => p.id));
+                                const uniqueNewProducts = (response.data.data || []).filter(p => !existingIds.has(p.id));
+
+                                this.products = [...this.products, ...uniqueNewProducts];
 
                                 this.links = response.data.links;
 

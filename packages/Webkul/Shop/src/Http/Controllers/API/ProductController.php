@@ -39,7 +39,7 @@ class ProductController extends APIController
 
         if (isset($params['rand']) && ! isset($params['sort'])) {
             $params['sort'] = 'rand';
-            $params['order'] = 'rand';
+            $params['order'] = is_numeric($params['rand']) ? (int) $params['rand'] : 'rand';
         }
 
         if (isset($params['group'])) {
