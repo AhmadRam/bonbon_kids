@@ -97,7 +97,12 @@ class CategoryController extends APIController
     public function getAttributeOptions(int $attributeId): mixed
     {
         if ($attributeId === 999999) {
-            $query = $this->categoryRepository->getModel()->where('parent_id', 1);
+            $rootCategoryId = core()->getCurrentChannel()->root_category_id ?? 1;
+
+            $query = $this->categoryRepository->getModel()
+                ->where('parent_id', $rootCategoryId)
+                ->where('status', 1)
+                ->whereHas('products');
 
             if ($search = request('search')) {
                 $query->whereHas('translations', function ($q) use ($search) {
