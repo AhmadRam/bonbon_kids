@@ -47,7 +47,7 @@
                         v-if="! product.is_saleable"
                     >
                         <span class="rounded-xl bg-black/80 px-3.5 py-1.5 text-sm font-bold text-white shadow-xl border border-white/20 whitespace-nowrap tracking-wide backdrop-blur-sm max-sm:text-xs max-sm:px-2.5 max-sm:py-1">
-                            {{ app()->getLocale() == 'ar' ? 'انتهى من المخزون' : 'Out of Stock' }}
+                            {{ app()->getLocale() == 'ar' ? 'نفذت الكمية' : 'Sold Out' }}
                         </span>
                     </div>
                 </a>
@@ -229,7 +229,7 @@
                         v-if="! product.is_saleable"
                     >
                         <span class="rounded-xl bg-black/80 px-4 py-2 text-sm font-bold text-white shadow-xl border border-white/20 whitespace-nowrap tracking-wide backdrop-blur-sm max-sm:text-xs">
-                            {{ app()->getLocale() == 'ar' ? 'انتهى من المخزون' : 'Out of Stock' }}
+                            {{ app()->getLocale() == 'ar' ? 'نفذت الكمية' : 'Sold Out' }}
                         </span>
                     </div>
                 </a>

@@ -171,7 +171,7 @@
                         @if (! $isProductInStock)
                             <div class="absolute inset-0 flex items-center justify-center bg-black/25 pointer-events-none">
                                 <span class="rounded-xl bg-black/80 px-6 py-2.5 text-lg font-bold text-white shadow-xl border border-white/20 whitespace-nowrap tracking-wide backdrop-blur-sm max-sm:text-base max-sm:px-4 max-sm:py-2">
-                                    {{ app()->getLocale() == 'ar' ? 'انتهى من المخزون' : 'Out of Stock' }}
+                                    {{ app()->getLocale() == 'ar' ? 'نفذت الكمية' : 'Sold Out' }}
                                 </span>
                             </div>
                         @endif
