@@ -6,6 +6,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 use Webkul\Category\Repositories\CategoryRepository;
+use Webkul\Product\Repositories\ProductRepository;
 use Webkul\Shop\Http\Requests\ContactRequest;
 use Webkul\Shop\Http\Resources\CategoryTreeResource;
 use Webkul\Shop\Mail\ContactUs;
@@ -23,7 +24,11 @@ class HomeController extends Controller
      *
      * @return void
      */
-    public function __construct(protected ThemeCustomizationRepository $themeCustomizationRepository, protected CategoryRepository $categoryRepository) {}
+    public function __construct(
+        protected ThemeCustomizationRepository $themeCustomizationRepository,
+        protected CategoryRepository $categoryRepository,
+        protected ProductRepository $productRepository
+    ) {}
 
     /**
      * Loads the home page for the storefront.
@@ -42,7 +47,66 @@ class HomeController extends Controller
 
         $categories = CategoryTreeResource::collection($categories);
 
-        return view('shop::home.index', compact('customizations', 'categories'));
+        $carouselExcludeIds = $this->resolveCarouselExcludeIds($customizations);
+
+        return view('shop::home.index', compact('customizations', 'categories', 'carouselExcludeIds'));
+    }
+
+    /**
+     * Compute per-carousel product IDs to exclude so products do not repeat across homepage carousels.
+     */
+    public function resolveCarouselExcludeIds($customizations): array
+    {
+        $productCarousels = $customizations
+            ->filter(fn ($customization) => $customization->type === $customization::PRODUCT_CAROUSEL)
+            ->values();
+
+        $carouselExcludeIds = [];
+
+        if ($productCarousels->isEmpty()) {
+            return $carouselExcludeIds;
+        }
+
+        $searchEngine = 'database';
+
+        if (core()->getConfigData('catalog.products.search.engine') == 'elastic') {
+            $searchEngine = core()->getConfigData('catalog.products.search.storefront_mode');
+        }
+
+        $channelId = core()->getCurrentChannel()->id;
+        $seenProductIds = [];
+        $lastIndex = $productCarousels->count() - 1;
+
+        foreach ($productCarousels as $index => $customization) {
+            $carouselExcludeIds[$customization->id] = $seenProductIds;
+
+            if ($index === $lastIndex) {
+                continue;
+            }
+
+            $filters = $customization->options['filters'] ?? [];
+
+            $queryParams = array_merge($filters, [
+                'channel_id' => $channelId,
+                'status' => 1,
+                'visible_individually' => 1,
+            ]);
+
+            if (! empty($seenProductIds)) {
+                $queryParams['exclude_ids'] = implode(',', $seenProductIds);
+            }
+
+            $products = $this->productRepository
+                ->setSearchEngine($searchEngine)
+                ->getAll($queryParams);
+
+            $seenProductIds = array_values(array_unique(array_merge(
+                $seenProductIds,
+                $products->pluck('id')->all()
+            )));
+        }
+
+        return $carouselExcludeIds;
     }
 
     /**

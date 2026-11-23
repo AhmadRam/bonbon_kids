@@ -46,7 +46,9 @@ class ProductsCategoriesProxyController extends Controller
                 'channel_id' => core()->getCurrentChannel()->id,
             ]);
 
-            return view('shop::home.index', compact('customizations'));
+            $carouselExcludeIds = app(HomeController::class)->resolveCarouselExcludeIds($customizations);
+
+            return view('shop::home.index', compact('customizations', 'carouselExcludeIds'));
         }
 
         /**

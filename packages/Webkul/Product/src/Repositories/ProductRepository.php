@@ -311,6 +311,18 @@ class ProductRepository extends Repository
                 }
             }
 
+            if (! empty($params['exclude_ids'])) {
+                $excludeIds = is_array($params['exclude_ids'])
+                    ? $params['exclude_ids']
+                    : explode(',', (string) $params['exclude_ids']);
+
+                $excludeIds = array_values(array_filter(array_map('intval', $excludeIds), fn ($id) => $id > 0));
+
+                if (! empty($excludeIds)) {
+                    $qb->whereNotIn('products.id', $excludeIds);
+                }
+            }
+
             /**
              * Filter query by price.
              */

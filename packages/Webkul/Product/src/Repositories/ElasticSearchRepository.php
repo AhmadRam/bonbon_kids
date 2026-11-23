@@ -48,6 +48,18 @@ class ElasticSearchRepository
             $filters['filter'][]['term']['type'] = $params['type'];
         }
 
+        if (! empty($params['exclude_ids'])) {
+            $excludeIds = is_array($params['exclude_ids'])
+                ? $params['exclude_ids']
+                : explode(',', (string) $params['exclude_ids']);
+
+            $excludeIds = array_values(array_filter(array_map('intval', $excludeIds), fn ($id) => $id > 0));
+
+            if (! empty($excludeIds)) {
+                $filters['must_not'][]['ids']['values'] = array_map('strval', $excludeIds);
+            }
+        }
+
         $results = ElasticSearch::search([
             'index' => $params['index'] ?? $this->getIndexName(),
             'body' => [

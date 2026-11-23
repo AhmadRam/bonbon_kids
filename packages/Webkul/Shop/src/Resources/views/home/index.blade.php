@@ -130,11 +130,20 @@
 
                 @break
             @case ($customization::PRODUCT_CAROUSEL)
+                @php
+                    $carouselFilters = $data['filters'] ?? [];
+                    $apiFilters = $carouselFilters;
+
+                    if (! empty($carouselExcludeIds[$customization->id])) {
+                        $apiFilters['exclude_ids'] = implode(',', $carouselExcludeIds[$customization->id]);
+                    }
+                @endphp
+
                 <!-- Product Carousel -->
                 <x-shop::products.carousel
                     :title="$data['title'] ?? ''"
-                    :src="route('shop.api.products.index', $data['filters'] ?? [])"
-                    :navigation-link="route('shop.search.index', $data['filters'] ?? [])"
+                    :src="route('shop.api.products.index', $apiFilters)"
+                    :navigation-link="route('shop.search.index', $carouselFilters)"
                     aria-label="{{ trans('shop::app.home.index.product-carousel') }}"
                 />
 
