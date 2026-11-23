@@ -2,10 +2,12 @@
 
 namespace Webkul\FPC\Listeners;
 
+use Illuminate\Support\Facades\DB;
 use Spatie\ResponseCache\Facades\ResponseCache;
 use Webkul\Product\Repositories\ProductBundleOptionProductRepository;
 use Webkul\Product\Repositories\ProductGroupedProductRepository;
 use Webkul\Product\Repositories\ProductRepository;
+use Webkul\Shop\Http\Controllers\SitemapController;
 
 class Product
 {
@@ -28,13 +30,23 @@ class Product
      */
     public function afterUpdate($product)
     {
+        if (! $product) {
+            return;
+        }
+
         $urls = $this->getForgettableUrls($product);
 
-        ResponseCache::forget($urls);
+        if (! empty($urls)) {
+            ResponseCache::forget($urls);
+        }
+
+        if (class_exists(SitemapController::class)) {
+            SitemapController::clearCache();
+        }
     }
 
     /**
-     * Delete product page c
+     * Delete product page cache
      *
      * @param  int  $productId
      * @return void
@@ -43,13 +55,23 @@ class Product
     {
         $product = $this->productRepository->find($productId);
 
+        if (! $product) {
+            return;
+        }
+
         $urls = $this->getForgettableUrls($product);
 
-        ResponseCache::forget($urls);
+        if (! empty($urls)) {
+            ResponseCache::forget($urls);
+        }
+
+        if (class_exists(SitemapController::class)) {
+            SitemapController::clearCache();
+        }
     }
 
     /**
-     * Returns product urls
+     * Returns product urls across all locales
      *
      * @param  \Webkul\Product\Contracts\Product  $product
      * @return array
@@ -59,12 +81,30 @@ class Product
         $urls = [];
 
         $products = $this->getAllRelatedProducts($product);
+        $productIds = collect($products)->pluck('id')->filter()->unique()->values()->all();
 
-        foreach ($products as $product) {
-            $urls[] = '/'.$product->url_key;
+        if (! empty($productIds)) {
+            $urlKeys = DB::table('product_attribute_values')
+                ->join('attributes', 'attributes.id', '=', 'product_attribute_values.attribute_id')
+                ->where('attributes.code', 'url_key')
+                ->whereIn('product_attribute_values.product_id', $productIds)
+                ->whereNotNull('product_attribute_values.text_value')
+                ->where('product_attribute_values.text_value', '!=', '')
+                ->pluck('product_attribute_values.text_value')
+                ->all();
+
+            foreach ($urlKeys as $urlKey) {
+                $urls[] = '/'.ltrim((string) $urlKey, '/');
+            }
         }
 
-        return $urls;
+        foreach ($products as $relatedProduct) {
+            if (! empty($relatedProduct->url_key)) {
+                $urls[] = '/'.ltrim((string) $relatedProduct->url_key, '/');
+            }
+        }
+
+        return array_values(array_unique($urls));
     }
 
     /**

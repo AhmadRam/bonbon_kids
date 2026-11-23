@@ -287,11 +287,20 @@ class CartController extends APIController
 
         $productIds = $cart->items->pluck('product_id')->toArray();
 
-        $products = $this->productRepository
+        $productsQuery = $this->productRepository
             ->select('products.*', 'product_cross_sells.child_id')
             ->join('product_cross_sells', 'products.id', '=', 'product_cross_sells.child_id')
             ->whereIn('product_cross_sells.parent_id', $productIds)
-            ->whereNotIn('product_cross_sells.child_id', $productIds)
+            ->whereNotIn('product_cross_sells.child_id', $productIds);
+
+        foreach (['status', 'visible_individually'] as $attributeCode) {
+            $productsQuery->whereHas('attribute_values', function ($attributeQuery) use ($attributeCode) {
+                $attributeQuery->whereHas('attribute', fn ($attr) => $attr->where('code', $attributeCode))
+                    ->where('boolean_value', 1);
+            });
+        }
+
+        $products = $productsQuery
             ->groupBy('product_cross_sells.child_id')
             ->take(core()->getConfigData('catalog.products.cart_view_page.no_of_cross_sells_products'))
             ->get();

@@ -4,6 +4,7 @@ namespace App\Mcp\Tools\Catalog;
 
 use App\Mcp\Tools\BaseAdminTool;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\Support\Facades\Event;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
@@ -66,7 +67,11 @@ class UpdateProductTool extends BaseAdminTool
             $updateData['weight'] = (float) $request->get('weight');
         }
 
+        Event::dispatch('catalog.product.update.before', $product->id);
+
         $updatedProduct = $productRepository->update($updateData, $product->id);
+
+        Event::dispatch('catalog.product.update.after', $updatedProduct);
 
         return $this->successResponse("Product [{$updatedProduct->sku}] updated successfully.", [
             'id' => $updatedProduct->id,

@@ -3,7 +3,9 @@
 namespace Webkul\Shop\Http\Controllers\API;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\DB;
 use Webkul\Category\Repositories\CategoryRepository;
+use Webkul\Checkout\Facades\Cart;
 use Webkul\Marketing\Jobs\UpdateCreateSearchTerm as UpdateCreateSearchTermJob;
 use Webkul\Product\Repositories\ProductRepository;
 use Webkul\Shop\Http\Resources\ProductResource;
@@ -48,21 +50,22 @@ class ProductController extends APIController
             foreach ($groupValues as $value) {
                 if (is_numeric($value)) {
                     $mappedIds[] = $value;
+
                     continue;
                 }
 
-                $option = \Illuminate\Support\Facades\DB::table('attribute_options')
+                $option = DB::table('attribute_options')
                     ->join('attribute_option_translations', 'attribute_options.id', '=', 'attribute_option_translations.attribute_option_id')
                     ->whereIn('attribute_options.attribute_id', function ($q) {
                         $q->select('id')->from('attributes')->where('code', 'group');
                     })
                     ->where(function ($q) use ($value) {
                         $q->where('attribute_option_translations.label', $value)
-                          ->orWhere('attribute_options.admin_name', $value)
-                          ->orWhere(\Illuminate\Support\Facades\DB::raw('LOWER(attribute_option_translations.label)'), strtolower($value))
-                          ->orWhere(\Illuminate\Support\Facades\DB::raw('LOWER(attribute_options.admin_name)'), strtolower($value))
-                          ->orWhere(\Illuminate\Support\Facades\DB::raw("REPLACE(LOWER(attribute_options.admin_name), ' ', '-')"), strtolower($value))
-                          ->orWhere(\Illuminate\Support\Facades\DB::raw("REPLACE(LOWER(attribute_option_translations.label), ' ', '-')"), strtolower($value));
+                            ->orWhere('attribute_options.admin_name', $value)
+                            ->orWhere(DB::raw('LOWER(attribute_option_translations.label)'), strtolower($value))
+                            ->orWhere(DB::raw('LOWER(attribute_options.admin_name)'), strtolower($value))
+                            ->orWhere(DB::raw("REPLACE(LOWER(attribute_options.admin_name), ' ', '-')"), strtolower($value))
+                            ->orWhere(DB::raw("REPLACE(LOWER(attribute_option_translations.label), ' ', '-')"), strtolower($value));
                     })
                     ->first();
 
@@ -142,7 +145,7 @@ class ProductController extends APIController
     {
         $product = $this->productRepository->findOrFail($id);
 
-        $relatedProducts = $product->related_products()
+        $relatedProducts = $this->applyActiveVisibilityFilter($product->related_products())
             ->take(core()->getConfigData('catalog.products.product_view_page.no_of_related_products'))
             ->get();
 
@@ -158,11 +161,26 @@ class ProductController extends APIController
     {
         $product = $this->productRepository->findOrFail($id);
 
-        $upSellProducts = $product->up_sells()
+        $upSellProducts = $this->applyActiveVisibilityFilter($product->up_sells())
             ->take(core()->getConfigData('catalog.products.product_view_page.no_of_up_sells_products'))
             ->get();
 
         return ProductResource::collection($upSellProducts);
+    }
+
+    /**
+     * Restrict product relation queries to active and individually visible products.
+     */
+    protected function applyActiveVisibilityFilter($query)
+    {
+        foreach (['status', 'visible_individually'] as $attributeCode) {
+            $query->whereHas('attribute_values', function ($attributeQuery) use ($attributeCode) {
+                $attributeQuery->whereHas('attribute', fn ($attr) => $attr->where('code', $attributeCode))
+                    ->where('boolean_value', 1);
+            });
+        }
+
+        return $query;
     }
 
     /**
@@ -187,13 +205,13 @@ class ProductController extends APIController
         }
 
         $params = [
-            'category_id'          => $categoryIds,
-            'channel_id'           => core()->getCurrentChannel()->id,
-            'status'               => 1,
+            'category_id' => $categoryIds,
+            'channel_id' => core()->getCurrentChannel()->id,
+            'status' => 1,
             'visible_individually' => 1,
-            'limit'                => core()->getConfigData('catalog.products.product_view_page.no_of_related_products') ?: 10,
-            'sort'                 => 'rand',
-            'order'                => 'rand',
+            'limit' => core()->getConfigData('catalog.products.product_view_page.no_of_related_products') ?: 10,
+            'sort' => 'rand',
+            'order' => 'rand',
         ];
 
         $sameCategoryProducts = $this->productRepository
@@ -211,7 +229,7 @@ class ProductController extends APIController
      */
     public function cartCategoryProducts(): JsonResource
     {
-        $cart = \Webkul\Checkout\Facades\Cart::getCart();
+        $cart = Cart::getCart();
 
         if (! $cart || ! $cart->items->count()) {
             return ProductResource::collection(collect());
@@ -240,13 +258,13 @@ class ProductController extends APIController
         }
 
         $params = [
-            'category_id'          => implode(',', $categoryIds),
-            'channel_id'           => core()->getCurrentChannel()->id,
-            'status'               => 1,
+            'category_id' => implode(',', $categoryIds),
+            'channel_id' => core()->getCurrentChannel()->id,
+            'status' => 1,
             'visible_individually' => 1,
-            'limit'                => 10,
-            'sort'                 => 'rand',
-            'order'                => 'rand',
+            'limit' => 10,
+            'sort' => 'rand',
+            'order' => 'rand',
         ];
 
         $cartCategoryProducts = $this->productRepository

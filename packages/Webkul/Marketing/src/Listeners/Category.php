@@ -33,6 +33,10 @@ class Category
      */
     public function afterCreate($category)
     {
+        if (! $category || empty($category->slug)) {
+            return;
+        }
+
         /**
          * Delete category and product url rewrites
          * if already exists for the request path
@@ -42,13 +46,7 @@ class Category
             'request_path' => $category->slug,
         ]);
 
-        foreach ($urlRewrites as $urlRewrite) {
-            Event::dispatch('marketing.search_seo.url_rewrites.delete.before', $urlRewrite->id);
-
-            $this->urlRewriteRepository->delete($urlRewrite->id);
-
-            Event::dispatch('marketing.search_seo.url_rewrites.delete.after', $urlRewrite->id);
-        }
+        $this->deleteUrlRewrites($urlRewrites);
     }
 
     /**
@@ -63,37 +61,64 @@ class Category
 
         $category = $this->categoryRepository->find($id);
 
-        $translations = $category->translate($locale);
-
-        /**
-         * If url key is empty for requested locale then return
-         */
-        if (empty($translations['slug'])) {
+        if (! $category || ! $locale) {
             return;
         }
 
-        $currentURLKey = request()->input($locale.'.slug');
+        $currentURLKey = trim((string) request()->input($locale.'.slug'));
 
-        if ($translations['slug'] === $currentURLKey) {
+        if ($currentURLKey === '') {
+            return;
+        }
+
+        /**
+         * Delete category and product url rewrites claiming the new slug.
+         */
+        $conflictingRewrites = $this->urlRewriteRepository->findWhere([
+            ['entity_type', 'IN', ['category', 'product']],
+            'request_path' => $currentURLKey,
+        ]);
+
+        $this->deleteUrlRewrites($conflictingRewrites);
+
+        $translations = $category->translate($locale);
+
+        /**
+         * If url key is empty for requested locale or unchanged then return
+         */
+        if (
+            empty($translations['slug'])
+            || $translations['slug'] === $currentURLKey
+        ) {
             return;
         }
 
         /**
          * Delete category and product url rewrites
-         * if already exists for the request path
+         * targeting the old slug in this locale, and any duplicate for old request_path.
          */
-        $urlRewrites = $this->urlRewriteRepository->findWhere([
+        $targetRewrites = $this->urlRewriteRepository->findWhere([
             ['entity_type', 'IN', ['category', 'product']],
             'target_path' => $translations['slug'],
             'locale' => $locale,
         ]);
 
-        foreach ($urlRewrites as $urlRewrite) {
-            Event::dispatch('marketing.search_seo.url_rewrites.delete.before', $urlRewrite->id);
+        $this->deleteUrlRewrites($targetRewrites);
 
-            $this->urlRewriteRepository->delete($urlRewrite->id);
+        $existingRewrites = $this->urlRewriteRepository->findWhere([
+            'entity_type' => 'category',
+            'request_path' => $translations['slug'],
+            'locale' => $locale,
+        ]);
 
-            Event::dispatch('marketing.search_seo.url_rewrites.delete.after', $urlRewrite->id);
+        $this->deleteUrlRewrites($existingRewrites);
+
+        $incomingStatus = request()->has('status')
+            ? (bool) request()->input('status')
+            : (bool) $category->status;
+
+        if (! $incomingStatus) {
+            return;
         }
 
         Event::dispatch('marketing.search_seo.url_rewrites.create.before');
@@ -119,25 +144,49 @@ class Category
     {
         $category = $this->categoryRepository->find($id);
 
+        if (! $category) {
+            return;
+        }
+
         /**
          * Delete all url rewrites for all locales
          */
         $translations = $category->getTranslationsArray();
 
         foreach ($translations as $locale => $translation) {
-            $urlRewrites = $this->urlRewriteRepository->findWhere([
+            if (empty($translation['slug'])) {
+                continue;
+            }
+
+            $requestRewrites = $this->urlRewriteRepository->findWhere([
                 'entity_type' => 'category',
                 'request_path' => $translation['slug'],
                 'locale' => $locale,
             ]);
 
-            foreach ($urlRewrites as $urlRewrite) {
-                Event::dispatch('marketing.search_seo.url_rewrites.delete.before', $urlRewrite->id);
+            $this->deleteUrlRewrites($requestRewrites);
 
-                $this->urlRewriteRepository->delete($urlRewrite->id);
+            $targetRewrites = $this->urlRewriteRepository->findWhere([
+                'entity_type' => 'category',
+                'target_path' => $translation['slug'],
+                'locale' => $locale,
+            ]);
 
-                Event::dispatch('marketing.search_seo.url_rewrites.delete.after', $urlRewrite->id);
-            }
+            $this->deleteUrlRewrites($targetRewrites);
+        }
+    }
+
+    /**
+     * Delete a collection of URL rewrites while firing expected lifecycle events.
+     */
+    protected function deleteUrlRewrites($urlRewrites): void
+    {
+        foreach ($urlRewrites as $urlRewrite) {
+            Event::dispatch('marketing.search_seo.url_rewrites.delete.before', $urlRewrite->id);
+
+            $this->urlRewriteRepository->delete($urlRewrite->id);
+
+            Event::dispatch('marketing.search_seo.url_rewrites.delete.after', $urlRewrite->id);
         }
     }
 }

@@ -15,6 +15,21 @@ class URLRewrite
     public function __construct(protected URLRewriteRepository $urlRewriteRepository) {}
 
     /**
+     * After URL Rewrite create
+     *
+     * @param  \Webkul\Marketing\Contracts\URLRewrite  $urlRewrite
+     * @return void
+     */
+    public function afterCreate($urlRewrite)
+    {
+        if (! $urlRewrite?->request_path) {
+            return;
+        }
+
+        ResponseCache::forget('/'.ltrim($urlRewrite->request_path, '/'));
+    }
+
+    /**
      * After URL Rewrite update
      *
      * @param  \Webkul\Marketing\Contracts\URLRewrite  $urlRewrite
@@ -22,7 +37,11 @@ class URLRewrite
      */
     public function afterUpdate($urlRewrite)
     {
-        ResponseCache::forget('/'.$urlRewrite->request_path);
+        if (! $urlRewrite?->request_path) {
+            return;
+        }
+
+        ResponseCache::forget('/'.ltrim($urlRewrite->request_path, '/'));
     }
 
     /**
@@ -35,6 +54,10 @@ class URLRewrite
     {
         $urlRewrite = $this->urlRewriteRepository->find($urlRewriteId);
 
-        ResponseCache::forget('/'.$urlRewrite->request_path);
+        if (! $urlRewrite?->request_path) {
+            return;
+        }
+
+        ResponseCache::forget('/'.ltrim($urlRewrite->request_path, '/'));
     }
 }

@@ -2,7 +2,9 @@
 
 namespace Webkul\Marketing\Listeners;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
+use Webkul\Attribute\Repositories\AttributeRepository;
 use Webkul\Marketing\Repositories\URLRewriteRepository;
 use Webkul\Product\Repositories\ProductRepository;
 
@@ -26,7 +28,32 @@ class Product
     ) {}
 
     /**
-     * After product is updated
+     * After product is created, remove any stale rewrites that claim its URL keys.
+     *
+     * @param  \Webkul\Product\Contracts\Product  $product
+     */
+    public function afterCreate($product): void
+    {
+        if (! $product) {
+            return;
+        }
+
+        $urlKeys = $this->getAllProductUrlKeys($product);
+
+        if (empty($urlKeys)) {
+            return;
+        }
+
+        $urlRewrites = $this->urlRewriteRepository->findWhere([
+            ['entity_type', 'IN', ['category', 'product']],
+            ['request_path', 'IN', $urlKeys],
+        ]);
+
+        $this->deleteUrlRewrites($urlRewrites);
+    }
+
+    /**
+     * Before product is updated
      *
      * @param  int  $id
      * @return void
@@ -41,9 +68,15 @@ class Product
 
         $product = $this->productRepository->find($id);
 
+        if (! $product) {
+            return;
+        }
+
         if (is_array($currentURLKey)) {
             foreach ($currentURLKey as $localeCode => $newURLKey) {
-                if (! $newURLKey) {
+                $newURLKey = trim((string) $newURLKey);
+
+                if ($newURLKey === '') {
                     continue;
                 }
 
@@ -56,12 +89,63 @@ class Product
                 $this->handleURLRewrite($product, $oldURLKey, $newURLKey, $localeCode);
             }
         } else {
-            if ($currentURLKey === $product->url_key) {
+            $currentURLKey = trim((string) $currentURLKey);
+
+            if ($currentURLKey === '') {
                 return;
             }
 
-            $this->handleURLRewrite($product, $product->url_key, $currentURLKey, core()->getRequestedLocaleCode());
+            $localeCode = request()->input('locale') ?: core()->getRequestedLocaleCode();
+            $oldURLKey = $this->getOldURLKey($product, $localeCode);
+
+            if ($currentURLKey === $oldURLKey) {
+                return;
+            }
+
+            $this->handleURLRewrite($product, $oldURLKey, $currentURLKey, $localeCode);
         }
+    }
+
+    /**
+     * After product is updated, ensure rewrites reflect its live status and URL keys.
+     *
+     * @param  \Webkul\Product\Contracts\Product  $product
+     */
+    public function afterUpdate($product): void
+    {
+        if (! $product) {
+            return;
+        }
+
+        $freshProduct = $this->productRepository->find($product->id);
+
+        if (! $freshProduct) {
+            return;
+        }
+
+        $urlKeys = $this->getAllProductUrlKeys($freshProduct);
+
+        if (empty($urlKeys)) {
+            return;
+        }
+
+        if (! $freshProduct->status || ! $freshProduct->visible_individually) {
+            $deadTargetRewrites = $this->urlRewriteRepository->findWhere([
+                'entity_type' => 'product',
+                ['target_path', 'IN', $urlKeys],
+            ]);
+
+            $this->deleteUrlRewrites($deadTargetRewrites);
+
+            return;
+        }
+
+        $conflictingRewrites = $this->urlRewriteRepository->findWhere([
+            ['entity_type', 'IN', ['category', 'product']],
+            ['request_path', 'IN', $urlKeys],
+        ]);
+
+        $this->deleteUrlRewrites($conflictingRewrites);
     }
 
     /**
@@ -73,8 +157,8 @@ class Product
      */
     protected function getOldURLKey($product, $localeCode)
     {
-        $attribute = app(\Webkul\Attribute\Repositories\AttributeRepository::class)->findOneByField('code', 'url_key');
-        
+        $attribute = app(AttributeRepository::class)->findOneByField('code', 'url_key');
+
         if (! $attribute) {
             return null;
         }
@@ -101,42 +185,47 @@ class Product
      */
     protected function handleURLRewrite($product, $oldURLKey, $newURLKey, $localeCode)
     {
-        if (empty($oldURLKey)) {
-            /**
-             * Delete category and product url rewrites
-             * if already exists for the request path
-             */
-            $urlRewrites = $this->urlRewriteRepository->findWhere([
-                ['entity_type', 'IN', ['category', 'product']],
-                'request_path' => $newURLKey,
-            ]);
+        /**
+         * Delete category and product url rewrites
+         * if already exists for the new request path.
+         */
+        $conflictingRewrites = $this->urlRewriteRepository->findWhere([
+            ['entity_type', 'IN', ['category', 'product']],
+            'request_path' => $newURLKey,
+        ]);
 
-            foreach ($urlRewrites as $urlRewrite) {
-                Event::dispatch('marketing.search_seo.url_rewrites.delete.before', $urlRewrite->id);
+        $this->deleteUrlRewrites($conflictingRewrites);
 
-                $this->urlRewriteRepository->delete($urlRewrite->id);
-
-                Event::dispatch('marketing.search_seo.url_rewrites.delete.after', $urlRewrite->id);
-            }
-
+        if (empty($oldURLKey) || $oldURLKey === $newURLKey) {
             return;
         }
 
         /**
          * Delete category and product url rewrites
-         * if already exists for the request path
+         * targeting the old path in this locale, and any duplicate for old request_path.
          */
-        $urlRewrites = $this->urlRewriteRepository->findWhere([
+        $targetRewrites = $this->urlRewriteRepository->findWhere([
             ['entity_type', 'IN', ['category', 'product']],
             'target_path' => $oldURLKey,
+            'locale' => $localeCode,
         ]);
 
-        foreach ($urlRewrites as $urlRewrite) {
-            Event::dispatch('marketing.search_seo.url_rewrites.delete.before', $urlRewrite->id);
+        $this->deleteUrlRewrites($targetRewrites);
 
-            $this->urlRewriteRepository->delete($urlRewrite->id);
+        $existingRewrites = $this->urlRewriteRepository->findWhere([
+            'entity_type' => 'product',
+            'request_path' => $oldURLKey,
+            'locale' => $localeCode,
+        ]);
 
-            Event::dispatch('marketing.search_seo.url_rewrites.delete.after', $urlRewrite->id);
+        $this->deleteUrlRewrites($existingRewrites);
+
+        $incomingStatus = request()->has('status')
+            ? (bool) request()->input('status')
+            : (bool) $product->status;
+
+        if (! $incomingStatus) {
+            return;
         }
 
         Event::dispatch('marketing.search_seo.url_rewrites.create.before');
@@ -144,7 +233,7 @@ class Product
         $urlRewrite = $this->urlRewriteRepository->create([
             'entity_type' => 'product',
             'request_path' => $oldURLKey,
-            'target_path' => $newURLKey ?? '',
+            'target_path' => $newURLKey,
             'locale' => $localeCode,
             'redirect_type' => self::PERMANENT_REDIRECT_CODE,
         ]);
@@ -162,15 +251,60 @@ class Product
     {
         $product = $this->productRepository->find($id);
 
-        /**
-         * Delete product url rewrites
-         * if already exists for the request path
-         */
-        $urlRewrites = $this->urlRewriteRepository->findWhere([
+        if (! $product) {
+            return;
+        }
+
+        $urlKeys = $this->getAllProductUrlKeys($product);
+
+        if (empty($urlKeys)) {
+            return;
+        }
+
+        $requestRewrites = $this->urlRewriteRepository->findWhere([
             'entity_type' => 'product',
-            'request_path' => $product->url_key,
+            ['request_path', 'IN', $urlKeys],
         ]);
 
+        $this->deleteUrlRewrites($requestRewrites);
+
+        $targetRewrites = $this->urlRewriteRepository->findWhere([
+            'entity_type' => 'product',
+            ['target_path', 'IN', $urlKeys],
+        ]);
+
+        $this->deleteUrlRewrites($targetRewrites);
+    }
+
+    /**
+     * Retrieve all non-empty url_key values for the product across all locales and channels.
+     */
+    protected function getAllProductUrlKeys($product): array
+    {
+        $attribute = app(AttributeRepository::class)->findOneByField('code', 'url_key');
+
+        if (! $attribute) {
+            return [];
+        }
+
+        return DB::table('product_attribute_values')
+            ->where('product_id', $product->id)
+            ->where('attribute_id', $attribute->id)
+            ->whereNotNull('text_value')
+            ->where('text_value', '!=', '')
+            ->pluck('text_value')
+            ->map(fn ($value) => trim((string) $value))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Delete a collection of URL rewrites while firing expected lifecycle events.
+     */
+    protected function deleteUrlRewrites($urlRewrites): void
+    {
         foreach ($urlRewrites as $urlRewrite) {
             Event::dispatch('marketing.search_seo.url_rewrites.delete.before', $urlRewrite->id);
 

@@ -4,6 +4,7 @@ namespace App\Mcp\Tools\Catalog;
 
 use App\Mcp\Tools\BaseAdminTool;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\Support\Facades\Event;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
@@ -33,8 +34,14 @@ class DeleteProductTool extends BaseAdminTool
             return $this->errorResponse('Product not found.');
         }
 
+        $deletedId = $product->id;
         $deletedSku = $product->sku;
-        $productRepository->delete($product->id);
+
+        Event::dispatch('catalog.product.delete.before', $deletedId);
+
+        $productRepository->delete($deletedId);
+
+        Event::dispatch('catalog.product.delete.after', $deletedId);
 
         return $this->successResponse("Product [{$deletedSku}] has been deleted successfully.");
     }

@@ -4,6 +4,7 @@ namespace Webkul\FPC\Listeners;
 
 use Spatie\ResponseCache\Facades\ResponseCache;
 use Webkul\Category\Repositories\CategoryRepository;
+use Webkul\Shop\Http\Controllers\SitemapController;
 
 class Category
 {
@@ -22,13 +23,11 @@ class Category
      */
     public function afterUpdate($category)
     {
-        foreach (core()->getAllLocales() as $locale) {
-            if ($categoryTranslation = $category->translate($locale->code)) {
-                ResponseCache::forget($categoryTranslation->slug);
-            }
-
-            ResponseCache::forget($category->translate(core()->getDefaultLocaleCodeFromDefaultChannel())->slug);
+        if (! $category) {
+            return;
         }
+
+        $this->forgetCategoryCache($category);
     }
 
     /**
@@ -41,12 +40,34 @@ class Category
     {
         $category = $this->categoryRepository->find($categoryId);
 
+        if (! $category) {
+            return;
+        }
+
+        $this->forgetCategoryCache($category);
+    }
+
+    /**
+     * Forget response cache for all category slugs and clear sitemap cache.
+     */
+    protected function forgetCategoryCache($category): void
+    {
         foreach (core()->getAllLocales() as $locale) {
             if ($categoryTranslation = $category->translate($locale->code)) {
-                ResponseCache::forget($categoryTranslation->slug);
+                if (! empty($categoryTranslation->slug)) {
+                    ResponseCache::forget($categoryTranslation->slug);
+                }
             }
+        }
 
-            ResponseCache::forget($category->translate(core()->getDefaultLocaleCodeFromDefaultChannel())->slug);
+        $defaultSlug = $category->translate(core()->getDefaultLocaleCodeFromDefaultChannel())?->slug;
+
+        if (! empty($defaultSlug)) {
+            ResponseCache::forget($defaultSlug);
+        }
+
+        if (class_exists(SitemapController::class)) {
+            SitemapController::clearCache();
         }
     }
 }

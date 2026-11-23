@@ -7,8 +7,10 @@ use Illuminate\Http\Request;
 use Spatie\ResponseCache\Middlewares\CacheResponse as BaseCacheResponseMiddleware;
 use Spatie\ResponseCache\ResponseCache as BaseResponseCache;
 use Symfony\Component\HttpFoundation\Response;
+use Webkul\Category\Repositories\CategoryRepository;
 use Webkul\Marketing\Repositories\SearchTermRepository;
 use Webkul\Marketing\Repositories\URLRewriteRepository;
+use Webkul\Product\Repositories\ProductRepository;
 
 class CacheResponse extends BaseCacheResponseMiddleware
 {
@@ -56,29 +58,17 @@ class CacheResponse extends BaseCacheResponseMiddleware
         }
 
         /**
-         * Redirect to the target path if the url rewrite is found.
+         * Redirect to the target path if a safe url rewrite is found.
          */
         if ($request->route()->getName() == 'shop.product_or_category.index') {
-            $slugOrPath = urldecode(trim($request->getPathInfo(), '/'));
+            $slugOrPath = rawurldecode(trim($request->getPathInfo(), '/'));
 
-            $categoryURLRewrite = app(URLRewriteRepository::class)->findOneWhere([
-                'entity_type' => 'category',
-                'request_path' => $slugOrPath,
-                'locale' => app()->getLocale(),
-            ]);
-
-            if ($categoryURLRewrite) {
-                return redirect()->to($categoryURLRewrite->target_path, $categoryURLRewrite->redirect_type);
+            if ($redirect = $this->resolveSafeRewriteRedirect('category', $slugOrPath)) {
+                return $redirect;
             }
 
-            $productURLRewrite = app(URLRewriteRepository::class)->findOneWhere([
-                'entity_type' => 'product',
-                'request_path' => $slugOrPath,
-                'locale' => app()->getLocale(),
-            ]);
-
-            if ($productURLRewrite) {
-                return redirect()->to($productURLRewrite->target_path, $productURLRewrite->redirect_type);
+            if ($redirect = $this->resolveSafeRewriteRedirect('product', $slugOrPath)) {
+                return $redirect;
             }
         }
 
@@ -100,5 +90,67 @@ class CacheResponse extends BaseCacheResponseMiddleware
         }
 
         return parent::handle($request, $next, ...$args);
+    }
+
+    /**
+     * Resolve a URL rewrite for a category or product only when it does not hijack
+     * a live entity and points to an active, non-looping target.
+     */
+    protected function resolveSafeRewriteRedirect(string $entityType, string $slugOrPath): ?Response
+    {
+        $urlRewrite = app(URLRewriteRepository::class)->findOneWhere([
+            'entity_type' => $entityType,
+            'request_path' => $slugOrPath,
+            'locale' => app()->getLocale(),
+        ]);
+
+        if (! $urlRewrite) {
+            return null;
+        }
+
+        $rawTarget = trim((string) $urlRewrite->target_path);
+        $normalizedTarget = trim($rawTarget, '/');
+
+        if ($normalizedTarget === '' || $normalizedTarget === $slugOrPath) {
+            return null;
+        }
+
+        if ($this->isEntitySlugActive('category', $slugOrPath)) {
+            return null;
+        }
+
+        if ($entityType === 'product' && $this->isEntitySlugActive('product', $slugOrPath)) {
+            return null;
+        }
+
+        if (preg_match('#^https?://#i', $rawTarget)) {
+            return redirect()->to($rawTarget, (int) ($urlRewrite->redirect_type ?: 301));
+        }
+
+        if (! $this->isEntitySlugActive($entityType, $normalizedTarget)) {
+            return null;
+        }
+
+        return redirect()->to($urlRewrite->target_path, (int) ($urlRewrite->redirect_type ?: 301));
+    }
+
+    /**
+     * Determine whether an active storefront entity owns the given slug.
+     */
+    protected function isEntitySlugActive(string $entityType, string $slug): bool
+    {
+        if ($entityType === 'category') {
+            $category = app(CategoryRepository::class)->findBySlug($slug);
+
+            return (bool) ($category && $category->status);
+        }
+
+        if ($entityType === 'product') {
+            $product = app(ProductRepository::class)->findBySlug($slug);
+
+            return (bool) ($product && $product->status && $product->visible_individually);
+        }
+
+        return false;
     }
 }

@@ -76,6 +76,10 @@ class EventServiceProvider extends ServiceProvider
             'Webkul\FPC\Listeners\CoreConfig@afterUpdate',
         ],
 
+        'marketing.search_seo.url_rewrites.create.after' => [
+            'Webkul\FPC\Listeners\URLRewrite@afterCreate',
+        ],
+
         'marketing.search_seo.url_rewrites.update.after' => [
             'Webkul\FPC\Listeners\URLRewrite@afterUpdate',
         ],

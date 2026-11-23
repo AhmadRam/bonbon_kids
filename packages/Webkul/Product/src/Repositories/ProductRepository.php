@@ -198,6 +198,8 @@ class ProductRepository extends Repository
         if ($this->searchEngine == 'elastic') {
             $indices = $this->elasticSearchRepository->search([
                 'url_key' => $slug,
+                'status' => 1,
+                'visible_individually' => 1,
             ], [
                 'type' => '',
                 'from' => 0,

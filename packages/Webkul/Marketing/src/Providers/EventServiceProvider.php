@@ -15,8 +15,16 @@ class EventServiceProvider extends ServiceProvider
         /**
          * Product Events
          */
+        'catalog.product.create.after' => [
+            'Webkul\Marketing\Listeners\Product@afterCreate',
+        ],
+
         'catalog.product.update.before' => [
             'Webkul\Marketing\Listeners\Product@beforeUpdate',
+        ],
+
+        'catalog.product.update.after' => [
+            'Webkul\Marketing\Listeners\Product@afterUpdate',
         ],
 
         'catalog.product.delete.before' => [
