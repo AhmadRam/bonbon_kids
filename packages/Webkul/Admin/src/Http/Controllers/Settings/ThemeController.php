@@ -120,6 +120,10 @@ class ThemeController extends Controller
 
         Event::dispatch('theme_customization.update.after', $theme);
 
+        if (session()->has('error')) {
+            return redirect()->back();
+        }
+
         session()->flash('success', trans('admin::app.settings.themes.update-success'));
 
         return redirect()->route('admin.settings.themes.index');
@@ -149,9 +153,15 @@ class ThemeController extends Controller
     {
         $selectedThemeIds = $massUpdateRequest->input('indices');
 
+        $themes = $this->themeCustomizationRepository->findWhereIn('id', $selectedThemeIds);
+
         $this->themeCustomizationRepository->massUpdateStatus([
             'status' => $massUpdateRequest->input('value'),
         ], $selectedThemeIds);
+
+        foreach ($themes as $theme) {
+            Event::dispatch('theme_customization.update.after', $theme);
+        }
 
         return new JsonResponse([
             'message' => trans('admin::app.settings.themes.update-success'),
@@ -163,7 +173,13 @@ class ThemeController extends Controller
         $selectedThemeIds = $massDestroyRequest->input('indices');
 
         foreach ($selectedThemeIds as $themeId) {
+            Event::dispatch('theme_customization.delete.before', $themeId);
+
             $this->themeCustomizationRepository->delete($themeId);
+
+            Storage::deleteDirectory('theme/'.$themeId);
+
+            Event::dispatch('theme_customization.delete.after', $themeId);
         }
 
         return new JsonResponse([

@@ -6,9 +6,14 @@
     @php
         $channels = core()->getAllChannels();
 
-        $currentChannel = core()->getRequestedChannel();
+        $currentChannel = $channels->firstWhere('id', $theme->channel_id) ?? core()->getRequestedChannel();
 
-        $currentLocale = core()->getRequestedLocale();
+        $requestedLocaleCode = request()->query('locale');
+
+        $currentLocale = ($requestedLocaleCode ? $currentChannel->locales->firstWhere('code', $requestedLocaleCode) : null)
+            ?? ($requestedLocaleCode ? core()->getRequestedLocale() : null)
+            ?? $currentChannel->default_locale
+            ?? core()->getRequestedLocale();
     @endphp
 
     <x-admin::form

@@ -2,6 +2,7 @@
 
 namespace Webkul\Theme\Repositories;
 
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -71,19 +72,24 @@ class ThemeCustomizationRepository extends Repository
     /**
      * Upload images
      *
-     * @return void|string
+     * @return void|string|RedirectResponse
      */
     public function uploadImage(array $data, ThemeCustomization $theme)
     {
         $locale = core()->getRequestedLocaleCode();
-
-        if (isset($data[$locale]['deleted_sliders'])) {
-            foreach ($data[$locale]['deleted_sliders'] as $slider) {
-                Storage::delete(str_replace('storage/', '', $slider['image']));
-            }
-        }
+        $isStaticContent = ($data['type'] ?? $theme->type) === 'static_content';
+        $deletedSliders = $data[$locale]['deleted_sliders'] ?? [];
 
         if (! isset($data[$locale]['options'])) {
+            if (! $isStaticContent) {
+                $translatedModel = $theme->translateOrNew($locale);
+                $translatedModel->options = [];
+                $translatedModel->theme_customization_id = $theme->id;
+                $translatedModel->save();
+
+                $this->deleteUnusedSliderImages($deletedSliders, $theme);
+            }
+
             return;
         }
 
@@ -96,7 +102,7 @@ class ThemeCustomizationRepository extends Repository
                     'description' => $image['description'],
                     'title' => $image['title'],
                 ];
-            } elseif ($image['image'] instanceof UploadedFile) {
+            } elseif (($image['image'] ?? null) instanceof UploadedFile) {
                 try {
                     $path = 'theme/'.$theme->id.'/'.Str::random(40).'.webp';
 
@@ -104,28 +110,74 @@ class ThemeCustomizationRepository extends Repository
 
                     Storage::put($path, (string) $encoded);
                 } catch (\Exception $e) {
+                    report($e);
+
                     session()->flash('error', $e->getMessage());
 
                     return redirect()->back();
                 }
 
-                if (($data['type'] ?? '') == 'static_content') {
+                if ($isStaticContent) {
                     return Storage::url($path);
                 }
 
                 $options['images'][] = [
                     'image' => 'storage/'.$path,
-                    'link' => $image['link'],
-                    'title' => $image['title'],
+                    'link' => $image['link'] ?? '',
+                    'title' => $image['title'] ?? '',
                 ];
             } else {
                 $options['images'][] = $image;
             }
         }
 
-        $translatedModel = $theme->translate($locale);
+        $translatedModel = $theme->translateOrNew($locale);
         $translatedModel->options = $options ?? [];
         $translatedModel->theme_customization_id = $theme->id;
         $translatedModel->save();
+
+        $this->deleteUnusedSliderImages($deletedSliders, $theme);
+    }
+
+    /**
+     * Delete removed slider images only after save and only if no other locale still references them.
+     */
+    protected function deleteUnusedSliderImages(array $deletedSliders, ThemeCustomization $theme): void
+    {
+        if (empty($deletedSliders)) {
+            return;
+        }
+
+        $referencedPaths = [];
+
+        foreach ($theme->translations()->get() as $translation) {
+            foreach ($translation->options['images'] ?? [] as $slider) {
+                if (! empty($slider['image']) && is_string($slider['image'])) {
+                    $referencedPaths[] = $this->normalizeStoragePath($slider['image']);
+                }
+            }
+        }
+
+        foreach ($deletedSliders as $slider) {
+            if (empty($slider['image']) || ! is_string($slider['image'])) {
+                continue;
+            }
+
+            $storagePath = $this->normalizeStoragePath($slider['image']);
+
+            if ($storagePath === '' || in_array($storagePath, $referencedPaths, true)) {
+                continue;
+            }
+
+            Storage::delete($storagePath);
+        }
+    }
+
+    /**
+     * Strip a leading storage/ prefix from a stored image path.
+     */
+    protected function normalizeStoragePath(string $path): string
+    {
+        return (string) preg_replace('#^storage/#', '', ltrim($path, '/'));
     }
 }

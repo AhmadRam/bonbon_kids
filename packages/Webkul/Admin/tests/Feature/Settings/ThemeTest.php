@@ -1,7 +1,15 @@
 <?php
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Spatie\ResponseCache\Facades\ResponseCache;
+use Spatie\ResponseCache\ResponseCache as BaseResponseCache;
+use Spatie\ResponseCache\ResponseCacheRepository;
+use Webkul\Core\Models\Locale;
+use Webkul\Customer\Models\Customer;
+use Webkul\FPC\Hasher\DefaultHasher;
 use Webkul\Theme\Models\ThemeCustomization;
+use Webkul\Theme\Repositories\ThemeCustomizationRepository;
 
 use function Pest\Laravel\deleteJson;
 use function Pest\Laravel\get;
@@ -476,4 +484,311 @@ it('should delete the theme', function () {
     $this->assertDatabaseMissing('theme_customization_translations', [
         'theme_customization_id' => $theme->id,
     ]);
+});
+
+it('invalidates homepage response cache across locales, trailing-slash APP_URL, and logged-in customers when updating an image carousel', function () {
+    Storage::fake(config('filesystems.default'));
+
+    config([
+        'responsecache.enabled' => true,
+        'responsecache.cache_store' => 'array',
+        'responsecache.add_cache_time_header' => true,
+        'app.url' => 'https://bonbonkw.com/',
+    ]);
+
+    app()->forgetInstance('responsecache');
+    app()->forgetInstance(BaseResponseCache::class);
+    app()->forgetInstance(ResponseCacheRepository::class);
+    ResponseCache::clearResolvedInstance('responsecache');
+
+    $channel = core()->getCurrentChannel();
+    $arLocale = Locale::firstOrCreate(
+        ['code' => 'ar'],
+        ['name' => 'Arabic', 'direction' => 'rtl']
+    );
+    $channel->locales()->syncWithoutDetaching([$arLocale->id]);
+    $channel->refresh()->load(['locales', 'currencies', 'default_locale']);
+    core()->setCurrentChannel($channel);
+
+    $theme = ThemeCustomization::factory()->create([
+        'type' => ThemeCustomization::IMAGE_CAROUSEL,
+        'status' => 1,
+        'channel_id' => $channel->id,
+        'theme_code' => $channel->theme,
+        'ar' => [
+            'options' => [
+                'images' => [
+                    [
+                        'title' => 'Old AR Slide',
+                        'link' => '/products',
+                        'image' => 'storage/theme/test/old-ar-banner.webp',
+                    ],
+                ],
+            ],
+        ],
+        'en' => [
+            'options' => [
+                'images' => [
+                    [
+                        'title' => 'Old EN Slide',
+                        'link' => '/products',
+                        'image' => 'storage/theme/test/old-en-banner.webp',
+                    ],
+                ],
+            ],
+        ],
+    ]);
+
+    // Prime guest AR homepage cache and verify second hit is served from FPC.
+    get(route('shop.home.index', ['locale' => 'ar']))
+        ->assertOk()
+        ->assertSee('old-ar-banner.webp');
+
+    get(route('shop.home.index', ['locale' => 'ar']))
+        ->assertOk()
+        ->assertHeader('Bagisto-FPC')
+        ->assertSee('old-ar-banner.webp');
+
+    // Prime logged-in customer AR homepage cache.
+    $customer = Customer::factory()->create();
+    $this->actingAs($customer, 'customer');
+
+    get(route('shop.home.index', ['locale' => 'ar']))
+        ->assertOk()
+        ->assertSee('old-ar-banner.webp');
+
+    get(route('shop.home.index', ['locale' => 'ar']))
+        ->assertOk()
+        ->assertHeader('Bagisto-FPC')
+        ->assertSee('old-ar-banner.webp');
+
+    $versionBefore = DefaultHasher::getHomeCacheVersion();
+
+    // Update AR slider while Admin UI is running in EN.
+    $this->loginAsAdmin();
+    app()->setLocale('en');
+
+    $this->withSession(['admin_locale' => 'en'])
+        ->postJson(route('admin.settings.themes.update', $theme->id), [
+            'locale' => 'ar',
+            'type' => ThemeCustomization::IMAGE_CAROUSEL,
+            'name' => $theme->name,
+            'sort_order' => (string) $theme->sort_order,
+            'channel_id' => $channel->id,
+            'theme_code' => $channel->theme,
+            'status' => 'on',
+            'ar' => [
+                'deleted_sliders' => [
+                    ['image' => 'storage/theme/test/old-ar-banner.webp'],
+                ],
+                'options' => [
+                    [
+                        'title' => 'New AR Slide',
+                        'link' => '/products',
+                        'image' => UploadedFile::fake()->image('new-ar-banner.png', 100, 100),
+                    ],
+                ],
+            ],
+        ])
+        ->assertRedirect(route('admin.settings.themes.index'));
+
+    $theme->refresh();
+    $newImageFilename = basename($theme->translate('ar')->options['images'][0]['image']);
+
+    expect(DefaultHasher::getHomeCacheVersion())->not->toBe($versionBefore);
+
+    // Verify logged-in customer immediately receives the new AR banner.
+    get(route('shop.home.index', ['locale' => 'ar']))
+        ->assertOk()
+        ->assertSee($newImageFilename)
+        ->assertDontSee('old-ar-banner.webp');
+
+    // Verify guest immediately receives the new AR banner.
+    auth()->guard('customer')->logout();
+
+    get(route('shop.home.index', ['locale' => 'ar']))
+        ->assertOk()
+        ->assertSee($newImageFilename)
+        ->assertDontSee('old-ar-banner.webp');
+});
+
+it('defaults theme edit page to the channel storefront default locale when locale query is omitted', function () {
+    $channel = core()->getCurrentChannel();
+    $originalDefaultLocaleId = $channel->default_locale_id;
+    $arLocale = Locale::firstOrCreate(
+        ['code' => 'ar'],
+        ['name' => 'Arabic', 'direction' => 'rtl']
+    );
+    $channel->locales()->syncWithoutDetaching([$arLocale->id]);
+    $channel->update(['default_locale_id' => $arLocale->id]);
+    $channel->refresh()->load(['locales', 'currencies', 'default_locale']);
+    core()->setCurrentChannel($channel);
+
+    $theme = ThemeCustomization::factory()->create([
+        'type' => ThemeCustomization::IMAGE_CAROUSEL,
+        'channel_id' => $channel->id,
+        'theme_code' => $channel->theme,
+        'ar' => [
+            'options' => [
+                'images' => [
+                    [
+                        'title' => 'AR Banner',
+                        'link' => '/ar',
+                        'image' => 'storage/theme/test/ar-only-banner.webp',
+                    ],
+                ],
+            ],
+        ],
+        'en' => [
+            'options' => [
+                'images' => [
+                    [
+                        'title' => 'EN Banner',
+                        'link' => '/en',
+                        'image' => 'storage/theme/test/en-only-banner.webp',
+                    ],
+                ],
+            ],
+        ],
+    ]);
+
+    $this->loginAsAdmin();
+    app()->setLocale('en');
+
+    try {
+        $defaultResponse = $this->withSession(['admin_locale' => 'en'])
+            ->get(route('admin.settings.themes.edit', $theme->id))
+            ->assertOk()
+            ->assertSee('ar-only-banner.webp');
+
+        expect($defaultResponse->getContent())->toMatch('/name="locale"\s+value="ar"/');
+
+        $enResponse = $this->withSession(['admin_locale' => 'en'])
+            ->get(route('admin.settings.themes.edit', ['id' => $theme->id, 'locale' => 'en']))
+            ->assertOk()
+            ->assertSee('en-only-banner.webp');
+
+        expect($enResponse->getContent())->toMatch('/name="locale"\s+value="en"/');
+    } finally {
+        $channel->update(['default_locale_id' => $originalDefaultLocaleId]);
+        core()->setCurrentChannel($channel->fresh(['locales', 'currencies', 'default_locale']));
+    }
+});
+
+it('creates missing locale translations, clears emptied sliders, and keeps images still referenced by another locale', function () {
+    $disk = config('filesystems.default');
+    Storage::fake($disk);
+
+    Storage::disk($disk)->put('theme/shared/banner.webp', 'shared-binary');
+
+    $channel = core()->getCurrentChannel();
+    $arLocale = Locale::firstOrCreate(
+        ['code' => 'ar'],
+        ['name' => 'Arabic', 'direction' => 'rtl']
+    );
+    $channel->locales()->syncWithoutDetaching([$arLocale->id]);
+
+    $theme = ThemeCustomization::factory()->create([
+        'type' => ThemeCustomization::IMAGE_CAROUSEL,
+        'channel_id' => $channel->id,
+        'theme_code' => $channel->theme,
+        'en' => [
+            'options' => [
+                'images' => [
+                    [
+                        'title' => 'Shared Banner',
+                        'link' => '/products',
+                        'image' => 'storage/theme/shared/banner.webp',
+                    ],
+                ],
+            ],
+        ],
+    ]);
+
+    expect($theme->translate('ar'))->toBeNull();
+
+    $repository = app(ThemeCustomizationRepository::class);
+
+    // Saving AR for the first time creates the translation and preserves the shared image still used by EN.
+    request()->merge(['locale' => 'ar']);
+
+    $repository->uploadImage([
+        'locale' => 'ar',
+        'type' => ThemeCustomization::IMAGE_CAROUSEL,
+        'ar' => [
+            'deleted_sliders' => [
+                ['image' => 'storage/theme/shared/banner.webp'],
+            ],
+            'options' => [
+                [
+                    'title' => 'AR Brand New',
+                    'link' => '/ar',
+                    'image' => UploadedFile::fake()->image('ar-new.png', 80, 80),
+                ],
+            ],
+        ],
+    ], $theme);
+
+    $theme->refresh();
+    $arTranslation = $theme->translate('ar');
+
+    expect($arTranslation)->not->toBeNull();
+    expect($arTranslation->options['images'] ?? [])->toHaveCount(1);
+    expect(Storage::disk($disk)->exists('theme/shared/banner.webp'))->toBeTrue();
+
+    $arStoredImage = $arTranslation->options['images'][0]['image'];
+    $arRelativePath = preg_replace('#^storage/#', '', $arStoredImage);
+    expect(Storage::disk($disk)->exists($arRelativePath))->toBeTrue();
+
+    // Removing all sliders in AR saves empty options and deletes the AR-only file.
+    $repository->uploadImage([
+        'locale' => 'ar',
+        'type' => ThemeCustomization::IMAGE_CAROUSEL,
+        'ar' => [
+            'deleted_sliders' => [
+                ['image' => $arStoredImage],
+            ],
+        ],
+    ], $theme);
+
+    $theme->refresh();
+
+    expect($theme->translate('ar')->options)->toBe([]);
+    expect(Storage::disk($disk)->exists($arRelativePath))->toBeFalse();
+});
+
+it('invalidates homepage response cache on massUpdate and massDestroy', function () {
+    config([
+        'responsecache.enabled' => true,
+        'responsecache.cache_store' => 'array',
+    ]);
+
+    app()->forgetInstance('responsecache');
+    app()->forgetInstance(BaseResponseCache::class);
+    app()->forgetInstance(ResponseCacheRepository::class);
+    ResponseCache::clearResolvedInstance('responsecache');
+
+    $theme = ThemeCustomization::factory()->create([
+        'type' => ThemeCustomization::IMAGE_CAROUSEL,
+        'status' => 1,
+    ]);
+
+    $this->loginAsAdmin();
+
+    $versionBeforeMassUpdate = DefaultHasher::getHomeCacheVersion();
+
+    postJson(route('admin.settings.themes.mass_update'), [
+        'indices' => [$theme->id],
+        'value' => 0,
+    ])->assertOk();
+
+    $versionAfterMassUpdate = DefaultHasher::getHomeCacheVersion();
+
+    expect($versionAfterMassUpdate)->not->toBe($versionBeforeMassUpdate);
+
+    postJson(route('admin.settings.themes.mass_delete'), [
+        'indices' => [$theme->id],
+    ])->assertOk();
+
+    expect(DefaultHasher::getHomeCacheVersion())->not->toBe($versionAfterMassUpdate);
 });
