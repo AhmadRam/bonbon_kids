@@ -46,6 +46,19 @@ class OrderRepository extends Repository
     {
         $maxAttempts = $maxAttempts ?? core()->getConfigData('sales.order_settings.order_creation.max_retry_attempts') ?? 3;
 
+        if (! empty($data['cart_id'])) {
+            $existingOrder = $this->model->newQuery()->where('cart_id', $data['cart_id'])->first();
+
+            if ($existingOrder) {
+                Log::warning('OrderRepository: prevented duplicate order creation for cart_id '.$data['cart_id'], [
+                    'existing_order_id' => $existingOrder->id,
+                    'attempt' => $attempt,
+                ]);
+
+                return $existingOrder;
+            }
+        }
+
         DB::beginTransaction();
 
         try {

@@ -2,8 +2,10 @@
 
 namespace Webkul\Shop\Http\Controllers\API;
 
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
 use Webkul\CartRule\Exceptions\CouponUsageLimitExceededException;
 use Webkul\Checkout\Facades\Cart;
 use Webkul\Customer\Repositories\CustomerRepository;
@@ -147,55 +149,109 @@ class OnepageController extends APIController
      */
     public function storeOrder()
     {
-        if (Cart::hasError()) {
+        $cart = Cart::getCart();
+
+        if (! $cart) {
             return new JsonResource([
                 'redirect' => true,
                 'redirect_url' => route('shop.checkout.cart.index'),
             ]);
         }
 
-        Cart::collectTotals();
+        $lock = Cache::lock('checkout_order_cart_'.$cart->id, 30);
 
         try {
-            $this->validateOrder();
-        } catch (\Exception $e) {
+            return $lock->block(15, function () use ($cart) {
+                $existingOrder = $this->orderRepository->findOneByField('cart_id', $cart->id);
+
+                if ($existingOrder) {
+                    Cart::deActivateCart();
+
+                    session()->flash('order_id', $existingOrder->id);
+
+                    return new JsonResource([
+                        'redirect' => true,
+                        'redirect_url' => route('shop.checkout.onepage.success'),
+                    ]);
+                }
+
+                $cart->refresh();
+
+                if (! $cart->is_active) {
+                    return new JsonResource([
+                        'redirect' => true,
+                        'redirect_url' => route('shop.checkout.cart.index'),
+                    ]);
+                }
+
+                if (Cart::hasError()) {
+                    return new JsonResource([
+                        'redirect' => true,
+                        'redirect_url' => route('shop.checkout.cart.index'),
+                    ]);
+                }
+
+                Cart::collectTotals();
+
+                try {
+                    $this->validateOrder();
+                } catch (\Exception $e) {
+                    return response()->json([
+                        'message' => $e->getMessage(),
+                    ], 500);
+                }
+
+                $cart = Cart::getCart();
+
+                if ($redirectUrl = Payment::getRedirectUrl($cart)) {
+                    return new JsonResource([
+                        'redirect' => true,
+                        'redirect_url' => $redirectUrl,
+                    ]);
+                }
+
+                $data = (new OrderResource($cart))->jsonSerialize();
+
+                try {
+                    $order = $this->orderRepository->create($data);
+                } catch (CouponUsageLimitExceededException $e) {
+                    cart()->removeCouponCode();
+
+                    Cart::collectTotals();
+
+                    return new JsonResource([
+                        'redirect' => false,
+                        'message' => trans('shop::app.checkout.coupon.usage-limit-exceeded'),
+                    ]);
+                }
+
+                Cart::deActivateCart();
+
+                session()->flash('order_id', $order->id);
+
+                return new JsonResource([
+                    'redirect' => true,
+                    'redirect_url' => route('shop.checkout.onepage.success'),
+                ]);
+            });
+        } catch (LockTimeoutException $e) {
+            $existingOrder = $this->orderRepository->findOneByField('cart_id', $cart->id);
+
+            if ($existingOrder) {
+                Cart::deActivateCart();
+
+                session()->flash('order_id', $existingOrder->id);
+
+                return new JsonResource([
+                    'redirect' => true,
+                    'redirect_url' => route('shop.checkout.onepage.success'),
+                ]);
+            }
+
             return response()->json([
-                'message' => $e->getMessage(),
-            ], 500);
+                'message' => 'جاري معالجة طلبك بالفعل، يرجى الانتظار لحظة.',
+            ], 429);
         }
-
-        $cart = Cart::getCart();
-
-        if ($redirectUrl = Payment::getRedirectUrl($cart)) {
-            return new JsonResource([
-                'redirect' => true,
-                'redirect_url' => $redirectUrl,
-            ]);
-        }
-
-        $data = (new OrderResource($cart))->jsonSerialize();
-
-        try {
-            $order = $this->orderRepository->create($data);
-        } catch (CouponUsageLimitExceededException $e) {
-            cart()->removeCouponCode();
-
-            Cart::collectTotals();
-
-            return new JsonResource([
-                'redirect' => false,
-                'message' => trans('shop::app.checkout.coupon.usage-limit-exceeded'),
-            ]);
-        }
-
-        Cart::deActivateCart();
-
-        session()->flash('order_id', $order->id);
-
-        return new JsonResource([
-            'redirect' => true,
-            'redirect_url' => route('shop.checkout.onepage.success'),
-        ]);
     }
 
     /**

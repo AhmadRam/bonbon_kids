@@ -2,7 +2,11 @@
 
 namespace Webkul\Daftra\Providers;
 
+use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use Webkul\Daftra\Console\Commands\SyncDaftraQuantities;
+use Webkul\Daftra\Jobs\SyncOrderToDaftraJob;
 
 class DaftraServiceProvider extends ServiceProvider
 {
@@ -13,21 +17,25 @@ class DaftraServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        include __DIR__ . '/../Http/routes.php';
+        include __DIR__.'/../Http/routes.php';
 
-        $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'daftra');
+        $this->loadTranslationsFrom(__DIR__.'/../Resources/lang', 'daftra');
 
-        \Illuminate\Support\Facades\Event::listen('checkout.order.save.after', function ($order) {
-            app(\Webkul\Daftra\Listeners\OrderListener::class)->syncOrderToDaftra($order);
+        Event::listen('checkout.order.save.after', function ($order) {
+            if (empty(config('daftra.api_key')) && empty(config('daftra.client_secret'))) {
+                return;
+            }
+
+            SyncOrderToDaftraJob::dispatch($order->id)->afterCommit();
         });
 
         if ($this->app->runningInConsole()) {
             $this->commands([
-                \Webkul\Daftra\Console\Commands\SyncDaftraQuantities::class,
+                SyncDaftraQuantities::class,
             ]);
 
             $this->app->booted(function () {
-                $schedule = $this->app->make(\Illuminate\Console\Scheduling\Schedule::class);
+                $schedule = $this->app->make(Schedule::class);
                 $schedule->command('daftra:sync-quantities')->hourly();
             });
         }
@@ -51,7 +59,7 @@ class DaftraServiceProvider extends ServiceProvider
     protected function registerConfig()
     {
         $this->mergeConfigFrom(
-            dirname(__DIR__) . '/Config/daftra.php',
+            dirname(__DIR__).'/Config/daftra.php',
             'daftra'
         );
     }

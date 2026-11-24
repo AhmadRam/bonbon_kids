@@ -148,6 +148,8 @@
 
                         isPlacingOrder: false,
 
+                        isProcessingCheckout: false,
+
                         currentStep: 'review',
 
                         shippingMethods: null,
@@ -166,10 +168,16 @@
                     this.getCart();
 
                     this.$emitter.on('address-validation-failed', () => {
-                        this.isPlacingOrder = false;
+                        if (! this.isProcessingCheckout) {
+                            this.isPlacingOrder = false;
+                        }
                     });
 
                     this.$emitter.on('address-validated-ready', (data) => {
+                        if (this.isProcessingCheckout) {
+                            return;
+                        }
+
                         this.processCompleteCheckout(data);
                     });
                 },
@@ -210,7 +218,7 @@
                     },
 
                     placeOrder() {
-                        if (this.isPlacingOrder) {
+                        if (this.isPlacingOrder || this.isProcessingCheckout) {
                             return;
                         }
 
@@ -221,6 +229,13 @@
                     },
 
                     async processCompleteCheckout({ params, setErrors }) {
+                        if (this.isProcessingCheckout) {
+                            return;
+                        }
+
+                        this.isProcessingCheckout = true;
+                        this.isPlacingOrder = true;
+
                         try {
                             // 1. Store Address
                             let addressResponse = await this.$axios.post('{{ route('shop.checkout.onepage.addresses.store') }}', params);
@@ -281,12 +296,14 @@
                                 window.location.href = '{{ route('shop.checkout.onepage.success') }}';
                             }
                         } catch (error) {
+                            this.isProcessingCheckout = false;
                             this.isPlacingOrder = false;
 
                             if (error.response?.status === 422 && setErrors && error.response.data?.errors) {
                                 setErrors(error.response.data.errors);
                                 setTimeout(() => {
-                                    const firstError = document.querySelector('.text-red-500, [aria-invalid="true"]');
+                                    const stepsContainer = document.getElementById('steps-container');
+                                    const firstError = stepsContainer ? stepsContainer.querySelector('.text-red-500, [aria-invalid="true"]') : null;
                                     if (firstError) {
                                         firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                     }

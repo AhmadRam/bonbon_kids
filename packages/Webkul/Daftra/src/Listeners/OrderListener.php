@@ -2,13 +2,16 @@
 
 namespace Webkul\Daftra\Listeners;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Webkul\Daftra\Http\Controllers\DaftraController;
+use Webkul\Sales\Contracts\Order;
 use Webkul\Sales\Repositories\OrderRepository;
 
 class OrderListener
 {
     protected $daftraController;
+
     protected $orderRepository;
 
     public function __construct(
@@ -20,18 +23,39 @@ class OrderListener
     }
 
     /**
-     * @param \Webkul\Sales\Contracts\Order $order
+     * @param  Order  $order
      */
     public function syncOrderToDaftra($order)
     {
+        if (empty(config('daftra.api_key')) && empty(config('daftra.client_secret'))) {
+            return;
+        }
+
+        $lock = Cache::lock('daftra_sync_lock_order_'.$order->id, 60);
+
+        if (! $lock->get()) {
+            Log::info("Daftra Sync skipped for order #{$order->id}: sync already in progress.");
+
+            return;
+        }
+
         try {
+            $order->refresh();
+
+            if (! empty($order->daftra_invoice_id)) {
+                Log::info("Skipping Daftra sync for order #{$order->id}: already synced to Invoice #{$order->daftra_invoice_id}");
+
+                return;
+            }
+
             Log::info("Starting Daftra sync for order #{$order->id}");
 
             // 1. Find or Create Client
             $clientId = $this->findOrCreateClient($order);
 
-            if (!$clientId) {
+            if (! $clientId) {
                 Log::error("Daftra Sync Failed: Could not find or create client for order #{$order->id}");
+
                 return;
             }
 
@@ -44,18 +68,18 @@ class OrderListener
                 // Daftra createInvoice allows sending item name directly if product_id is not available.
                 $items[] = $this->daftraController->buildInvoiceItem(
                     $item->name,
-                    "SKU: " . $item->sku,
+                    'SKU: '.$item->sku,
                     $item->price,
                     $item->qty_ordered,
                     null, // product_id in Daftra, we can omit it and Daftra creates a line item
                     $item->discount_amount
                 );
             }
-            
+
             // Add shipping as an item if there is shipping cost
             if ($order->shipping_amount > 0) {
-                 $items[] = $this->daftraController->buildInvoiceItem(
-                    'Shipping - ' . $order->shipping_title,
+                $items[] = $this->daftraController->buildInvoiceItem(
+                    'Shipping - '.$order->shipping_title,
                     'Shipping charge',
                     $order->shipping_amount,
                     1,
@@ -79,19 +103,19 @@ class OrderListener
                     $paymentMethod,
                     $order->grand_total,
                     $order->created_at->format('Y-m-d H:i:s'),
-                    'order_' . $order->id
+                    'order_'.$order->id
                 );
             }
 
             // 4. Build Invoice Data
             $invoiceDetails = [
                 'client_id' => $clientId,
-                'notes' => 'Bagisto Order #' . $order->id,
+                'notes' => 'Bagisto Order #'.$order->id,
                 'discount' => 0,
                 'discount_amount' => 0, // We already applied discount in line items or we can apply it here
                 'store_id' => 2, // Force invoice to deduct from the Sub-warehouse (store 2)
             ];
-            
+
             // Daftra base currency might be different, let's use the order currency
             $invoiceData = $this->daftraController->buildInvoiceData(
                 $invoiceDetails,
@@ -117,11 +141,13 @@ class OrderListener
 
                 Log::info("Successfully synced order #{$order->id} to Daftra Invoice #{$daftraInvoiceId}");
             } else {
-                Log::error("Daftra Sync Failed: Could not get Invoice ID from response", ['response' => $response]);
+                Log::error('Daftra Sync Failed: Could not get Invoice ID from response', ['response' => $response]);
             }
 
         } catch (\Exception $e) {
-            Log::error("Daftra Sync Exception for order #{$order->id}: " . $e->getMessage());
+            Log::error("Daftra Sync Exception for order #{$order->id}: ".$e->getMessage());
+        } finally {
+            $lock->release();
         }
     }
 
@@ -133,7 +159,7 @@ class OrderListener
         $phone = $order->billing_address ? $order->billing_address->phone : '';
 
         // 1. Try to find the client by email if available
-        if (!empty($email)) {
+        if (! empty($email)) {
             $clientId = $this->searchClientByEmail($email);
             if ($clientId) {
                 return $clientId;
@@ -145,20 +171,20 @@ class OrderListener
             $clientsResponse = $this->daftraController->getClients(1, 100);
             if (isset($clientsResponse['data']) && is_array($clientsResponse['data'])) {
                 foreach ($clientsResponse['data'] as $clientItem) {
-                    if (isset($clientItem['Client']) && !empty($email) && strcasecmp($clientItem['Client']['email'] ?? '', $email) === 0) {
+                    if (isset($clientItem['Client']) && ! empty($email) && strcasecmp($clientItem['Client']['email'] ?? '', $email) === 0) {
                         return $clientItem['Client']['id'];
                     }
                 }
             }
         } catch (\Exception $e) {
-            Log::warning("Daftra find client failed: " . $e->getMessage());
+            Log::warning('Daftra find client failed: '.$e->getMessage());
         }
 
         // 3. Client not found, create new
         try {
             $clientData = [
                 'Client' => [
-                    'business_name' => trim($firstName . ' ' . $lastName) ?: 'Customer',
+                    'business_name' => trim($firstName.' '.$lastName) ?: 'Customer',
                     'first_name' => $firstName,
                     'last_name' => $lastName,
                     'email' => $email,
@@ -166,7 +192,7 @@ class OrderListener
                     'address1' => $order->billing_address ? $order->billing_address->address1 : '',
                     'city' => $order->billing_address ? $order->billing_address->city : '',
                     'country_code' => $order->billing_address ? $order->billing_address->country : '',
-                ]
+                ],
             ];
 
             $response = $this->daftraController->createClient($clientData);
@@ -177,13 +203,13 @@ class OrderListener
                 return $response['data']['Client']['id'];
             }
 
-            Log::error("Daftra Create Client returned unexpected format", ['response' => $response]);
+            Log::error('Daftra Create Client returned unexpected format', ['response' => $response]);
 
         } catch (\Exception $e) {
-            Log::error("Daftra Create Client Exception: " . $e->getMessage());
+            Log::error('Daftra Create Client Exception: '.$e->getMessage());
 
             // If creation failed because email already exists, search across multiple pages
-            if (!empty($email) && (str_contains($e->getMessage(), 'متواجد سابقاً') || str_contains($e->getMessage(), 'already exists') || str_contains($e->getMessage(), 'validation_errors'))) {
+            if (! empty($email) && (str_contains($e->getMessage(), 'متواجد سابقاً') || str_contains($e->getMessage(), 'already exists') || str_contains($e->getMessage(), 'validation_errors'))) {
                 $foundId = $this->searchClientAcrossPages($email);
                 if ($foundId) {
                     return $foundId;
@@ -209,7 +235,7 @@ class OrderListener
                 }
             }
         } catch (\Exception $e) {
-            Log::warning("searchClientByEmail failed: " . $e->getMessage());
+            Log::warning('searchClientByEmail failed: '.$e->getMessage());
         }
 
         return null;

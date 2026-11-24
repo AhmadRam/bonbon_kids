@@ -113,6 +113,8 @@
                     useBillingAddressForShipping: true,
 
                     isStoring: false,
+
+                    hasValidatedSubmit: false,
                 }
             },
 
@@ -124,14 +126,20 @@
                 this.$emitter.on('trigger-address-submit', () => {
                     const btn = document.getElementById('checkout-guest-address-submit-btn');
                     if (btn) {
+                        this.hasValidatedSubmit = false;
                         btn.click();
                         setTimeout(() => {
-                            const firstError = document.querySelector('.text-red-500, [aria-invalid="true"]');
+                            if (this.hasValidatedSubmit) {
+                                return;
+                            }
+
+                            const form = btn.closest('form') || document.getElementById('steps-container');
+                            const firstError = form ? form.querySelector('.text-red-500, [aria-invalid="true"]') : null;
                             if (firstError) {
                                 this.$emitter.emit('address-validation-failed');
                                 firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
                             }
-                        }, 50);
+                        }, 100);
                     }
                 });
             },
@@ -142,6 +150,8 @@
 
             methods: {
                 addAddress(params, { setErrors }) {
+                    this.hasValidatedSubmit = true;
+
                     params['billing']['use_for_shipping'] = this.useBillingAddressForShipping;
 
                     this.$emitter.emit('address-validated-ready', {

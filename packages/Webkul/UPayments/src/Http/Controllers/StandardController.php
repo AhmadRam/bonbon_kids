@@ -2,16 +2,20 @@
 
 namespace Webkul\UPayments\Http\Controllers;
 
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Webkul\Checkout\Facades\Cart;
 use Webkul\Checkout\Repositories\CartRepository;
+use Webkul\Sales\Models\Order;
 use Webkul\Sales\Repositories\InvoiceRepository;
 use Webkul\Sales\Repositories\OrderRepository;
 use Webkul\Sales\Repositories\OrderTransactionRepository;
 use Webkul\Sales\Transformers\OrderResource;
+use Webkul\UPayments\Payment\UPayments;
 
 class StandardController extends Controller
 {
@@ -19,10 +23,10 @@ class StandardController extends Controller
      * Map of payment method codes to their gateway source.
      */
     protected array $methodSourceMap = [
-        'upayments_knet'        => 'knet',
-        'upayments_cc'          => 'cc',
-        'upayments_apple_pay'   => 'apple-pay',
-        'upayments_google_pay'  => 'google-pay',
+        'upayments_knet' => 'knet',
+        'upayments_cc' => 'cc',
+        'upayments_apple_pay' => 'apple-pay',
+        'upayments_google_pay' => 'google-pay',
         'upayments_samsung_pay' => 'samsung-pay',
     ];
 
@@ -56,7 +60,7 @@ class StandardController extends Controller
             return redirect()->route('shop.checkout.cart.index');
         }
 
-        $paymentClass = Config::get('payment_methods.' . $method . '.class');
+        $paymentClass = Config::get('payment_methods.'.$method.'.class');
 
         if (! $paymentClass) {
             session()->flash('error', trans('upayments::app.response.invalid-method'));
@@ -64,7 +68,7 @@ class StandardController extends Controller
             return redirect()->route('shop.checkout.cart.index');
         }
 
-        /** @var \Webkul\UPayments\Payment\UPayments $gateway */
+        /** @var UPayments $gateway */
         $gateway = app($paymentClass);
 
         if (! $gateway->hasValidCredentials()) {
@@ -82,19 +86,19 @@ class StandardController extends Controller
 
             Log::info('UPayments: redirect initiated', [
                 'cart_id' => $cart->id,
-                'method'  => $method,
-                'link'    => $link,
+                'method' => $method,
+                'link' => $link,
             ]);
 
             return redirect($link);
         } catch (\Exception $e) {
             Log::error('UPayments: redirect failed', [
                 'cart_id' => $cart->id,
-                'method'  => $method,
-                'error'   => $e->getMessage(),
+                'method' => $method,
+                'error' => $e->getMessage(),
             ]);
 
-            session()->flash('error', trans('upayments::app.response.redirect-failed') . ': ' . $e->getMessage());
+            session()->flash('error', trans('upayments::app.response.redirect-failed').': '.$e->getMessage());
 
             return redirect()->route('shop.checkout.cart.index');
         }
@@ -124,9 +128,9 @@ class StandardController extends Controller
             return redirect()->route('shop.checkout.cart.index');
         }
 
-        $paymentClass = Config::get('payment_methods.' . $method . '.class');
+        $paymentClass = Config::get('payment_methods.'.$method.'.class');
 
-        /** @var \Webkul\UPayments\Payment\UPayments $gateway */
+        /** @var UPayments $gateway */
         $gateway = app($paymentClass);
 
         try {
@@ -135,7 +139,7 @@ class StandardController extends Controller
             if (! $isPaid) {
                 Log::warning('UPayments: payment not captured', [
                     'track_id' => $trackId,
-                    'cart_id'  => $cartId,
+                    'cart_id' => $cartId,
                 ]);
 
                 session()->flash('error', trans('upayments::app.response.payment-failed'));
@@ -143,69 +147,110 @@ class StandardController extends Controller
                 return redirect()->route('shop.checkout.cart.index');
             }
 
-            $cart = $this->cartRepository->find($cartId) ?? Cart::getCart();
+            $lock = Cache::lock('checkout_order_cart_'.$cartId, 30);
 
-            if (! $cart || ! $cart->is_active) {
-                session()->flash('error', trans('upayments::app.response.cart-processed'));
+            return $lock->block(15, function () use ($cartId, $method, $trackId) {
+                $existingOrder = $this->orderRepository->findOneByField('cart_id', $cartId);
 
-                return redirect()->route('shop.checkout.cart.index');
-            }
+                if ($existingOrder) {
+                    if ($cart = $this->cartRepository->find($cartId)) {
+                        Cart::setCart($cart);
+                        Cart::deActivateCart();
+                    }
 
-            Cart::setCart($cart);
-            Cart::collectTotals();
+                    session()->forget(['upayments_cart_id', 'upayments_method']);
 
-            $data = (new OrderResource($cart))->jsonSerialize();
+                    session()->flash('order_id', $existingOrder->id);
 
-            $data['payment']['additional'] = [
-                'upayments_track_id' => $trackId,
-                'upayments_method'   => $method,
-            ];
+                    session()->flash('order', $existingOrder);
 
-            $order = $this->orderRepository->create($data);
+                    session()->flash('success', trans('upayments::app.response.payment-success'));
 
-            $this->orderRepository->update(['status' => 'processing'], $order->id);
+                    return redirect()->route('shop.checkout.onepage.success');
+                }
 
-            Log::info('UPayments: order created', [
-                'order_id' => $order->id,
-                'track_id' => $trackId,
-            ]);
+                $cart = $this->cartRepository->find($cartId) ?? Cart::getCart();
 
-            if ($order->canInvoice()) {
-                $invoice = $this->invoiceRepository->create($this->prepareInvoiceData($order));
+                if (! $cart || ! $cart->is_active) {
+                    session()->flash('error', trans('upayments::app.response.cart-processed'));
 
-                $this->orderTransactionRepository->create([
-                    'transaction_id' => $trackId,
-                    'status'         => 'paid',
-                    'type'           => $order->payment->method,
-                    'payment_method' => $order->payment->method,
-                    'order_id'       => $order->id,
-                    'invoice_id'     => $invoice->id,
-                    'amount'         => $order->base_grand_total,
-                    'data'           => json_encode([
-                        'upayments_track_id' => $trackId,
-                        'upayments_method'   => $method,
-                    ]),
+                    return redirect()->route('shop.checkout.cart.index');
+                }
+
+                Cart::setCart($cart);
+                Cart::collectTotals();
+
+                $data = (new OrderResource($cart))->jsonSerialize();
+
+                $data['payment']['additional'] = [
+                    'upayments_track_id' => $trackId,
+                    'upayments_method' => $method,
+                ];
+
+                $order = $this->orderRepository->create($data);
+
+                $this->orderRepository->update(['status' => 'processing'], $order->id);
+
+                Log::info('UPayments: order created', [
+                    'order_id' => $order->id,
+                    'track_id' => $trackId,
                 ]);
+
+                if ($order->canInvoice()) {
+                    $invoice = $this->invoiceRepository->create($this->prepareInvoiceData($order));
+
+                    $this->orderTransactionRepository->create([
+                        'transaction_id' => $trackId,
+                        'status' => 'paid',
+                        'type' => $order->payment->method,
+                        'payment_method' => $order->payment->method,
+                        'order_id' => $order->id,
+                        'invoice_id' => $invoice->id,
+                        'amount' => $order->base_grand_total,
+                        'data' => json_encode([
+                            'upayments_track_id' => $trackId,
+                            'upayments_method' => $method,
+                        ]),
+                    ]);
+                }
+
+                Cart::deActivateCart();
+
+                session()->forget(['upayments_cart_id', 'upayments_method']);
+
+                session()->flash('order_id', $order->id);
+
+                session()->flash('order', $order);
+
+                session()->flash('success', trans('upayments::app.response.payment-success'));
+
+                return redirect()->route('shop.checkout.onepage.success');
+            });
+        } catch (LockTimeoutException $e) {
+            $existingOrder = $this->orderRepository->findOneByField('cart_id', $cartId);
+
+            if ($existingOrder) {
+                session()->forget(['upayments_cart_id', 'upayments_method']);
+
+                session()->flash('order_id', $existingOrder->id);
+
+                session()->flash('order', $existingOrder);
+
+                session()->flash('success', trans('upayments::app.response.payment-success'));
+
+                return redirect()->route('shop.checkout.onepage.success');
             }
 
-            Cart::deActivateCart();
+            session()->flash('error', trans('upayments::app.response.verification-failed'));
 
-            session()->forget(['upayments_cart_id', 'upayments_method']);
-
-            session()->flash('order_id', $order->id);
-
-            session()->flash('order', $order);
-
-            session()->flash('success', trans('upayments::app.response.payment-success'));
-
-            return redirect()->route('shop.checkout.onepage.success');
+            return redirect()->route('shop.checkout.cart.index');
         } catch (\Exception $e) {
             Log::error('UPayments: callback processing failed', [
                 'track_id' => $trackId,
-                'error'    => $e->getMessage(),
+                'error' => $e->getMessage(),
             ]);
 
-            session()->flash('error', trans('upayments::app.response.verification-failed') . ': ' . $e->getMessage());
+            session()->flash('error', trans('upayments::app.response.verification-failed').': '.$e->getMessage());
 
             return redirect()->route('shop.checkout.cart.index');
         }
@@ -242,7 +287,7 @@ class StandardController extends Controller
     /**
      * Prepare invoice data from order.
      */
-    protected function prepareInvoiceData(\Webkul\Sales\Models\Order $order): array
+    protected function prepareInvoiceData(Order $order): array
     {
         $invoiceData = ['order_id' => $order->id];
 

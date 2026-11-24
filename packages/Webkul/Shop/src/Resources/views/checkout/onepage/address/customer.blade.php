@@ -359,6 +359,8 @@
                     isLoading: true,
 
                     isStoring: false,
+
+                    hasValidatedSubmit: false,
                 }
             },
 
@@ -375,14 +377,20 @@
                 this.$emitter.on('trigger-address-submit', () => {
                     const btn = document.getElementById('checkout-customer-address-submit-btn');
                     if (btn) {
+                        this.hasValidatedSubmit = false;
                         btn.click();
                         setTimeout(() => {
-                            const firstError = document.querySelector('.text-red-500, [aria-invalid="true"]');
+                            if (this.hasValidatedSubmit) {
+                                return;
+                            }
+
+                            const form = btn.closest('form') || document.getElementById('steps-container');
+                            const firstError = form ? form.querySelector('.text-red-500, [aria-invalid="true"]') : null;
                             if (firstError) {
                                 this.$emitter.emit('address-validation-failed');
                                 firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
                             }
-                        }, 50);
+                        }, 100);
                     }
                 });
             },
@@ -570,6 +578,8 @@
                 },
 
                 addAddressToCart(params, { setErrors }) {
+                    this.hasValidatedSubmit = true;
+
                     let payload = {
                         billing: {
                             ...this.getSelectedAddress('billing', params.billing.id),
