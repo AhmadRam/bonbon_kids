@@ -40,7 +40,9 @@ class OrderListener
         }
 
         try {
-            $order->refresh();
+            if (method_exists($order, 'refresh')) {
+                $order->refresh();
+            }
 
             if (! empty($order->daftra_invoice_id)) {
                 Log::info("Skipping Daftra sync for order #{$order->id}: already synced to Invoice #{$order->daftra_invoice_id}");
@@ -60,31 +62,40 @@ class OrderListener
             }
 
             // 2. Build Invoice Items
-            $items = [];
-            foreach ($order->items as $item) {
-                // Determine product ID in Daftra.
-                // Depending on integration, we might need to search Daftra for the product code.
-                // For now, we just pass the SKU as item name or product code if it exists.
-                // Daftra createInvoice allows sending item name directly if product_id is not available.
-                $items[] = $this->daftraController->buildInvoiceItem(
-                    $item->name,
-                    'SKU: '.$item->sku,
-                    $item->price,
-                    $item->qty_ordered,
-                    null, // product_id in Daftra, we can omit it and Daftra creates a line item
-                    $item->discount_amount
-                );
+            $storeId = (int) config('daftra.store_id', 2);
+
+            if (method_exists($order, 'loadMissing')) {
+                $order->loadMissing('items.child');
             }
 
-            // Add shipping as an item if there is shipping cost
-            if ($order->shipping_amount > 0) {
+            $items = [];
+            $rowNumber = 1;
+
+            foreach ($order->items as $item) {
+                $sku = trim((string) ($item->child?->sku ?: $item->sku));
+                $daftraProduct = $this->daftraController->findProductBySku($sku, $item->name);
+
+                if (! $daftraProduct) {
+                    Log::warning("Daftra Sync: Product not found in Daftra for order #{$order->id}, SKU: {$sku}, Name: {$item->name}");
+                }
+
+                $productCode = ($daftraProduct && $daftraProduct['product_code'] !== '')
+                    ? $daftraProduct['product_code']
+                    : $sku;
+
+                $productName = ($daftraProduct && $daftraProduct['name'] !== '')
+                    ? $daftraProduct['name']
+                    : $item->name;
+
                 $items[] = $this->daftraController->buildInvoiceItem(
-                    'Shipping - '.$order->shipping_title,
-                    'Shipping charge',
-                    $order->shipping_amount,
-                    1,
-                    null,
-                    0
+                    (string) $rowNumber++,
+                    $productCode,
+                    $item->price,
+                    $item->qty_ordered,
+                    $daftraProduct['id'] ?? null,
+                    $item->discount_amount,
+                    $storeId,
+                    $productName
                 );
             }
 
@@ -113,7 +124,9 @@ class OrderListener
                 'notes' => 'Bagisto Order #'.$order->id,
                 'discount' => 0,
                 'discount_amount' => 0, // We already applied discount in line items or we can apply it here
-                'store_id' => 2, // Force invoice to deduct from the Sub-warehouse (store 2)
+                'store_id' => $storeId, // Force invoice to deduct from the Sub-warehouse (store 2)
+                'invoice_layout_id' => (int) config('daftra.invoice_layout_id', 13),
+                'shipping_amount' => $order->shipping_amount > 0 ? (float) $order->shipping_amount : null,
             ];
 
             // Daftra base currency might be different, let's use the order currency

@@ -81,7 +81,7 @@ class CreateDaftraOrderRefund implements ShouldQueue
             return;
         }
 
-        $refund = Refund::with(['items', 'inventory_source'])->find($this->refund_id);
+        $refund = Refund::with(['items.child', 'items.order_item.child', 'inventory_source'])->find($this->refund_id);
 
         if (! $refund) {
             Log::error("Daftra Refund: Refund not found with ID: {$this->refund_id}");
@@ -155,7 +155,7 @@ class CreateDaftraOrderRefund implements ShouldQueue
      */
     protected function buildRefundDetails($order, $refund, $address, $clientId): array
     {
-        $storeId = $refund->inventory_source_id ? (int) $refund->inventory_source_id : 1;
+        $storeId = $refund->inventory_source_id ? (int) $refund->inventory_source_id : (int) config('daftra.store_id', 2);
 
         return [
             'no' => $this->generateRefundNumber($order, $refund),
@@ -164,6 +164,8 @@ class CreateDaftraOrderRefund implements ShouldQueue
             'client_id' => $clientId,
             'subscription_id' => $order->daftra_invoice_id ? (int) $order->daftra_invoice_id : null,
             'store_id' => $storeId,
+            'invoice_layout_id' => (int) config('daftra.invoice_layout_id', 13),
+            'shipping_amount' => $refund->base_shipping_amount > 0 ? (float) $refund->base_shipping_amount : null,
             'client_business_name' => '',
             'client_first_name' => $address->first_name,
             'client_last_name' => $address->last_name,
@@ -189,41 +191,42 @@ class CreateDaftraOrderRefund implements ShouldQueue
     protected function buildRefundItems($order, $refund): array
     {
         $items = [];
-        $storeId = $refund->inventory_source_id ? (int) $refund->inventory_source_id : 1;
+        $storeId = $refund->inventory_source_id ? (int) $refund->inventory_source_id : (int) config('daftra.store_id', 2);
+        $rowNumber = 1;
 
         foreach ($refund->items as $refundItem) {
+            if ((float) $refundItem->qty <= 0) {
+                continue;
+            }
+
+            $sku = trim((string) ($refundItem->child?->sku ?: $refundItem->order_item?->child?->sku ?: $refundItem->sku));
+            $daftraProduct = $this->daftraService->findProductBySku($sku, $refundItem->name);
+
+            if (! $daftraProduct) {
+                Log::warning("Daftra Refund: Product not found in Daftra for order #{$order->id}, refund #{$refund->id}, SKU: {$sku}, Name: {$refundItem->name}");
+            }
+
+            $productCode = ($daftraProduct && $daftraProduct['product_code'] !== '')
+                ? $daftraProduct['product_code']
+                : $sku;
+
+            $productName = ($daftraProduct && $daftraProduct['name'] !== '')
+                ? $daftraProduct['name']
+                : $refundItem->name;
+
             $items[] = [
                 'invoice_id' => $order->daftra_invoice_id,
-                'item' => $refundItem->name,
-                'description' => 'SKU: '.$refundItem->sku,
+                'item' => (string) $rowNumber++,
+                'description' => $productCode,
                 'unit_price' => (float) $refundItem->base_price,
                 'quantity' => (float) $refundItem->qty,
-                'product_id' => null,
+                'product_id' => $daftraProduct['id'] ?? null,
                 'discount' => (float) ($refundItem->base_discount_amount ?? 0),
                 'discount_type' => 2,
                 'tax1' => (float) ($refundItem->base_tax_amount ?? 0),
                 'tax2' => 0,
                 'store_id' => $storeId,
-                'col_3' => null,
-                'col_4' => null,
-                'col_5' => null,
-            ];
-        }
-
-        if ($refund->base_shipping_amount > 0) {
-            $items[] = [
-                'invoice_id' => $order->daftra_invoice_id,
-                'item' => 'مرتجع رسوم الشحن',
-                'description' => 'مرتجع رسوم الشحن',
-                'unit_price' => (float) $refund->base_shipping_amount,
-                'quantity' => 1,
-                'product_id' => null,
-                'discount' => 0,
-                'discount_type' => 2,
-                'tax1' => 0,
-                'tax2' => 0,
-                'store_id' => $storeId,
-                'col_3' => null,
+                'col_3' => $productName,
                 'col_4' => null,
                 'col_5' => null,
             ];
@@ -232,8 +235,8 @@ class CreateDaftraOrderRefund implements ShouldQueue
         if ($refund->base_adjustment_refund > 0) {
             $items[] = [
                 'invoice_id' => $order->daftra_invoice_id,
-                'item' => 'استرداد تعديل',
-                'description' => 'استرداد مبلغ تعديل',
+                'item' => (string) $rowNumber++,
+                'description' => '',
                 'unit_price' => (float) $refund->base_adjustment_refund,
                 'quantity' => 1,
                 'product_id' => null,
@@ -242,7 +245,7 @@ class CreateDaftraOrderRefund implements ShouldQueue
                 'tax1' => 0,
                 'tax2' => 0,
                 'store_id' => $storeId,
-                'col_3' => null,
+                'col_3' => 'استرداد تعديل',
                 'col_4' => null,
                 'col_5' => null,
             ];
@@ -436,7 +439,7 @@ class CreateDaftraOrderRefund implements ShouldQueue
         } catch (Exception $e) {
             Log::error('Daftra Create Client Exception: '.$e->getMessage());
 
-            if (!empty($email) && (str_contains($e->getMessage(), 'متواجد سابقاً') || str_contains($e->getMessage(), 'already exists') || str_contains($e->getMessage(), 'validation_errors'))) {
+            if (! empty($email) && (str_contains($e->getMessage(), 'متواجد سابقاً') || str_contains($e->getMessage(), 'already exists') || str_contains($e->getMessage(), 'validation_errors'))) {
                 for ($page = 1; $page <= 10; $page++) {
                     try {
                         $pagedResp = $this->daftraService->getClients($page, 100);

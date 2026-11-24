@@ -1,4 +1,5 @@
 <?php
+
 return [
     'base_url' => env('DAFTRA_BASE_URL', 'https://elkasaby2024.daftra.com'),
     'client_id' => env('DAFTRA_CLIENT_ID', '1'),
@@ -6,4 +7,6 @@ return [
     'username' => env('DAFTRA_USERNAME'),
     'password' => env('DAFTRA_PASSWORD'),
     'api_key' => env('DAFTRA_API_KEY'),
+    'store_id' => (int) env('DAFTRA_STORE_ID', 2),
+    'invoice_layout_id' => (int) env('DAFTRA_INVOICE_LAYOUT_ID', 13),
 ];
