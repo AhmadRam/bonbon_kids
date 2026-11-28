@@ -39,16 +39,16 @@
         th,
         td,
         h5 {
-            font-size: 12px;
+            font-size: 11.5px;
             color: #000;
             line-height: 1.45;
         }
 
         .container {
-            width: 210mm;
-            max-width: 100%;
-            margin: 16px auto;
-            padding: 10mm;
+            width: 100%;
+            max-width: 190mm;
+            margin: 20px auto;
+            padding: 14mm 16mm;
             background-color: #fff;
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
             display: block;
@@ -86,14 +86,14 @@
         .table thead th {
             font-weight: 700;
             border: 1px solid #d3d3d3;
-            padding: 7px 10px;
+            padding: 6px 8px;
             background: #005aff0d;
             word-wrap: break-word;
             overflow-wrap: break-word;
         }
 
         .table tbody td {
-            padding: 7px 10px;
+            padding: 6px 8px;
             color: #222;
             vertical-align: top;
             border: 1px solid #d3d3d3;
@@ -103,8 +103,8 @@
 
         .table.items thead th,
         .table.items tbody td {
-            padding: 6px 5px;
-            font-size: 11px;
+            padding: 5px 4px;
+            font-size: 10.5px;
         }
 
         .table.items tbody td:first-child {
@@ -127,7 +127,7 @@
         }
 
         .sale-summary {
-            width: 280px;
+            width: 245px;
             max-width: 100%;
             border-collapse: collapse;
             background-color: #005aff0d;
@@ -136,8 +136,8 @@
         }
 
         .sale-summary tr td {
-            padding: 5px 10px;
-            font-size: 12px;
+            padding: 5px 8px;
+            font-size: 11.5px;
         }
 
         .sale-summary tr td:last-child {
@@ -198,7 +198,7 @@
         }
 
         .header .image img {
-            max-height: 64px;
+            max-height: 58px;
             max-width: 100%;
             width: auto;
             height: auto;
@@ -256,8 +256,8 @@
             .container {
                 width: 100% !important;
                 max-width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
+                margin: 0 auto !important;
+                padding: 10mm 12mm !important;
                 box-shadow: none !important;
                 border: none !important;
             }
@@ -316,10 +316,10 @@
 
             <!-- Invoice Title in the Middle -->
             <div class="header-title">
-                <span style="font-size: 24px; color: #0041FF; font-weight: 800; letter-spacing: 1px;">
+                <span style="font-size: 22px; color: #0041FF; font-weight: 800; letter-spacing: 1px;">
                     {{ strtoupper(__('shop::app.customers.account.orders.invoice-pdf.invoice')) }}
                 </span><br>
-                <span style="color: #111; font-size: 15px; font-weight: 700; margin-top: 4px; display: inline-block;">
+                <span style="color: #111; font-size: 14px; font-weight: 700; margin-top: 4px; display: inline-block;">
                     {{ $storeName }}
                 </span>
             </div>
@@ -617,7 +617,7 @@
                         </td>
                     </tr>
 
-                    <tr style="font-weight: 700; font-size: 14px;">
+                    <tr style="font-weight: 700; font-size: 13px;">
                         <td style="color: #0041FF;">@lang('shop::app.customers.account.orders.invoice-pdf.grand-total')</td>
                         <td>-</td>
                         <td style="text-align: {{ $isRtl ? 'left' : 'right' }}; color: #0041FF;">{!! core()->formatBasePrice($invoice->order->base_grand_total, true) !!}</td>
