@@ -631,6 +631,123 @@ it('CheckoutStockVerifier rejects checkout when Sharq stock is insufficient and 
     expect($failOpenVerifier->verifyCart($cart))->toBe([]);
 });
 
+it('skips Daftra invoice sync when order has already been canceled or closed', function () {
+    Http::fake();
+
+    $order = new class
+    {
+        public int $id = 99;
+
+        public string $status = 'canceled';
+
+        public ?int $daftra_invoice_id = null;
+
+        public function refresh(): self
+        {
+            return $this;
+        }
+    };
+
+    $listener = new OrderListener(
+        app(DaftraController::class),
+        Mockery::mock(OrderRepository::class)
+    );
+
+    $listener->syncOrderToDaftra($order);
+
+    Http::assertNothingSent();
+});
+
+it('deletes Daftra invoice and clears daftra_invoice_id when order is canceled, and preserves invoice ID if delete fails', function () {
+    Http::fake([
+        'https://z-toys.daftra.com/api2/invoices/625.json' => Http::response(['result' => 'successful'], 200),
+        'https://z-toys.daftra.com/api2/invoices/999.json' => Http::response(['result' => 'failed'], 500),
+    ]);
+
+    $listener = new OrderListener(
+        app(DaftraController::class),
+        Mockery::mock(OrderRepository::class)
+    );
+
+    $orderSuccess = new class
+    {
+        public int $id = 26;
+
+        public ?int $daftra_invoice_id = 625;
+
+        public array $items = [];
+
+        public bool $saved = false;
+
+        public function __construct()
+        {
+            $this->items = [
+                (object) ['child' => null, 'sku' => '6161-366'],
+            ];
+        }
+
+        public function refresh(): self
+        {
+            return $this;
+        }
+
+        public function loadMissing(string ...$relations): self
+        {
+            return $this;
+        }
+
+        public function save(): bool
+        {
+            $this->saved = true;
+
+            return true;
+        }
+    };
+
+    $listener->cancelOrderInDaftra($orderSuccess);
+
+    expect($orderSuccess->daftra_invoice_id)->toBeNull();
+    expect($orderSuccess->saved)->toBeTrue();
+
+    Http::assertSent(function (Request $request) {
+        return $request->method() === 'DELETE'
+            && str_contains($request->url(), '/api2/invoices/625.json');
+    });
+
+    $orderFail = new class
+    {
+        public int $id = 27;
+
+        public ?int $daftra_invoice_id = 999;
+
+        public array $items = [];
+
+        public bool $saved = false;
+
+        public function refresh(): self
+        {
+            return $this;
+        }
+
+        public function loadMissing(string ...$relations): self
+        {
+            return $this;
+        }
+
+        public function save(): bool
+        {
+            $this->saved = true;
+
+            return true;
+        }
+    };
+
+    $listener->cancelOrderInDaftra($orderFail);
+
+    expect($orderFail->daftra_invoice_id)->toBe(999);
+    expect($orderFail->saved)->toBeFalse();
+});
+
 it('syncs refund to daftra with resolved product_id, custom layout columns, and header shipping_amount', function () {
     Http::fake(function (Request $request) {
         $url = $request->url();

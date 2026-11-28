@@ -41,6 +41,14 @@ class ShipmentItemRepository extends Repository
             $orderedInventory->update(['qty' => $orderedQty]);
         }
 
+        $order = $data['shipment']->order ?? null;
+
+        if (! empty($order?->daftra_invoice_id)) {
+            Event::dispatch('catalog.product.update.after', $data['product']);
+
+            return;
+        }
+
         $inventory = $data['product']->inventories()
             ->where('vendor_id', $data['vendor_id'])
             ->where('inventory_source_id', $data['shipment']->inventory_source_id)

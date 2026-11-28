@@ -8,6 +8,7 @@ use Illuminate\Support\ServiceProvider;
 use Webkul\Daftra\Console\Commands\SyncDaftraQuantities;
 use Webkul\Daftra\Console\Commands\SyncMissingDaftraOrders;
 use Webkul\Daftra\Http\Controllers\DaftraController;
+use Webkul\Daftra\Jobs\CancelDaftraOrderJob;
 use Webkul\Daftra\Jobs\SyncOrderToDaftraJob;
 
 class DaftraServiceProvider extends ServiceProvider
@@ -47,6 +48,30 @@ class DaftraServiceProvider extends ServiceProvider
             }
 
             SyncOrderToDaftraJob::dispatch($order->id)->afterCommit();
+        });
+
+        Event::listen('sales.order.cancel.after', function ($order) {
+            if (empty(config('daftra.api_key')) && empty(config('daftra.client_secret'))) {
+                return;
+            }
+
+            $canceledSkus = [];
+            if (method_exists($order, 'loadMissing')) {
+                $order->loadMissing('items.child');
+            }
+
+            foreach ($order->items ?? [] as $item) {
+                $sku = trim((string) ($item->child?->sku ?: $item->sku));
+                if ($sku !== '') {
+                    $canceledSkus[] = $sku;
+                }
+            }
+
+            if (! empty($canceledSkus)) {
+                app(DaftraController::class)->forgetLiveStockCache($canceledSkus);
+            }
+
+            CancelDaftraOrderJob::dispatch($order->id)->afterCommit();
         });
 
         if ($this->app->runningInConsole()) {

@@ -183,10 +183,9 @@ class CheckoutStockVerifier
             ->leftJoin('order_items as parent_items', 'parent_items.id', '=', 'order_items.parent_id')
             ->whereNull('orders.daftra_invoice_id')
             ->whereNotIn('orders.status', ['canceled', 'closed'])
-            ->where('orders.created_at', '>=', now()->subDay())
             ->whereIn('order_items.product_id', $productIds)
             ->where('order_items.type', '!=', 'configurable')
-            ->selectRaw('order_items.product_id, SUM(GREATEST(0, COALESCE(order_items.qty_ordered, parent_items.qty_ordered, 0) - COALESCE(order_items.qty_canceled, 0) - COALESCE(order_items.qty_refunded, 0))) as pending_qty')
+            ->selectRaw('order_items.product_id, SUM(GREATEST(0, COALESCE(order_items.qty_ordered, parent_items.qty_ordered, 0) - COALESCE(order_items.qty_shipped, 0) - COALESCE(order_items.qty_canceled, 0) - COALESCE(order_items.qty_refunded, 0))) as pending_qty')
             ->groupBy('order_items.product_id')
             ->get();
 

@@ -18,6 +18,6 @@ class Order
             ->pluck('product_id')
             ->toArray();
 
-        UpdateCreateInventoryIndexJob::dispatch($productIds);
+        UpdateCreateInventoryIndexJob::dispatchSync($productIds);
     }
 }

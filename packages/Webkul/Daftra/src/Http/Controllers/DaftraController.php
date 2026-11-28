@@ -608,6 +608,25 @@ class DaftraController extends Controller
     }
 
     /**
+     * حذف فاتورة في دفترة واسترجاع الكمية للمخزن تلقائياً
+     */
+    public function deleteInvoice(int $invoiceId)
+    {
+        try {
+            $response = Http::withHeaders($this->getHeaders())
+                ->delete($this->baseUrl."/api2/invoices/{$invoiceId}.json");
+
+            if ($response->successful()) {
+                return $response->json();
+            }
+
+            throw new Exception('فشل في حذف الفاتورة: '.$response->body());
+        } catch (Exception $e) {
+            throw new Exception('خطأ في حذف الفاتورة: '.$e->getMessage());
+        }
+    }
+
+    /**
      * احصل على الفواتير
      */
     public function getInvoices($page = 1, $limit = 100)

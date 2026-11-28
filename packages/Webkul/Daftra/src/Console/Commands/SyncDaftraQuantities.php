@@ -68,7 +68,6 @@ class SyncDaftraQuantities extends Command
 
             $skuToProduct = $this->loadNormalizedProductMap();
             $existingInventories = $this->loadExistingInventories();
-            $pendingUnsyncedByProduct = $this->loadPendingUnsyncedQuantities();
 
             $manageStockAttrId = DB::table('attributes')
                 ->where('code', 'manage_stock')
@@ -81,6 +80,12 @@ class SyncDaftraQuantities extends Command
 
             $changedProductIds = [];
             $sharqStockChanged = false;
+
+            $reconciledOrdered = $this->reconcileOrderedInventories();
+            foreach ($reconciledOrdered as $pid) {
+                $changedProductIds[] = $pid;
+                $sharqStockChanged = true;
+            }
 
             do {
                 $this->info("Fetching page {$page} from Daftra...");
@@ -148,11 +153,6 @@ class SyncDaftraQuantities extends Command
                                 $inventories[$primaryStoreId] = $stockBalance;
                             }
                         }
-                    }
-
-                    $pendingQty = (float) ($pendingUnsyncedByProduct[$productId] ?? 0.0);
-                    if ($pendingQty > 0 && array_key_exists($primaryStoreId, $inventories)) {
-                        $inventories[$primaryStoreId] = max(0.0, $inventories[$primaryStoreId] - $pendingQty);
                     }
 
                     $existingForProduct = $existingInventories[$productId] ?? [];
@@ -311,33 +311,71 @@ class SyncDaftraQuantities extends Command
     }
 
     /**
-     * Sum ordered quantities from recent orders not yet synced to Daftra,
-     * so periodic sync never overwrites a freshly deducted order before Daftra receives it.
+     * Reconcile product_ordered_inventories so it holds ONLY unshipped quantities
+     * from active Bagisto orders not yet synced to Daftra (daftra_invoice_id IS NULL).
+     * Returns product IDs whose ordered inventory changed.
      *
-     * @return array<int, float>
+     * @return array<int, int>
      */
-    protected function loadPendingUnsyncedQuantities(): array
+    protected function reconcileOrderedInventories(): array
     {
         $rows = DB::table('order_items')
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
             ->leftJoin('order_items as parent_items', 'parent_items.id', '=', 'order_items.parent_id')
             ->whereNull('orders.daftra_invoice_id')
             ->whereNotIn('orders.status', ['canceled', 'closed'])
-            ->where('orders.created_at', '>=', now()->subDay())
             ->whereNotNull('order_items.product_id')
+            ->whereNotNull('orders.channel_id')
             ->where('order_items.type', '!=', 'configurable')
-            ->selectRaw('order_items.product_id, SUM(GREATEST(0, COALESCE(order_items.qty_ordered, parent_items.qty_ordered, 0) - COALESCE(order_items.qty_canceled, 0) - COALESCE(order_items.qty_refunded, 0))) as pending_qty')
-            ->groupBy('order_items.product_id')
+            ->selectRaw('order_items.product_id, orders.channel_id, SUM(GREATEST(0, COALESCE(order_items.qty_ordered, parent_items.qty_ordered, 0) - COALESCE(order_items.qty_shipped, 0) - COALESCE(order_items.qty_canceled, 0) - COALESCE(order_items.qty_refunded, 0))) as pending_qty')
+            ->groupBy('order_items.product_id', 'orders.channel_id')
             ->get();
 
-        $map = [];
+        $expected = [];
         foreach ($rows as $row) {
-            $qty = (float) $row->pending_qty;
+            $qty = (int) round((float) $row->pending_qty);
             if ($qty > 0) {
-                $map[(int) $row->product_id] = $qty;
+                $expected[(int) $row->product_id.'|'.(int) $row->channel_id] = [
+                    'product_id' => (int) $row->product_id,
+                    'channel_id' => (int) $row->channel_id,
+                    'qty' => $qty,
+                ];
             }
         }
 
-        return $map;
+        $existingRows = DB::table('product_ordered_inventories')
+            ->select('id', 'product_id', 'channel_id', 'qty')
+            ->get();
+
+        $changedProductIds = [];
+        $seenKeys = [];
+
+        foreach ($existingRows as $existing) {
+            $key = (int) $existing->product_id.'|'.(int) $existing->channel_id;
+            $seenKeys[$key] = true;
+            $targetQty = $expected[$key]['qty'] ?? 0;
+
+            if ((int) $existing->qty !== $targetQty) {
+                DB::table('product_ordered_inventories')
+                    ->where('id', $existing->id)
+                    ->update(['qty' => $targetQty]);
+
+                $changedProductIds[] = (int) $existing->product_id;
+            }
+        }
+
+        foreach ($expected as $key => $item) {
+            if (! isset($seenKeys[$key])) {
+                DB::table('product_ordered_inventories')->insert([
+                    'product_id' => $item['product_id'],
+                    'channel_id' => $item['channel_id'],
+                    'qty' => $item['qty'],
+                ]);
+
+                $changedProductIds[] = $item['product_id'];
+            }
+        }
+
+        return array_values(array_unique($changedProductIds));
     }
 }
