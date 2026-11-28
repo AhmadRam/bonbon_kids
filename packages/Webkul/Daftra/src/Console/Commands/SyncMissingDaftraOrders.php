@@ -40,7 +40,7 @@ class SyncMissingDaftraOrders extends Command
         $sinceDays = max(1, (int) $this->option('since'));
         $dryRun = (bool) $this->option('dry-run');
 
-        $query = Order::with(['items.child', 'payment', 'billing_address'])
+        $query = Order::with(['items.child', 'payment', 'addresses'])
             ->whereNull('daftra_invoice_id')
             ->whereNotIn('status', ['canceled', 'closed'])
             ->orderBy('id');
