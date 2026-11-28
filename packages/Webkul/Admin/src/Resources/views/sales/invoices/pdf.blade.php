@@ -1,12 +1,13 @@
 @php
     $isRtl = in_array(app()->getLocale(), ['ar', 'he', 'fa']);
 @endphp
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html dir="{{ $isRtl ? 'rtl' : 'ltr' }}" lang="{{ app()->getLocale() }}">
 
 <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="Cache-control" content="no-cache">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>@lang('shop::app.customers.account.orders.invoice-pdf.invoice') #{{ $invoice->increment_id ?? $invoice->id }}</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,61 +15,100 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 
     <style type="text/css">
+        @page {
+            size: A4 portrait;
+            margin: 10mm;
+        }
+
         * {
             font-family: 'Cairo', 'DejaVu Sans', 'Segoe UI', Tahoma, sans-serif;
             box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            max-width: 100%;
+            background-color: #f3f4f6;
+            -webkit-text-size-adjust: 100%;
         }
 
         body,
         th,
         td,
         h5 {
-            font-size: 13px;
+            font-size: 12px;
             color: #000;
-        }
-
-        body {
-            background-color: #fff;
-            margin: 0;
-            padding: 0;
+            line-height: 1.45;
         }
 
         .container {
-            padding: 20px;
-            max-width: 960px;
-            margin: 0 auto;
+            width: 210mm;
+            max-width: 100%;
+            margin: 16px auto;
+            padding: 10mm;
+            background-color: #fff;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
             display: block;
         }
 
         .invoice-summary {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .table {
-            margin: 20px 0px 0px 0px;
+            margin: 14px 0 0 0;
+            width: 100%;
+            max-width: 100%;
             border-spacing: 0px;
         }
 
         .table table {
             width: 100%;
+            max-width: 100%;
             border-collapse: collapse;
             text-align: start;
             table-layout: fixed;
             border: 1px solid #d3d3d3;
         }
 
+        .table thead {
+            display: table-header-group;
+        }
+
+        .table tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
         .table thead th {
             font-weight: 700;
             border: 1px solid #d3d3d3;
-            padding: 8px 12px;
+            padding: 7px 10px;
             background: #005aff0d;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .table tbody td {
-            padding: 8px 10px;
+            padding: 7px 10px;
             color: #222;
             vertical-align: top;
             border: 1px solid #d3d3d3;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .table.items thead th,
+        .table.items tbody td {
+            padding: 6px 5px;
+            font-size: 11px;
+        }
+
+        .table.items tbody td:first-child {
+            overflow-wrap: anywhere;
         }
 
         .table tbody td p,
@@ -77,17 +117,32 @@
             color: #000;
         }
 
+        .sale-summary-wrapper {
+            display: flex;
+            justify-content: flex-end;
+            width: 100%;
+            margin-top: 16px;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
         .sale-summary {
-            margin-top: 20px;
-            float: {{ $isRtl ? 'left' : 'right' }};
+            width: 280px;
+            max-width: 100%;
+            border-collapse: collapse;
             background-color: #005aff0d;
             border: 1px solid #d3d3d3;
             border-radius: 4px;
-            min-width: 320px;
         }
 
         .sale-summary tr td {
-            padding: 5px 12px;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .sale-summary tr td:last-child {
+            white-space: nowrap;
+            text-align: {{ $isRtl ? 'left' : 'right' }};
         }
 
         .sale-summary tr.bold {
@@ -117,31 +172,62 @@
             text-align: start;
         }
 
-        .col-6 {
-            width: 48%;
-            display: inline-block;
-            vertical-align: top;
-        }
-
         .table-header {
             color: #0041FF;
             text-align: start;
         }
 
         .header {
-            padding: 10px 0px 20px 0px;
+            padding: 4px 0 14px 0;
             width: 100%;
             position: relative;
             border-bottom: solid 2px #0041FF;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 12px;
             direction: ltr;
+        }
+
+        .header .image {
+            flex: 0 0 auto;
+            max-width: 28%;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .header .image img {
+            max-height: 64px;
+            max-width: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+        }
+
+        .header .header-title {
+            flex: 1 1 auto;
+            min-width: 0;
+            text-align: center;
+            direction: {{ $isRtl ? 'rtl' : 'ltr' }};
         }
 
         .row {
             display: flex;
             justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            width: 100%;
+            padding: 12px 0;
+        }
+
+        .col-6 {
+            flex: 1 1 50%;
+            width: 50%;
+            min-width: 0;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .item-options {
@@ -155,26 +241,37 @@
                 display: none !important;
             }
 
+            html,
             body {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
                 background: #fff !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
+                overflow: visible !important;
             }
 
             .container {
+                width: 100% !important;
                 max-width: 100% !important;
+                margin: 0 !important;
                 padding: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
             }
 
-            @page {
-                size: A4;
-                margin: 10mm 15mm;
+            .table,
+            .table table {
+                width: 100% !important;
+                max-width: 100% !important;
             }
         }
     </style>
 </head>
 
-<body style="background-image: none; background-color: #fff;">
+<body>
     @php
         $invoiceLogo = core()->getConfigData('sales.invoice_settings.pdf_print_outs.logo');
         $channelLogo = core()->getCurrentChannel()->logo;
@@ -214,27 +311,27 @@
         <div class="header">
             <!-- Left Logo -->
             <div class="image">
-                <img style="max-height: 80px; width: auto;" src="{{ $logoSrc }}" alt="Bonbon Logo" />
+                <img src="{{ $logoSrc }}" alt="Bonbon Logo" />
             </div>
 
             <!-- Invoice Title in the Middle -->
-            <div style="text-align: center; direction: {{ $isRtl ? 'rtl' : 'ltr' }};">
-                <span style="font-size: 30px; color: #0041FF; font-weight: 800; letter-spacing: 1px;">
+            <div class="header-title">
+                <span style="font-size: 24px; color: #0041FF; font-weight: 800; letter-spacing: 1px;">
                     {{ strtoupper(__('shop::app.customers.account.orders.invoice-pdf.invoice')) }}
                 </span><br>
-                <span style="color: #111; font-size: 17px; font-weight: 700; margin-top: 4px; display: inline-block;">
+                <span style="color: #111; font-size: 15px; font-weight: 700; margin-top: 4px; display: inline-block;">
                     {{ $storeName }}
                 </span>
             </div>
 
             <!-- Right Logo -->
             <div class="image">
-                <img style="max-height: 80px; width: auto;" src="{{ $companyLogoSrc }}" alt="Omar Al-Sharrah Logo" />
+                <img src="{{ $companyLogoSrc }}" alt="Omar Al-Sharrah Logo" />
             </div>
         </div>
 
         <!-- Order & Merchant Information -->
-        <div class="row" style="padding: 15px 0px;">
+        <div class="row">
             <!-- Left Details -->
             <div class="col-6">
                 <div class="merchant-details">
@@ -284,7 +381,7 @@
             </div>
 
             <!-- Right Details -->
-            <div class="col-6" style="{{ $isRtl ? 'padding-right: 40px;' : 'padding-left: 40px;' }}">
+            <div class="col-6">
                 <div class="merchant-details">
                     <div>
                         <span class="label">@lang('shop::app.customers.account.orders.invoice-pdf.order-id'): </span>
@@ -439,13 +536,13 @@
                 <table>
                     <thead>
                         <tr>
-                            <th class="text-center table-header" style="width: 15%;">@lang('shop::app.customers.account.orders.invoice-pdf.sku')</th>
-                            <th class="align-start table-header" style="width: 35%;">@lang('shop::app.customers.account.orders.invoice-pdf.product-name')</th>
+                            <th class="text-center table-header" style="width: 13%;">@lang('shop::app.customers.account.orders.invoice-pdf.sku')</th>
+                            <th class="align-start table-header" style="width: 31%;">@lang('shop::app.customers.account.orders.invoice-pdf.product-name')</th>
                             <th class="text-center table-header" style="width: 12%;">@lang('shop::app.customers.account.orders.invoice-pdf.price')</th>
                             <th class="text-center table-header" style="width: 8%;">@lang('shop::app.customers.account.orders.invoice-pdf.qty')</th>
-                            <th class="text-center table-header" style="width: 10%;">@lang('shop::app.customers.account.orders.invoice-pdf.subtotal')</th>
-                            <th class="text-center table-header" style="width: 10%;">@lang('shop::app.customers.account.orders.invoice-pdf.discount')</th>
-                            <th class="text-center table-header" style="width: 10%;">@lang('shop::app.customers.account.orders.invoice-pdf.grand-total')</th>
+                            <th class="text-center table-header" style="width: 12%;">@lang('shop::app.customers.account.orders.invoice-pdf.subtotal')</th>
+                            <th class="text-center table-header" style="width: 11%;">@lang('shop::app.customers.account.orders.invoice-pdf.discount')</th>
+                            <th class="text-center table-header" style="width: 13%;">@lang('shop::app.customers.account.orders.invoice-pdf.grand-total')</th>
                         </tr>
                     </thead>
 
@@ -482,57 +579,67 @@
             </div>
 
             <!-- Sale Summary -->
-            <table class="sale-summary">
-                <tr>
-                    <td>@lang('shop::app.customers.account.orders.invoice-pdf.subtotal')</td>
-                    <td style="width: 10px;">-</td>
-                    <td style="text-align: {{ $isRtl ? 'left' : 'right' }};">{!! core()->formatBasePrice($invoice->base_sub_total, true) !!}</td>
-                </tr>
-
-                @if ((float) $invoice->base_shipping_amount > 0)
+            <div class="sale-summary-wrapper">
+                <table class="sale-summary">
                     <tr>
-                        <td>@lang('shop::app.customers.account.orders.invoice-pdf.shipping-handling')</td>
-                        <td>-</td>
-                        <td style="text-align: {{ $isRtl ? 'left' : 'right' }};">{!! core()->formatBasePrice($invoice->base_shipping_amount, true) !!}</td>
+                        <td>@lang('shop::app.customers.account.orders.invoice-pdf.subtotal')</td>
+                        <td style="width: 10px;">-</td>
+                        <td style="text-align: {{ $isRtl ? 'left' : 'right' }};">{!! core()->formatBasePrice($invoice->base_sub_total, true) !!}</td>
                     </tr>
-                @endif
 
-                @if ((float) $invoice->base_tax_amount > 0)
+                    @if ((float) $invoice->base_shipping_amount > 0)
+                        <tr>
+                            <td>@lang('shop::app.customers.account.orders.invoice-pdf.shipping-handling')</td>
+                            <td>-</td>
+                            <td style="text-align: {{ $isRtl ? 'left' : 'right' }};">{!! core()->formatBasePrice($invoice->base_shipping_amount, true) !!}</td>
+                        </tr>
+                    @endif
+
+                    @if ((float) $invoice->base_tax_amount > 0)
+                        <tr>
+                            <td>@lang('shop::app.customers.account.orders.invoice-pdf.tax')</td>
+                            <td>-</td>
+                            <td style="text-align: {{ $isRtl ? 'left' : 'right' }};">{!! core()->formatBasePrice($invoice->base_tax_amount, true) !!}</td>
+                        </tr>
+                    @endif
+
+                    @if ((float) $invoice->base_discount_amount > 0)
+                        <tr>
+                            <td>@lang('shop::app.customers.account.orders.invoice-pdf.discount')</td>
+                            <td>-</td>
+                            <td style="text-align: {{ $isRtl ? 'left' : 'right' }};">{!! core()->formatBasePrice($invoice->base_discount_amount, true) !!}</td>
+                        </tr>
+                    @endif
+
                     <tr>
-                        <td>@lang('shop::app.customers.account.orders.invoice-pdf.tax')</td>
-                        <td>-</td>
-                        <td style="text-align: {{ $isRtl ? 'left' : 'right' }};">{!! core()->formatBasePrice($invoice->base_tax_amount, true) !!}</td>
+                        <td colspan="3" style="padding: 0;">
+                            <hr style="border: 0; border-top: 1px solid #d3d3d3; margin: 4px 0;">
+                        </td>
                     </tr>
-                @endif
 
-                @if ((float) $invoice->base_discount_amount > 0)
-                    <tr>
-                        <td>@lang('shop::app.customers.account.orders.invoice-pdf.discount')</td>
+                    <tr style="font-weight: 700; font-size: 14px;">
+                        <td style="color: #0041FF;">@lang('shop::app.customers.account.orders.invoice-pdf.grand-total')</td>
                         <td>-</td>
-                        <td style="text-align: {{ $isRtl ? 'left' : 'right' }};">{!! core()->formatBasePrice($invoice->base_discount_amount, true) !!}</td>
+                        <td style="text-align: {{ $isRtl ? 'left' : 'right' }}; color: #0041FF;">{!! core()->formatBasePrice($invoice->order->base_grand_total, true) !!}</td>
                     </tr>
-                @endif
-
-                <tr>
-                    <td colspan="3" style="padding: 0;">
-                        <hr style="border: 0; border-top: 1px solid #d3d3d3; margin: 4px 0;">
-                    </td>
-                </tr>
-
-                <tr style="font-weight: 700; font-size: 14px;">
-                    <td style="color: #0041FF;">@lang('shop::app.customers.account.orders.invoice-pdf.grand-total')</td>
-                    <td>-</td>
-                    <td style="text-align: {{ $isRtl ? 'left' : 'right' }}; color: #0041FF;">{!! core()->formatBasePrice($invoice->order->base_grand_total, true) !!}</td>
-                </tr>
-            </table>
+                </table>
+            </div>
         </div>
     </div>
 
     <!-- Automatic Print Trigger on Page Load -->
     <script type="text/javascript">
-        window.onload = function () {
-            window.print();
-        };
+        window.addEventListener('load', function () {
+            var triggerPrint = function () {
+                window.print();
+            };
+
+            if (document.fonts && document.fonts.ready) {
+                document.fonts.ready.then(triggerPrint).catch(triggerPrint);
+            } else {
+                triggerPrint();
+            }
+        });
     </script>
 </body>
 
