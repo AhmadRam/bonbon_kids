@@ -4,9 +4,11 @@ namespace Webkul\Daftra\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Spatie\ResponseCache\Facades\ResponseCache;
 use Webkul\Daftra\Http\Controllers\DaftraController;
+use Webkul\Product\Helpers\Indexers\Inventory;
 use Webkul\Product\Repositories\ProductInventoryRepository;
 use Webkul\Product\Repositories\ProductRepository;
 
@@ -17,7 +19,7 @@ class SyncDaftraQuantities extends Command
      *
      * @var string
      */
-    protected $signature = 'daftra:sync-quantities';
+    protected $signature = 'daftra:sync-quantities {--full : Force a full inventory reindex and response cache clear}';
 
     /**
      * The console command description.
@@ -27,43 +29,22 @@ class SyncDaftraQuantities extends Command
     protected $description = 'Sync product quantities from Daftra to Bagisto';
 
     /**
-     * @var DaftraController
-     */
-    protected $daftraController;
-
-    /**
-     * @var ProductRepository
-     */
-    protected $productRepository;
-
-    /**
-     * @var ProductInventoryRepository
-     */
-    protected $productInventoryRepository;
-
-    /**
      * Create a new command instance.
      *
      * @return void
      */
     public function __construct(
-        DaftraController $daftraController,
-        ProductRepository $productRepository,
-        ProductInventoryRepository $productInventoryRepository
+        protected DaftraController $daftraController,
+        protected ProductRepository $productRepository,
+        protected ProductInventoryRepository $productInventoryRepository
     ) {
         parent::__construct();
-
-        $this->daftraController = $daftraController;
-        $this->productRepository = $productRepository;
-        $this->productInventoryRepository = $productInventoryRepository;
     }
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
-    public function handle()
+    public function handle(): int
     {
         $this->info('Starting Daftra quantity sync...');
 
@@ -71,16 +52,39 @@ class SyncDaftraQuantities extends Command
             $page = 1;
             $limit = 100;
             $updatedCount = 0;
+            $unchangedCount = 0;
             $notFoundCount = 0;
+            $forceFull = (bool) $this->option('full');
+            $primaryStoreId = (int) config('daftra.store_id', 2);
 
-            // Default Inventory Source in Bagisto is usually ID 1.
-            // You can also get it dynamically via Webkul\Inventory\Repositories\InventorySourceRepository
-            $defaultInventorySourceId = 1;
+            $validSourceIds = DB::table('inventory_sources')
+                ->pluck('id')
+                ->map(fn ($id) => (int) $id)
+                ->all();
+
+            if (empty($validSourceIds)) {
+                $validSourceIds = [1];
+            }
+
+            $skuToProduct = $this->loadNormalizedProductMap();
+            $existingInventories = $this->loadExistingInventories();
+            $pendingUnsyncedByProduct = $this->loadPendingUnsyncedQuantities();
+
+            $manageStockAttrId = DB::table('attributes')
+                ->where('code', 'manage_stock')
+                ->value('id');
+
+            $defaultChannelCode = core()->getDefaultChannelCode();
+            $existingManageStock = $manageStockAttrId
+                ? $this->loadExistingManageStock((int) $manageStockAttrId, $defaultChannelCode)
+                : [];
+
+            $changedProductIds = [];
+            $sharqStockChanged = false;
 
             do {
                 $this->info("Fetching page {$page} from Daftra...");
 
-                // Get products from Daftra API
                 $daftraProductsData = $this->daftraController->getProducts($page, $limit);
 
                 if (empty($daftraProductsData)) {
@@ -88,99 +92,120 @@ class SyncDaftraQuantities extends Command
                 }
 
                 foreach ($daftraProductsData as $daftraItem) {
-                    // Daftra returns an array of items, inside each item there is a 'Product' key
-                    if (! isset($daftraItem['Product'])) {
+                    if (! isset($daftraItem['Product']) || ! is_array($daftraItem['Product'])) {
                         continue;
                     }
 
                     $daftraProduct = $daftraItem['Product'];
                     $productCode = $daftraProduct['product_code'] ?? null;
-                    $stockBalance = $daftraProduct['stock_balance'] ?? 0;
+                    $barcode = $daftraProduct['barcode'] ?? null;
+                    $candidates = $this->daftraController->extractSkuCandidates($productCode, $barcode);
 
-                    // If product_code is empty, try barcode, or skip
-                    $sku = $productCode ?: ($daftraProduct['barcode'] ?? null);
-
-                    if (empty($sku)) {
+                    if (empty($candidates)) {
                         continue;
                     }
 
-                    $stockBalance = max(0, (float) $stockBalance);
+                    $matchedProduct = null;
+                    foreach ($candidates as $candidate) {
+                        $normalized = mb_strtolower($candidate);
+                        if (isset($skuToProduct[$normalized])) {
+                            $matchedProduct = $skuToProduct[$normalized];
+                            break;
+                        }
+                    }
 
-                    // Find product in Bagisto by SKU
-                    $bagistoProduct = $this->productRepository->findOneWhere(['sku' => $sku]);
+                    if (! $matchedProduct) {
+                        $notFoundCount++;
 
-                    if ($bagistoProduct) {
-                        // Update Inventory
-                        // Map Daftra store_id to Bagisto inventory_source_id
-                        $inventories = [];
+                        continue;
+                    }
 
+                    $productId = $matchedProduct['id'];
+                    $bagistoSku = $matchedProduct['sku'];
+
+                    if (! empty($daftraProduct['id'])) {
+                        Cache::put(
+                            $this->daftraController->skuToDaftraIdCacheKey($bagistoSku),
+                            (int) $daftraProduct['id'],
+                            86400
+                        );
+                    }
+
+                    $inventories = array_fill_keys($validSourceIds, 0.0);
+                    $isDeactivated = (int) ($daftraProduct['deactivate'] ?? 0) === 1;
+
+                    if (! $isDeactivated) {
                         if (! empty($daftraProduct['ProductStock']) && is_array($daftraProduct['ProductStock'])) {
                             foreach ($daftraProduct['ProductStock'] as $stockItem) {
-                                $storeId = $stockItem['store_id'] ?? null;
-                                $balance = max(0, (float) ($stockItem['balance'] ?? 0));
-                                if ($storeId) {
-                                    $inventories[$storeId] = $balance;
+                                $storeId = (int) ($stockItem['store_id'] ?? 0);
+                                if ($storeId > 0 && in_array($storeId, $validSourceIds, true)) {
+                                    $inventories[$storeId] = max(0.0, (float) ($stockItem['balance'] ?? 0));
                                 }
                             }
                         } else {
-                            // Fallback if ProductStock is not available for some reason
-                            $inventories[$defaultInventorySourceId] = $stockBalance;
+                            $stockBalance = max(0.0, (float) ($daftraProduct['stock_balance'] ?? 0));
+                            if ($stockBalance > 0 && in_array($primaryStoreId, $validSourceIds, true)) {
+                                $inventories[$primaryStoreId] = $stockBalance;
+                            }
                         }
+                    }
 
-                        // Bagisto 2.x saveInventories structure: ['inventories' => [inventory_source_id => qty]]
-                        $inventoryData = [
-                            'inventories' => $inventories,
-                        ];
+                    $pendingQty = (float) ($pendingUnsyncedByProduct[$productId] ?? 0.0);
+                    if ($pendingQty > 0 && array_key_exists($primaryStoreId, $inventories)) {
+                        $inventories[$primaryStoreId] = max(0.0, $inventories[$primaryStoreId] - $pendingQty);
+                    }
 
-                        $this->productInventoryRepository->saveInventories($inventoryData, $bagistoProduct);
+                    $existingForProduct = $existingInventories[$productId] ?? [];
+                    $hasInventoryChange = $forceFull;
 
-                        // Ensure manage_stock attribute is set to 1 for this product
-                        $manageStockAttr = DB::table('attributes')->where('code', 'manage_stock')->first();
-                        if ($manageStockAttr) {
-                            DB::table('product_attribute_values')->updateOrInsert([
-                                'product_id' => $bagistoProduct->id,
-                                'attribute_id' => $manageStockAttr->id,
-                                'channel' => core()->getDefaultChannelCode(),
-                            ], [
-                                'boolean_value' => 1,
-                            ]);
+                    foreach ($inventories as $sourceId => $newQty) {
+                        $oldQty = $existingForProduct[$sourceId] ?? null;
+                        if ($oldQty === null || abs((float) $oldQty - (float) $newQty) > 0.0001) {
+                            $hasInventoryChange = true;
+                            if ($sourceId === $primaryStoreId) {
+                                $sharqStockChanged = true;
+                            }
                         }
+                    }
 
-                        // Update Price
-                        // Price sync is temporarily disabled as requested, but logic is kept for future use.
-                        /*
-                        $price = $daftraProduct['price1'] ?? $daftraProduct['price'] ?? null;
-                        if ($price !== null && (float)$price > 0) {
-                            // Update the product's price attribute
-                            // We need to update it through the repository
-                            $this->productRepository->update([
-                                'price' => (float) $price,
-                            ], $bagistoProduct->id);
-                        }
-                        */
+                    if ($hasInventoryChange) {
+                        $this->productInventoryRepository->saveInventories(
+                            ['inventories' => $inventories],
+                            (object) ['id' => $productId]
+                        );
 
-                        $this->line("Updated SKU: {$sku} | New Qty: {$stockBalance}");
+                        $existingInventories[$productId] = $inventories;
+                        $changedProductIds[] = $productId;
+                        $this->line("Updated SKU: {$bagistoSku} | Store {$primaryStoreId} Qty: ".($inventories[$primaryStoreId] ?? 0));
                         $updatedCount++;
                     } else {
-                        $notFoundCount++;
+                        $unchangedCount++;
+                    }
+
+                    if ($manageStockAttrId && ($existingManageStock[$productId] ?? null) !== 1) {
+                        DB::table('product_attribute_values')->updateOrInsert([
+                            'product_id' => $productId,
+                            'attribute_id' => $manageStockAttrId,
+                            'channel' => $defaultChannelCode,
+                        ], [
+                            'boolean_value' => 1,
+                        ]);
+                        $existingManageStock[$productId] = 1;
                     }
                 }
 
-                // If less than limit returned, we're on the last page
                 if (count($daftraProductsData) < $limit) {
                     break;
                 }
 
                 $page++;
-
             } while (true);
 
             $this->info('Sync completed successfully!');
-            $this->info("Updated Products: {$updatedCount}");
-            $this->info("Not Found in Bagisto: {$notFoundCount}");
+            $this->info("Updated Products: {$updatedCount} | Unchanged: {$unchangedCount} | Not Found in Bagisto: {$notFoundCount}");
 
-            if ($updatedCount > 0) {
-                $this->info('Reindexing inventory indices...');
+            if ($forceFull) {
+                $this->info('Running full inventory reindex...');
                 Artisan::call('indexer:index', [
                     '--type' => ['inventory'],
                     '--mode' => ['full'],
@@ -189,14 +214,130 @@ class SyncDaftraQuantities extends Command
                 if (class_exists(ResponseCache::class)) {
                     ResponseCache::clear();
                 }
+            } elseif (! empty($changedProductIds)) {
+                $this->info('Reindexing changed inventory indices ('.count(array_unique($changedProductIds)).' products)...');
+                $inventoryIndexer = app(Inventory::class);
+
+                foreach (array_chunk(array_unique($changedProductIds), 100) as $chunkIds) {
+                    $products = $this->productRepository
+                        ->with(['inventories', 'ordered_inventories', 'inventory_indices'])
+                        ->whereIn('type', ['simple', 'virtual'])
+                        ->findWhereIn('id', $chunkIds);
+
+                    if ($products->isNotEmpty()) {
+                        $inventoryIndexer->reindexBatch($products);
+                    }
+                }
+
+                if ($sharqStockChanged && class_exists(ResponseCache::class)) {
+                    ResponseCache::clear();
+                }
             }
 
             return 0;
-
         } catch (\Exception $e) {
             $this->error('Error during sync: '.$e->getMessage());
 
             return 1;
         }
+    }
+
+    /**
+     * Load all Bagisto products keyed by normalized lowercase SKU.
+     *
+     * @return array<string, array{id: int, sku: string}>
+     */
+    protected function loadNormalizedProductMap(): array
+    {
+        $map = [];
+
+        $rows = DB::table('products')->select('id', 'sku')->get();
+        foreach ($rows as $row) {
+            $sku = trim((string) $row->sku);
+            if ($sku === '') {
+                continue;
+            }
+
+            $map[mb_strtolower($sku)] = [
+                'id' => (int) $row->id,
+                'sku' => $sku,
+            ];
+        }
+
+        return $map;
+    }
+
+    /**
+     * Load existing product_inventories grouped by [product_id][inventory_source_id] => qty.
+     *
+     * @return array<int, array<int, float>>
+     */
+    protected function loadExistingInventories(): array
+    {
+        $map = [];
+
+        $rows = DB::table('product_inventories')
+            ->where('vendor_id', 0)
+            ->select('product_id', 'inventory_source_id', 'qty')
+            ->get();
+
+        foreach ($rows as $row) {
+            $map[(int) $row->product_id][(int) $row->inventory_source_id] = (float) $row->qty;
+        }
+
+        return $map;
+    }
+
+    /**
+     * Load existing manage_stock boolean values keyed by product_id.
+     *
+     * @return array<int, int>
+     */
+    protected function loadExistingManageStock(int $attributeId, string $channel): array
+    {
+        $map = [];
+
+        $rows = DB::table('product_attribute_values')
+            ->where('attribute_id', $attributeId)
+            ->where('channel', $channel)
+            ->select('product_id', 'boolean_value')
+            ->get();
+
+        foreach ($rows as $row) {
+            $map[(int) $row->product_id] = (int) $row->boolean_value;
+        }
+
+        return $map;
+    }
+
+    /**
+     * Sum ordered quantities from recent orders not yet synced to Daftra,
+     * so periodic sync never overwrites a freshly deducted order before Daftra receives it.
+     *
+     * @return array<int, float>
+     */
+    protected function loadPendingUnsyncedQuantities(): array
+    {
+        $rows = DB::table('order_items')
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->leftJoin('order_items as parent_items', 'parent_items.id', '=', 'order_items.parent_id')
+            ->whereNull('orders.daftra_invoice_id')
+            ->whereNotIn('orders.status', ['canceled', 'closed'])
+            ->where('orders.created_at', '>=', now()->subDay())
+            ->whereNotNull('order_items.product_id')
+            ->where('order_items.type', '!=', 'configurable')
+            ->selectRaw('order_items.product_id, SUM(GREATEST(0, COALESCE(order_items.qty_ordered, parent_items.qty_ordered, 0) - COALESCE(order_items.qty_canceled, 0) - COALESCE(order_items.qty_refunded, 0))) as pending_qty')
+            ->groupBy('order_items.product_id')
+            ->get();
+
+        $map = [];
+        foreach ($rows as $row) {
+            $qty = (float) $row->pending_qty;
+            if ($qty > 0) {
+                $map[(int) $row->product_id] = $qty;
+            }
+        }
+
+        return $map;
     }
 }

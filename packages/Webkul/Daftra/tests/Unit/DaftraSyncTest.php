@@ -3,9 +3,14 @@
 use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Webkul\Daftra\Http\Controllers\DaftraController;
 use Webkul\Daftra\Listeners\OrderListener;
+use Webkul\Daftra\Services\CheckoutStockVerifier;
+use Webkul\Product\Helpers\Indexers\Inventory;
+use Webkul\Product\Repositories\ProductInventoryRepository;
+use Webkul\Product\Repositories\ProductRepository;
 use Webkul\Sales\Jobs\CreateDaftraOrderRefund;
 use Webkul\Sales\Repositories\OrderRepository;
 
@@ -307,6 +312,323 @@ it('syncs order to daftra with resolved product_id, custom layout columns, and h
             && $items[1]['product_id'] === null
             && $items[1]['store_id'] === 2;
     });
+});
+
+it('syncs upayments_knet order with empty Payment in invoice and records invoice_payments separately without failing invoice sync on payment error', function () {
+    Http::fake(function (Request $request) {
+        $url = $request->url();
+
+        if (str_contains($url, '/api2/clients.json')) {
+            return Http::response([
+                'data' => [
+                    [
+                        'Client' => [
+                            'id' => '88',
+                            'email' => 'knet@example.com',
+                        ],
+                    ],
+                ],
+            ], 200);
+        }
+
+        if (str_contains($url, '/api2/products.json')) {
+            return Http::response([
+                'data' => [
+                    [
+                        'Product' => [
+                            'id' => '1319',
+                            'product_code' => '6161-366',
+                            'name' => 'دمية الموضة',
+                        ],
+                    ],
+                ],
+            ], 200);
+        }
+
+        if (str_contains($url, '/api2/invoices') && $request->method() === 'POST') {
+            return Http::response(['id' => 777], 200);
+        }
+
+        if (str_contains($url, '/api2/invoice_payments') && $request->method() === 'POST') {
+            return Http::response(['result' => 'failed', 'message' => 'Validation error'], 422);
+        }
+
+        return Http::response([], 404);
+    });
+
+    $order = new class
+    {
+        public int $id = 26;
+
+        public string $status = 'processing';
+
+        public string $order_currency_code = 'KWD';
+
+        public float $shipping_amount = 1.0;
+
+        public float $grand_total = 13.59;
+
+        public string $customer_email = 'knet@example.com';
+
+        public string $customer_first_name = 'شيماء';
+
+        public string $customer_last_name = 'الخالد';
+
+        public object $billing_address;
+
+        public object $payment;
+
+        public mixed $created_at;
+
+        public array $items = [];
+
+        public ?int $daftra_invoice_id = null;
+
+        public bool $saved = false;
+
+        public function __construct()
+        {
+            $this->billing_address = (object) [
+                'phone' => '+96550313111',
+                'address1' => '',
+                'city' => 'سعد العبد الله',
+                'country' => 'KW',
+            ];
+            $this->payment = (object) ['method' => 'upayments_knet'];
+            $this->created_at = now();
+            $this->items = [
+                (object) [
+                    'child' => null,
+                    'sku' => '6161-366',
+                    'name' => 'دمية الموضة',
+                    'price' => 0.99,
+                    'qty_ordered' => 1,
+                    'discount_amount' => 0,
+                ],
+            ];
+        }
+
+        public function loadMissing(string $relation): self
+        {
+            return $this;
+        }
+
+        public function refresh(): self
+        {
+            return $this;
+        }
+
+        public function save(): bool
+        {
+            $this->saved = true;
+
+            return true;
+        }
+    };
+
+    $listener = new OrderListener(
+        app(DaftraController::class),
+        Mockery::mock(OrderRepository::class)
+    );
+
+    $listener->syncOrderToDaftra($order);
+
+    expect($order->daftra_invoice_id)->toBe(777);
+    expect($order->saved)->toBeTrue();
+
+    Http::assertSent(function (Request $request) {
+        if (! str_contains($request->url(), '/api2/invoices') || $request->method() !== 'POST') {
+            return false;
+        }
+
+        $payload = $request->data();
+
+        return $payload['Payment'] === []
+            && ($payload['Invoice']['store_id'] ?? null) === 2;
+    });
+
+    Http::assertSent(function (Request $request) {
+        if (! str_contains($request->url(), '/api2/invoice_payments') || $request->method() !== 'POST') {
+            return false;
+        }
+
+        $payment = $request->data()['InvoicePayment'] ?? [];
+
+        return ($payment['invoice_id'] ?? null) === 777
+            && ($payment['treasury_id'] ?? null) === 3
+            && ($payment['payment_method'] ?? null) === 'cash_on_delivery'
+            && ($payment['transaction_id'] ?? null) === 'order_26';
+    });
+});
+
+it('extracts normalized SKU candidates from prefixed and compound Daftra product codes', function () {
+    $controller = app(DaftraController::class);
+
+    expect($controller->extractSkuCandidates(' SKU - 936-2', ''))->toContain('936-2');
+    expect($controller->extractSkuCandidates('  2049  -  2029', '3170000000134'))
+        ->toContain('2049')
+        ->toContain('2029')
+        ->toContain('3170000000134');
+});
+
+it('fetches live Sharq store balance only, micro-caches it, and fails open on errors', function () {
+    Http::fake(function (Request $request) {
+        if ($request['product_code'] === 'Y209') {
+            return Http::response([
+                'data' => [
+                    [
+                        'Product' => [
+                            'id' => '742',
+                            'product_code' => 'Y209',
+                            'stock_balance' => '105',
+                            'deactivate' => '0',
+                            'ProductStock' => [
+                                ['store_id' => '1', 'balance' => '105'],
+                                ['store_id' => '2', 'balance' => '0'],
+                            ],
+                        ],
+                    ],
+                ],
+            ], 200);
+        }
+
+        if ($request['product_code'] === '6161-366') {
+            return Http::response([
+                'data' => [
+                    [
+                        'Product' => [
+                            'id' => '1319',
+                            'product_code' => '6161-366',
+                            'stock_balance' => '4',
+                            'deactivate' => '0',
+                            'ProductStock' => [
+                                ['store_id' => '1', 'balance' => '0'],
+                                ['store_id' => '2', 'balance' => '4'],
+                            ],
+                        ],
+                    ],
+                ],
+            ], 200);
+        }
+
+        return Http::response(['error' => 'Gateway timeout'], 504);
+    });
+
+    $controller = app(DaftraController::class);
+
+    $first = $controller->getLiveStoreBalances([
+        ['sku' => 'Y209'],
+        ['sku' => '6161-366'],
+        ['sku' => 'TIMEOUT-SKU'],
+    ], 2, 2.5, 1.5);
+
+    expect($first['Y209'])->toBe(0.0);
+    expect($first['6161-366'])->toBe(4.0);
+    expect($first['TIMEOUT-SKU'])->toBeNull();
+
+    $second = $controller->getLiveStoreBalances([
+        ['sku' => 'Y209'],
+        ['sku' => '6161-366'],
+    ], 2, 2.5, 1.5);
+
+    expect($second['Y209'])->toBe(0.0);
+    expect($second['6161-366'])->toBe(4.0);
+
+    // Y209 and 6161-366 served from cache on second call (only 3 total HTTP calls from first batch).
+    Http::assertSentCount(3);
+});
+
+it('CheckoutStockVerifier rejects checkout when Sharq stock is insufficient and fails open on API error', function () {
+    config(['daftra.checkout_stock_check' => true]);
+
+    $daftraMock = Mockery::mock(DaftraController::class);
+    $daftraMock->shouldReceive('getLiveStoreBalances')
+        ->once()
+        ->andReturn(['6161-366' => 0.0]);
+    $daftraMock->shouldReceive('forgetLiveStockCache')
+        ->once()
+        ->with(['6161-366'], 2);
+
+    $invRepoMock = Mockery::mock(ProductInventoryRepository::class);
+    $invRepoMock->shouldReceive('saveInventories')->never();
+
+    $indexerMock = Mockery::mock(Inventory::class);
+    $productRepoMock = Mockery::mock(ProductRepository::class);
+
+    DB::shouldReceive('table')->with('order_items')->andReturnSelf();
+    DB::shouldReceive('join')->andReturnSelf();
+    DB::shouldReceive('leftJoin')->andReturnSelf();
+    DB::shouldReceive('whereNull')->andReturnSelf();
+    DB::shouldReceive('whereNotIn')->andReturnSelf();
+    DB::shouldReceive('where')->andReturnSelf();
+    DB::shouldReceive('whereIn')->andReturnSelf();
+    DB::shouldReceive('whereNotNull')->andReturnSelf();
+    DB::shouldReceive('selectRaw')->andReturnSelf();
+    DB::shouldReceive('groupBy')->andReturnSelf();
+    DB::shouldReceive('get')->andReturn(collect());
+    DB::shouldReceive('table')->with('inventory_sources')->andReturnSelf();
+    DB::shouldReceive('exists')->andReturn(false);
+
+    $verifier = new CheckoutStockVerifier(
+        $daftraMock,
+        $invRepoMock,
+        $indexerMock,
+        $productRepoMock
+    );
+
+    $product = new class
+    {
+        public int $id = 52;
+
+        public string $sku = '6161-366';
+
+        public string $name = 'دمية الموضة';
+
+        public bool $manage_stock = true;
+
+        public function isStockable(): bool
+        {
+            return true;
+        }
+    };
+
+    $cart = (object) [
+        'items' => [
+            (object) [
+                'type' => 'simple',
+                'quantity' => 1,
+                'name' => 'دمية الموضة',
+                'product' => $product,
+                'child' => null,
+            ],
+        ],
+    ];
+
+    $shortages = $verifier->verifyCart($cart);
+
+    expect($shortages)->toHaveCount(1);
+    expect($shortages[0])->toMatchArray([
+        'product_id' => 52,
+        'sku' => '6161-366',
+        'requested' => 1,
+        'available' => 0,
+    ]);
+    expect($verifier->formatShortageMessage($shortages))->toContain('دمية الموضة');
+
+    // Now test fail-open when Daftra throws
+    $failingDaftraMock = Mockery::mock(DaftraController::class);
+    $failingDaftraMock->shouldReceive('getLiveStoreBalances')
+        ->once()
+        ->andThrow(new RuntimeException('Daftra unreachable'));
+
+    $failOpenVerifier = new CheckoutStockVerifier(
+        $failingDaftraMock,
+        $invRepoMock,
+        $indexerMock,
+        $productRepoMock
+    );
+
+    expect($failOpenVerifier->verifyCart($cart))->toBe([]);
 });
 
 it('syncs refund to daftra with resolved product_id, custom layout columns, and header shipping_amount', function () {

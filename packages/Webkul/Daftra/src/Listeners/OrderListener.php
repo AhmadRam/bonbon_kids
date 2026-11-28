@@ -69,10 +69,15 @@ class OrderListener
             }
 
             $items = [];
+            $orderedSkus = [];
             $rowNumber = 1;
 
             foreach ($order->items as $item) {
                 $sku = trim((string) ($item->child?->sku ?: $item->sku));
+                if ($sku !== '') {
+                    $orderedSkus[] = $sku;
+                }
+
                 $daftraProduct = $this->daftraController->findProductBySku($sku, $item->name);
 
                 if (! $daftraProduct) {
@@ -99,24 +104,9 @@ class OrderListener
                 );
             }
 
-            // 3. Build Payments (Optional, if we want to mark it based on order status)
+            // 3. Always create the Daftra invoice without nested Payment objects so
+            // paid orders (e.g., UPayments/KNET) never fail invoice creation & stock deduction.
             $payments = [];
-            if ($order->status === 'processing' || $order->status === 'completed') {
-                $rawMethod = $order->payment->method ?? 'cash';
-                $paymentMethod = match (true) {
-                    str_contains($rawMethod, 'cash') => 'cash',
-                    str_contains($rawMethod, 'transfer') => 'bank_transfer',
-                    str_contains($rawMethod, 'cheque') => 'cheque',
-                    default => 'cash',
-                };
-
-                $payments[] = $this->daftraController->buildPayment(
-                    $paymentMethod,
-                    $order->grand_total,
-                    $order->created_at->format('Y-m-d H:i:s'),
-                    'order_'.$order->id
-                );
-            }
 
             // 4. Build Invoice Data
             $invoiceDetails = [
@@ -152,6 +142,13 @@ class OrderListener
                     $order->save();
                 });
 
+                $this->daftraController->forgetLiveStockCache($orderedSkus, $storeId);
+
+                // 7. Record payment separately for paid/processing/completed orders
+                if ($order->status === 'processing' || $order->status === 'completed') {
+                    $this->recordInvoicePayment($order, (int) $daftraInvoiceId);
+                }
+
                 Log::info("Successfully synced order #{$order->id} to Daftra Invoice #{$daftraInvoiceId}");
             } else {
                 Log::error('Daftra Sync Failed: Could not get Invoice ID from response', ['response' => $response]);
@@ -161,6 +158,40 @@ class OrderListener
             Log::error("Daftra Sync Exception for order #{$order->id}: ".$e->getMessage());
         } finally {
             $lock->release();
+        }
+    }
+
+    /**
+     * Record the payment separately against an already-created Daftra invoice.
+     * Failures are logged as warnings so they never block invoice creation or stock deduction.
+     */
+    protected function recordInvoicePayment($order, int $daftraInvoiceId): void
+    {
+        $rawMethod = (string) ($order->payment->method ?? 'cash');
+        $isUpayments = str_starts_with($rawMethod, 'upayments');
+
+        $paymentMethod = (string) config('daftra.payment_method', 'cash_on_delivery');
+
+        $treasuryId = $isUpayments
+            ? (int) config('daftra.upayments_treasury_id', 3)
+            : (int) config('daftra.default_treasury_id', 1);
+
+        $date = $order->created_at
+            ? $order->created_at->format('Y-m-d H:i:s')
+            : now()->format('Y-m-d H:i:s');
+
+        try {
+            $this->daftraController->createInvoicePayment([
+                'invoice_id' => $daftraInvoiceId,
+                'amount' => (float) $order->grand_total,
+                'payment_method' => $paymentMethod,
+                'treasury_id' => $treasuryId,
+                'transaction_id' => 'order_'.$order->id,
+                'date' => $date,
+                'status' => 1,
+            ]);
+        } catch (\Exception $e) {
+            Log::warning("Daftra Invoice Payment recording failed for order #{$order->id} (Invoice #{$daftraInvoiceId}): ".$e->getMessage());
         }
     }
 

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Cache;
 use Webkul\CartRule\Exceptions\CouponUsageLimitExceededException;
 use Webkul\Checkout\Facades\Cart;
 use Webkul\Customer\Repositories\CustomerRepository;
+use Webkul\Daftra\Services\CheckoutStockVerifier;
 use Webkul\Payment\Facades\Payment;
 use Webkul\Sales\Repositories\OrderRepository;
 use Webkul\Sales\Transformers\OrderResource;
@@ -202,6 +203,15 @@ class OnepageController extends APIController
                 }
 
                 $cart = Cart::getCart();
+
+                $stockVerifier = app(CheckoutStockVerifier::class);
+                $stockShortages = $stockVerifier->verifyCart($cart);
+
+                if (! empty($stockShortages)) {
+                    return response()->json([
+                        'message' => $stockVerifier->formatShortageMessage($stockShortages),
+                    ], Response::HTTP_UNPROCESSABLE_ENTITY);
+                }
 
                 if ($redirectUrl = Payment::getRedirectUrl($cart)) {
                     return new JsonResource([
